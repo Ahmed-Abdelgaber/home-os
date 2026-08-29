@@ -10,13 +10,11 @@
 
 .homeos-hero-card__glow {
   position: absolute;
-  top: -60px;
-  right: -60px;
-  width: 220px;
-  height: 220px;
-  border-radius: var(--homeos-radius-circle);
-  background: radial-gradient(circle at 30% 30%, var(--homeos-primary-100), transparent 70%);
-  filter: blur(2px);
+  inset: 0;
+  background-image: url('/images/IMG_5718.JPG');
+  background-size: cover;
+  background-position: center 20%;
+  opacity: 0.2;
 }
 
 .homeos-hero-card__spend {
