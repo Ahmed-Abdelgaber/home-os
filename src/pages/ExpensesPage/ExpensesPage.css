@@ -1,0 +1,11 @@
+.homeos-expenses-skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: var(--homeos-radius-card);
+  overflow: hidden;
+}
+
+.homeos-expenses-skeleton-stack .homeos-skeleton {
+  border-radius: 0;
+}

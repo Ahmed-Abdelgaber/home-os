@@ -1,0 +1,23 @@
+.homeos-status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--homeos-radius-circle);
+  font-size: var(--homeos-text-caption);
+  font-weight: var(--homeos-weight-bold);
+}
+
+.homeos-status-chip--stocked {
+  background: var(--homeos-soft-surface);
+  color: var(--homeos-ink-600);
+}
+
+.homeos-status-chip--active {
+  background: var(--homeos-primary-100);
+  color: var(--homeos-primary-600);
+}
+
+.homeos-status-chip--finished {
+  background: var(--homeos-success-soft);
+  color: var(--homeos-success);
+}

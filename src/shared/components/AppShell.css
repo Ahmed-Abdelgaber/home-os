@@ -1,0 +1,33 @@
+/*
+  IonTabs is the root element of the /app/* route, with no wrapper element around it.
+  Ionic builds its own .ion-page for IonTabs and forwards this className onto it, so the
+  shell's page element stays a direct child of the root ion-router-outlet. The outlet sets
+  inline z-index and .ion-page-hidden on its direct children only — any wrapper element
+  here traps those styles and lets a leaving page paint over the tab shell. Sizing comes
+  from .ion-page and the ion-tabs host; do not restate it.
+*/
+
+/* Notch is drawn by .homeos-tab-bar-notch instead — the flat rule would cut across it. */
+.homeos-app-shell ion-tab-bar {
+  border-top: none;
+  position: relative;
+}
+
+.homeos-tab-bar-notch {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 24px;
+  pointer-events: none;
+}
+
+.homeos-tab-bar-notch__fill {
+  fill: var(--homeos-background);
+}
+
+.homeos-tab-bar-notch__stroke {
+  fill: none;
+  stroke: var(--homeos-border);
+  stroke-width: 1px;
+}

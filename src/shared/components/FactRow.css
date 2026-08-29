@@ -1,0 +1,19 @@
+.homeos-fact-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--homeos-space-12);
+  padding: var(--homeos-space-12) var(--homeos-space-16);
+}
+
+.homeos-fact-row__label {
+  color: var(--homeos-ink-500);
+  font-size: var(--homeos-text-footnote);
+}
+
+.homeos-fact-row__value {
+  color: var(--homeos-ink-950);
+  font-size: var(--homeos-text-body-sm);
+  font-weight: var(--homeos-weight-semibold);
+  text-align: right;
+}

@@ -1,0 +1,21 @@
+.homeos-trip-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-20);
+}
+
+.homeos-trip-form-skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-16);
+}
+
+.homeos-trip-form__error {
+  margin: 0;
+  padding: var(--homeos-space-12);
+  background: var(--homeos-danger-soft);
+  color: var(--homeos-danger);
+  border-radius: var(--homeos-radius-control);
+  font-size: var(--homeos-text-footnote);
+  font-weight: var(--homeos-weight-medium);
+}

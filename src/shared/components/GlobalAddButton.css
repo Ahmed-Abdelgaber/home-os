@@ -1,0 +1,31 @@
+/*
+  Lives in IonTabs' "bottom" slot, alongside ion-tab-bar. Two constraints pin it there:
+  ion-tab-bar's host sets `contain: strict`, so nesting it inside the bar would paint-clip
+  the raised half; and .tabs-inner sets `contain: layout`, making it a stacking context
+  that would trap this button's z-index below the tab bar's own (10). As a slot sibling
+  it shares the ion-tabs host stacking context, so z-index clears the bar.
+
+  Absolute positioning resolves against the ion-tabs host, which fills the page — so this
+  offset is measured from the bottom of the screen.
+*/
+.homeos-global-add-button {
+  position: absolute;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 22px);
+  transform: translateX(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: var(--homeos-radius-circle);
+  background: var(--homeos-primary-500);
+  color: #ffffff;
+  border: none;
+  font-size: var(--homeos-glyph-lg);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--homeos-shadow-raised);
+  /* Sits above the tab pages the sibling ion-router-outlet stacks inside .tabs-inner,
+     and below Ionic's overlays (IonActionSheet uses 20000+). */
+  z-index: 200;
+}

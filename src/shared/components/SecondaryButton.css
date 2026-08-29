@@ -1,0 +1,13 @@
+.homeos-secondary-button {
+  background: var(--homeos-surface);
+  border: 1.5px solid var(--homeos-primary-500);
+  color: var(--homeos-primary-500);
+  border-radius: var(--homeos-radius-button);
+  padding: 0 var(--homeos-space-16);
+  height: 44px;
+  font-family: inherit;
+  font-size: var(--homeos-text-footnote);
+  font-weight: var(--homeos-weight-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+}

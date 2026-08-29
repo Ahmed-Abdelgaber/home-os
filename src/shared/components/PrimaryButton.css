@@ -1,0 +1,21 @@
+.homeos-primary-button {
+  width: 100%;
+  height: 48px;
+  background: var(--homeos-primary-500);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--homeos-radius-button);
+  font-family: inherit;
+  font-size: var(--homeos-text-body);
+  font-weight: var(--homeos-weight-bold);
+  cursor: pointer;
+}
+
+.homeos-primary-button:active {
+  background: var(--homeos-primary-600);
+}
+
+.homeos-primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

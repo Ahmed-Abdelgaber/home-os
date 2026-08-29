@@ -1,0 +1,19 @@
+.homeos-trips__add {
+  margin-bottom: var(--homeos-space-24);
+}
+
+.homeos-trips__section + .homeos-trips__section {
+  margin-top: var(--homeos-space-24);
+}
+
+.homeos-trips-skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: var(--homeos-radius-card);
+  overflow: hidden;
+}
+
+.homeos-trips-skeleton-stack .homeos-skeleton {
+  border-radius: 0;
+}

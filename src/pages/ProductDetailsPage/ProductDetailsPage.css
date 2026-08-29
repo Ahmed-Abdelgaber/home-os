@@ -1,0 +1,41 @@
+.homeos-product-details__identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--homeos-space-12);
+  margin-bottom: var(--homeos-space-20);
+}
+
+.homeos-product-details__title {
+  margin: 0;
+  color: var(--homeos-ink-950);
+  font-size: var(--homeos-text-heading);
+  font-weight: var(--homeos-weight-bold);
+}
+
+.homeos-product-details__badge {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: var(--homeos-radius-circle);
+  font-size: var(--homeos-text-caption);
+  font-weight: var(--homeos-weight-bold);
+}
+
+.homeos-product-details__badge--active {
+  background: var(--homeos-primary-100);
+  color: var(--homeos-primary-600);
+}
+
+.homeos-product-details__badge--inactive {
+  background: var(--homeos-soft-surface);
+  color: var(--homeos-ink-600);
+}
+
+.homeos-product-details__facts {
+  margin-bottom: var(--homeos-space-20);
+}
+
+.homeos-product-details__toggle {
+  width: 100%;
+  margin-top: var(--homeos-space-12);
+}

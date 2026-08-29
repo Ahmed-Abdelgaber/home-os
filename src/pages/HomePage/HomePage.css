@@ -1,0 +1,25 @@
+.homeos-home-content {
+  --background: var(--homeos-background);
+}
+
+.homeos-home-body {
+  position: relative;
+  z-index: 2;
+  margin-top: -32px;
+  padding: 0 var(--homeos-page-padding-x) var(--homeos-space-32);
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-24);
+}
+
+.homeos-section-skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: var(--homeos-radius-card);
+  overflow: hidden;
+}
+
+.homeos-section-skeleton-stack .homeos-skeleton {
+  border-radius: 0;
+}

@@ -1,0 +1,44 @@
+.homeos-header {
+  background: var(--homeos-header);
+  padding: calc(env(safe-area-inset-top) + var(--homeos-space-16)) var(--homeos-page-padding-x) var(--homeos-space-40);
+}
+
+.homeos-header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.homeos-header__brand {
+  color: #ffffff;
+  font-size: var(--homeos-text-title-lg);
+  font-weight: var(--homeos-weight-bold);
+}
+
+.homeos-header__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--homeos-radius-circle);
+  background: var(--homeos-primary-100);
+  color: var(--homeos-primary-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--homeos-weight-bold);
+  font-size: var(--homeos-text-body);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.homeos-header__greeting {
+  margin: var(--homeos-space-20) 0 0;
+  color: var(--homeos-primary-100);
+  font-size: var(--homeos-text-body-lg);
+  font-weight: var(--homeos-weight-semibold);
+}
+
+.homeos-header__name {
+  margin: var(--homeos-space-4) 0 0;
+  color: #ffffff;
+  font-size: var(--homeos-text-display);
+  font-weight: var(--homeos-weight-bold);
+}

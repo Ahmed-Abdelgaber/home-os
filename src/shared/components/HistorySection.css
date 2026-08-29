@@ -1,0 +1,21 @@
+.homeos-history-section {
+  margin-top: var(--homeos-space-24);
+}
+
+.homeos-history-section__title {
+  margin: 0 0 var(--homeos-space-12);
+  color: var(--homeos-ink-950);
+  font-size: var(--homeos-text-body-lg);
+  font-weight: var(--homeos-weight-bold);
+}
+
+.homeos-history-section__entry {
+  margin: 0;
+  padding: var(--homeos-space-8) 0;
+  color: var(--homeos-ink-600);
+  font-size: var(--homeos-text-body-sm);
+}
+
+.homeos-history-section__entry + .homeos-history-section__entry {
+  border-top: 1px solid var(--homeos-border);
+}

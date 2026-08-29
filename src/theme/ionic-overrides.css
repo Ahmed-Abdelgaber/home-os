@@ -1,0 +1,30 @@
+/*
+  Map HomeOS tokens onto Ionic's CSS variables so Ionic primitives
+  (nav, tab bar, buttons) inherit HomeOS identity instead of default Ionic look.
+*/
+:root {
+  --ion-color-primary: var(--homeos-primary-500);
+  --ion-color-primary-shade: var(--homeos-primary-600);
+  --ion-color-primary-tint: var(--homeos-primary-100);
+  --ion-color-primary-contrast: #ffffff;
+
+  --ion-background-color: var(--homeos-background);
+  --ion-text-color: var(--homeos-ink-950);
+  --ion-border-color: var(--homeos-border);
+
+  --ion-font-family: var(--homeos-font-family);
+
+  --ion-toolbar-background: var(--homeos-surface);
+  --ion-tab-bar-background: var(--homeos-surface);
+  --ion-tab-bar-color: var(--homeos-ink-500);
+  --ion-tab-bar-color-selected: var(--homeos-primary-500);
+}
+
+ion-tab-bar {
+  border-top: 1px solid var(--homeos-border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+ion-tab-button {
+  font-weight: var(--homeos-weight-medium);
+}

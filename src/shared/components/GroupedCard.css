@@ -1,0 +1,10 @@
+.homeos-grouped-card {
+  background: var(--homeos-surface);
+  border: 1px solid var(--homeos-border);
+  border-radius: var(--homeos-radius-card);
+  overflow: hidden;
+}
+
+.homeos-grouped-card > * + * {
+  border-top: 1px solid var(--homeos-border);
+}

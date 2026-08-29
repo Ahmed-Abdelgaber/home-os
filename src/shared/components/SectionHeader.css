@@ -1,0 +1,35 @@
+.homeos-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--homeos-space-12);
+}
+
+.homeos-section-header__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--homeos-primary-600);
+}
+
+.homeos-section-header__title h2 {
+  margin: 0;
+  color: var(--homeos-ink-950);
+  font-size: var(--homeos-text-title-sm);
+  font-weight: var(--homeos-weight-bold);
+}
+
+.homeos-section-header__action {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  background: none;
+  border: none;
+  padding: 0 var(--homeos-space-8);
+  margin: 0 calc(var(--homeos-space-8) * -1);
+  color: var(--homeos-primary-500);
+  font-size: var(--homeos-text-body-sm);
+  font-weight: var(--homeos-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+}

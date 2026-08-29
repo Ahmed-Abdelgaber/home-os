@@ -1,0 +1,93 @@
+.homeos-login-content {
+  --background: var(--homeos-background);
+}
+
+.homeos-login-panel {
+  min-height: 46vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--homeos-header);
+  padding: var(--homeos-space-20);
+  padding-top: calc(env(safe-area-inset-top) + var(--homeos-space-24));
+  padding-bottom: var(--homeos-space-40);
+}
+
+.homeos-login-panel__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--homeos-space-12);
+}
+
+.homeos-login-panel__mark {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--homeos-radius-control);
+  background: var(--homeos-primary-500);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--homeos-text-title);
+  font-weight: var(--homeos-weight-bold);
+}
+
+.homeos-login-panel__wordmark {
+  color: #ffffff;
+  font-size: var(--homeos-text-heading-lg);
+  font-weight: var(--homeos-weight-bold);
+}
+
+.homeos-login-panel__tagline {
+  margin: var(--homeos-space-16) 0 0;
+  color: var(--homeos-primary-100);
+  font-size: var(--homeos-text-body);
+  font-weight: var(--homeos-weight-medium);
+  max-width: 26ch;
+}
+
+.homeos-login-card {
+  position: relative;
+  z-index: 2;
+  margin: -32px var(--homeos-page-padding-x) 0;
+  padding: var(--homeos-space-24) var(--homeos-space-20) var(--homeos-space-32);
+  background: var(--homeos-surface);
+  border: 1px solid var(--homeos-border);
+  border-radius: var(--homeos-radius-hero);
+  box-shadow: var(--homeos-shadow-modal);
+  animation: homeos-login-card-in 250ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .homeos-login-card {
+    animation: none;
+  }
+}
+
+@keyframes homeos-login-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.homeos-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-20);
+}
+
+.homeos-login-form__auth-error {
+  margin: 0;
+  padding: var(--homeos-space-12);
+  background: var(--homeos-danger-soft);
+  color: var(--homeos-danger);
+  border-radius: var(--homeos-radius-control);
+  font-size: var(--homeos-text-footnote);
+  font-weight: var(--homeos-weight-medium);
+}

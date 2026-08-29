@@ -1,0 +1,7 @@
+.homeos-empty-state {
+  margin: 0;
+  padding: var(--homeos-space-20);
+  text-align: center;
+  color: var(--homeos-ink-500);
+  font-size: var(--homeos-text-body-sm);
+}

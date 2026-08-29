@@ -1,0 +1,22 @@
+.homeos-skeleton {
+  border-radius: var(--homeos-radius-control);
+  background: var(--homeos-soft-surface);
+  animation: homeos-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .homeos-skeleton {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+@keyframes homeos-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}

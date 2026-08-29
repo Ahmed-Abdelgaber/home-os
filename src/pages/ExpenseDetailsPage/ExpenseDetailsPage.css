@@ -1,0 +1,22 @@
+.homeos-expense-details__linked-note {
+  display: block;
+  width: 100%;
+  margin-bottom: var(--homeos-space-20);
+  padding: var(--homeos-space-12);
+  background: var(--homeos-info-soft);
+  color: var(--homeos-info);
+  border: none;
+  border-radius: var(--homeos-radius-control);
+  font-family: inherit;
+  font-size: var(--homeos-text-footnote);
+  font-weight: var(--homeos-weight-medium);
+  text-align: left;
+  cursor: pointer;
+}
+
+.homeos-expense-details__delete {
+  width: 100%;
+  margin-top: var(--homeos-space-20);
+  border-color: var(--homeos-danger);
+  color: var(--homeos-danger);
+}

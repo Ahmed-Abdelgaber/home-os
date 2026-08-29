@@ -1,0 +1,28 @@
+.homeos-catalog-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--homeos-space-12);
+  min-height: 44px;
+  margin-bottom: var(--homeos-space-16);
+  color: var(--homeos-ink-950);
+  font-size: var(--homeos-text-body-sm);
+  font-weight: var(--homeos-weight-medium);
+}
+
+.homeos-catalog-toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--homeos-primary-500);
+}
+
+.homeos-catalog-skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: var(--homeos-radius-card);
+  overflow: hidden;
+}
+
+.homeos-catalog-skeleton-stack .homeos-skeleton {
+  border-radius: 0;
+}
