@@ -72,13 +72,14 @@ export function useProductHistory(productId: string | undefined, excludeItemId: 
     queryKey: ['items', 'product-history', productId, excludeItemId],
     enabled: Boolean(productId),
     queryFn: async (): Promise<ProductHistoryEntry[]> => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('items')
         .select('id, started_date, finished_date, status')
         .eq('product_id', productId as string)
-        .neq('id', excludeItemId ?? '')
-        .order('started_date', { ascending: false, nullsFirst: false })
-        .limit(5)
+      if (excludeItemId) {
+        query = query.neq('id', excludeItemId)
+      }
+      const { data, error } = await query.order('started_date', { ascending: false, nullsFirst: false }).limit(5)
       if (error) throw error
 
       return (data ?? []).map((row) => ({
