@@ -34,4 +34,9 @@
   font-size: var(--homeos-text-title);
   line-height: 1;
   cursor: pointer;
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-quick-add-sheet__close:active {
+  background: var(--homeos-border);
 }

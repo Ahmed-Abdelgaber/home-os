@@ -108,6 +108,12 @@
   text-align: left;
   cursor: pointer;
   min-height: 44px;
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease), transform var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-hero-card__upcoming:active {
+  background: var(--homeos-primary-100);
+  transform: scale(0.99);
 }
 
 .homeos-hero-card__upcoming-icon {

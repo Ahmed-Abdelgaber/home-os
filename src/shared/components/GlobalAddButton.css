@@ -28,4 +28,10 @@
   /* Sits above the tab pages the sibling ion-router-outlet stacks inside .tabs-inner,
      and below Ionic's overlays (IonActionSheet uses 20000+). */
   z-index: 200;
+  transition: transform var(--homeos-motion-fast) var(--homeos-ease), box-shadow var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-global-add-button:active {
+  transform: translateX(-50%) scale(0.92);
+  box-shadow: 0 3px 10px rgba(var(--homeos-primary-500-rgb), 0.35);
 }

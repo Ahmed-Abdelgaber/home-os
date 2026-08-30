@@ -35,4 +35,9 @@
   font-size: var(--homeos-text-title-sm);
   line-height: 1;
   cursor: pointer;
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-install-prompt__dismiss:active {
+  background: rgba(255, 255, 255, 0.28);
 }
