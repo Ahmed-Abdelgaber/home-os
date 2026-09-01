@@ -1,7 +1,8 @@
-import { IonContent, IonPage } from '@ionic/react'
+import { IonContent, IonPage, IonRefresher, IonRefresherContent } from '@ionic/react'
 import { archiveOutline, cubeOutline, hourglassOutline, pulseOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCurrentPerson } from '../../core/auth/useCurrentPerson'
 import { cairoGreeting } from '../../core/utils/cairoDate'
 import { useHomeSnapshot } from '../../features/home/useHomeSnapshot'
@@ -35,6 +36,7 @@ function ListSkeleton({ rows }: { rows: number }) {
  */
 export function HomePage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { data: personName } = useCurrentPerson()
   const snapshot = useHomeSnapshot()
   const longRunning = useLongRunningItems()
@@ -47,6 +49,16 @@ export function HomePage() {
   return (
     <IonPage>
       <IonContent fullscreen className="homeos-home-content">
+        <IonRefresher
+          slot="fixed"
+          onIonRefresh={async (event) => {
+            await queryClient.invalidateQueries({ queryKey: ['home'] })
+            event.detail.complete()
+          }}
+        >
+          <IonRefresherContent />
+        </IonRefresher>
+        
         <HomeOSHeader greeting={`${cairoGreeting()} 👋`} name={personName ?? ''} avatarInitial={personName?.charAt(0) ?? '?'} />
 
         <div className="homeos-home-body">

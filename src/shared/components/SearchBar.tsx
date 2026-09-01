@@ -1,5 +1,4 @@
-import { closeCircleOutline, searchOutline } from 'ionicons/icons'
-import { IonIcon } from '@ionic/react'
+import { IonSearchbar } from '@ionic/react'
 import './SearchBar.css'
 
 interface SearchBarProps {
@@ -11,20 +10,12 @@ interface SearchBarProps {
 /** Reusable search/filter input for list pages. Filtering is client-side. */
 export function SearchBar({ value, onChange, placeholder = 'Search…' }: SearchBarProps) {
   return (
-    <div className="homeos-search-bar">
-      <IonIcon icon={searchOutline} className="homeos-search-bar__icon" />
-      <input
-        type="text"
-        className="homeos-search-bar__input"
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      {value && (
-        <button type="button" className="homeos-search-bar__clear" onClick={() => onChange('')} aria-label="Clear search">
-          <IonIcon icon={closeCircleOutline} />
-        </button>
-      )}
-    </div>
+    <IonSearchbar
+      className="homeos-search-bar"
+      value={value}
+      onIonInput={(e) => onChange(e.detail.value ?? '')}
+      placeholder={placeholder}
+      mode="ios" // Force iOS mode for a cleaner pill look if desired, or remove to use platform default
+    />
   )
 }

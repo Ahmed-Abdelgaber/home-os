@@ -10,6 +10,7 @@ import { ExpenseDetailsPage } from '../pages/ExpenseDetailsPage/ExpenseDetailsPa
 import { ProductCatalogPage } from '../pages/ProductCatalogPage/ProductCatalogPage'
 import { ProductDetailsPage } from '../pages/ProductDetailsPage/ProductDetailsPage'
 import { ProductFormPage } from '../pages/ProductFormPage/ProductFormPage'
+import { InactiveProductsPage } from '../pages/InactiveProductsPage/InactiveProductsPage'
 import { TripsPage } from '../pages/TripsPage/TripsPage'
 import { TripFormPage } from '../pages/TripFormPage/TripFormPage'
 import { AccountsPage } from '../pages/AccountsPage/AccountsPage'
@@ -34,6 +35,7 @@ const protectedRoutes: { path: string; element: ReactElement }[] = [
   { path: '/app/expenses/add', element: <AddExpensePage /> },
   { path: '/app/expenses/:expenseId', element: <ExpenseDetailsPage /> },
   { path: '/app/products', element: <ProductCatalogPage /> },
+  { path: '/app/products/inactive', element: <InactiveProductsPage /> },
   { path: '/app/products/new', element: <ProductFormPage /> },
   { path: '/app/products/:productId/edit', element: <ProductFormPage /> },
   { path: '/app/products/:productId', element: <ProductDetailsPage /> },

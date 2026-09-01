@@ -107,7 +107,7 @@ export function ExpenseDetailsPage() {
                   {detail.notes && <FactRow label="Notes" value={detail.notes} />}
                 </GroupedCard>
 
-                <PrimaryButton onClick={() => setEditing(true)}>Edit expense</PrimaryButton>
+                <PrimaryButton className="homeos-expense-details__edit" onClick={() => setEditing(true)}>Edit expense</PrimaryButton>
 
                 {!detail.linkedItemId && (
                   <SecondaryButton className="homeos-expense-details__delete" onClick={() => setConfirmingDelete(true)}>
