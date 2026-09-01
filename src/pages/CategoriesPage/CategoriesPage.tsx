@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useIonAlert } from '@ionic/react'
 import { pricetagOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -32,7 +33,7 @@ export function CategoriesPage() {
   const [sheet, setSheet] = useState<SheetState>(null)
 
   return (
-    <AppPage title="Categories" backHref="/app/tabs/more">
+    <AppPage title="Categories" backHref="/app/tabs/more" onRefresh={async () => { await categories.refetch() }}>
       <PrimaryButton className="homeos-categories__add" onClick={() => setSheet({ mode: 'add' })}>
         Add category
       </PrimaryButton>
@@ -90,7 +91,24 @@ function CategoryForm({ initial, onSaved }: { initial?: CategoryDetail; onSaved:
     defaultValues: { name: initial?.name ?? '', isActive: initial?.isActive ?? true },
   })
 
+  const [presentAlert] = useIonAlert()
+
   const onSubmit = async (values: CategoryFormValues) => {
+    if (initial) {
+      presentAlert({
+        header: 'Save Changes?',
+        message: 'Are you sure you want to save these changes?',
+        buttons: [
+          { text: 'Cancel', role: 'cancel' },
+          { text: 'Save', handler: () => executeSubmit(values) }
+        ]
+      })
+    } else {
+      executeSubmit(values)
+    }
+  }
+
+  const executeSubmit = async (values: CategoryFormValues) => {
     setSubmitError(null)
     try {
       if (initial) {

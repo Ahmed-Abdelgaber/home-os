@@ -32,4 +32,9 @@
   font-weight: var(--homeos-weight-semibold);
   font-family: inherit;
   cursor: pointer;
+  transition: opacity var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-section-header__action:active {
+  opacity: 0.6;
 }

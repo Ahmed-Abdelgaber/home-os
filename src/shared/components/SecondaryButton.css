@@ -10,4 +10,10 @@
   font-weight: var(--homeos-weight-semibold);
   white-space: nowrap;
   cursor: pointer;
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease), transform var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-secondary-button:active {
+  background: var(--homeos-primary-50);
+  transform: scale(0.98);
 }

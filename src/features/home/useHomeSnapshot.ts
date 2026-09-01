@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../core/supabase/client'
-import { cairoMonthRange, cairoToday, formatShortDate } from '../../core/utils/cairoDate'
+import { cairoToday, formatShortDate } from '../../core/utils/cairoDate'
 import type { TravelStatus } from '../../shared/components/HeroSnapshotCard'
 
 interface HomeSnapshot {
@@ -8,10 +8,13 @@ interface HomeSnapshot {
   amount: string
   percentVsLastMonth: number | null
   travel: TravelStatus
+  activePeriodId: string | null
 }
 
-async function fetchMonthSpend(start: string, end: string): Promise<number> {
-  const { data, error } = await supabase.from('expenses').select('amount').gte('expense_date', start).lt('expense_date', end)
+async function fetchPeriodSpend(start: string, end: string | null): Promise<number> {
+  let q = supabase.from('expenses').select('amount').gte('expense_date', start)
+  if (end) q = q.lte('expense_date', end) // End dates are inclusive
+  const { data, error } = await q
   if (error) throw error
   return (data ?? []).reduce((sum, row) => sum + Number(row.amount), 0)
 }
@@ -66,24 +69,39 @@ async function fetchTravel(): Promise<TravelStatus> {
   }
 }
 
-/** Monthly spend + travel status per docs/06_HOME_SCREEN_SPEC.md §2. */
+/** Dynamic period spend + travel status per docs/06_HOME_SCREEN_SPEC.md §2. */
 export function useHomeSnapshot() {
   return useQuery({
     queryKey: ['home', 'snapshot'],
     queryFn: async (): Promise<HomeSnapshot> => {
-      const current = cairoMonthRange(0)
-      const previous = cairoMonthRange(-1)
-      const [currentSpend, previousSpend, travel] = await Promise.all([
-        fetchMonthSpend(current.start, current.end),
-        fetchMonthSpend(previous.start, previous.end),
-        fetchTravel(),
-      ])
+      const { data: periods, error: periodsErr } = await supabase
+        .from('periods')
+        .select('id, start_date, end_date, is_active')
+        .order('start_date', { ascending: false })
+        .limit(2)
+      
+      if (periodsErr) throw periodsErr
+
+      let currentSpend = 0
+      let previousSpend = 0
+      
+      const active = periods?.find(p => p.is_active)
+      if (active) {
+        currentSpend = await fetchPeriodSpend(active.start_date, active.end_date)
+        const previous = periods.find(p => p.start_date !== active.start_date)
+        if (previous) {
+          previousSpend = await fetchPeriodSpend(previous.start_date, previous.end_date)
+        }
+      }
+
+      const travel = await fetchTravel()
 
       return {
         currency: 'EGP',
         amount: currentSpend.toLocaleString('en-US'),
         percentVsLastMonth: previousSpend === 0 ? null : Math.round(((currentSpend - previousSpend) / previousSpend) * 100),
         travel,
+        activePeriodId: active?.id ?? null,
       }
     },
   })

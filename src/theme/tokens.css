@@ -89,4 +89,5 @@
   /* Motion */
   --homeos-motion-fast: 150ms;
   --homeos-motion-normal: 250ms;
+  --homeos-ease: cubic-bezier(0.4, 0, 0.2, 1);
 }

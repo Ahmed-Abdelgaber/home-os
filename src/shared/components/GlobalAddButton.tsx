@@ -1,4 +1,5 @@
-import { IonActionSheet } from '@ionic/react'
+import { IonActionSheet, IonIcon } from '@ionic/react'
+import { add } from 'ionicons/icons'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './GlobalAddButton.css'
@@ -17,7 +18,7 @@ export function GlobalAddButton() {
         aria-label="Add"
         onClick={() => setIsOpen(true)}
       >
-        +
+        <IonIcon icon={add} />
       </button>
       <IonActionSheet
         isOpen={isOpen}

@@ -1,4 +1,5 @@
-import { IonModal } from '@ionic/react'
+import { IonIcon, IonModal } from '@ionic/react'
+import { close } from 'ionicons/icons'
 import type { ReactNode } from 'react'
 import './QuickAddSheet.css'
 
@@ -17,7 +18,7 @@ export function QuickAddSheet({ isOpen, title, onClose, children }: QuickAddShee
         <div className="homeos-quick-add-sheet__header">
           <h2 className="homeos-quick-add-sheet__title">{title}</h2>
           <button type="button" className="homeos-quick-add-sheet__close" aria-label="Close" onClick={onClose}>
-            ×
+            <IonIcon icon={close} />
           </button>
         </div>
         <div className="homeos-quick-add-sheet__body">{children}</div>

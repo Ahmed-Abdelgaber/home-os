@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useIonAlert } from '@ionic/react'
 import { walletOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -30,7 +31,7 @@ export function AccountsPage() {
   const [sheet, setSheet] = useState<SheetState>(null)
 
   return (
-    <AppPage title="Accounts" backHref="/app/tabs/more">
+    <AppPage title="Accounts" backHref="/app/tabs/more" onRefresh={async () => { await accounts.refetch() }}>
       <PrimaryButton className="homeos-accounts__add" onClick={() => setSheet({ mode: 'add' })}>
         Add account
       </PrimaryButton>
@@ -89,7 +90,24 @@ function AccountForm({ initial, onSaved }: { initial?: AccountDetail; onSaved: (
     },
   })
 
+  const [presentAlert] = useIonAlert()
+
   const onSubmit = async (values: AccountFormValues) => {
+    if (initial) {
+      presentAlert({
+        header: 'Save Changes?',
+        message: 'Are you sure you want to save these changes?',
+        buttons: [
+          { text: 'Cancel', role: 'cancel' },
+          { text: 'Save', handler: () => executeSubmit(values) }
+        ]
+      })
+    } else {
+      executeSubmit(values)
+    }
+  }
+
+  const executeSubmit = async (values: AccountFormValues) => {
     setSubmitError(null)
     // Empty strings mean "not set" in the form but must reach the database as null.
     const input = { name: values.name, type: values.type || null, ownerId: values.ownerId || null }

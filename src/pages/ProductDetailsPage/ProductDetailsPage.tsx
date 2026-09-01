@@ -53,7 +53,7 @@ export function ProductDetailsPage() {
               {detail.isActive ? 'Archive product' : 'Reactivate product'}
             </SecondaryButton>
 
-            <HistorySection title="Previous purchases" entries={history.data ?? []} />
+            <HistorySection title="Previous purchases" entries={history.data ?? []} onEntryClick={(id) => navigate(`/app/items/${id}`)} />
           </>
         )}
       </QueryState>

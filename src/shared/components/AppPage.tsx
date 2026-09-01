@@ -1,4 +1,4 @@
-import { IonBackButton, IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react'
+import { IonBackButton, IonButtons, IonContent, IonHeader, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar } from '@ionic/react'
 import type { ReactNode } from 'react'
 
 interface AppPageProps {
@@ -9,6 +9,8 @@ interface AppPageProps {
    * which have nothing above them — that also hides the back button.
    */
   backHref?: string
+  /** When provided, pull-to-refresh triggers this callback. Should return a promise (e.g. query invalidation). */
+  onRefresh?: () => Promise<void>
   children: ReactNode
 }
 
@@ -17,7 +19,7 @@ interface AppPageProps {
  * Every screen except Home and Login is this shape, and each was spelling out the same
  * six Ionic elements.
  */
-export function AppPage({ title, backHref, children }: AppPageProps) {
+export function AppPage({ title, backHref, onRefresh, children }: AppPageProps) {
   return (
     <IonPage>
       <IonHeader>
@@ -31,8 +33,20 @@ export function AppPage({ title, backHref, children }: AppPageProps) {
         </IonToolbar>
       </IonHeader>
       <IonContent className="homeos-page-content" fullscreen>
+        {onRefresh && (
+          <IonRefresher
+            slot="fixed"
+            onIonRefresh={async (event) => {
+              await onRefresh()
+              event.detail.complete()
+            }}
+          >
+            <IonRefresherContent />
+          </IonRefresher>
+        )}
         {children}
       </IonContent>
     </IonPage>
   )
 }
+

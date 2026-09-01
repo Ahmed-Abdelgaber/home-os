@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useIonAlert } from '@ionic/react'
 import { personOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -28,7 +29,7 @@ export function PeoplePage() {
   const [sheet, setSheet] = useState<SheetState>(null)
 
   return (
-    <AppPage title="People" backHref="/app/tabs/more">
+    <AppPage title="People" backHref="/app/tabs/more" onRefresh={async () => { await people.refetch() }}>
       <PrimaryButton className="homeos-people__add" onClick={() => setSheet({ mode: 'add' })}>
         Add person
       </PrimaryButton>
@@ -83,7 +84,24 @@ function PersonForm({ initial, onSaved }: { initial?: PersonDetail; onSaved: () 
     defaultValues: { name: initial?.name ?? '', kind: initial?.kind ?? 'person', isActive: initial?.isActive ?? true },
   })
 
+  const [presentAlert] = useIonAlert()
+
   const onSubmit = async (values: PersonFormValues) => {
+    if (initial) {
+      presentAlert({
+        header: 'Save Changes?',
+        message: 'Are you sure you want to save these changes?',
+        buttons: [
+          { text: 'Cancel', role: 'cancel' },
+          { text: 'Save', handler: () => executeSubmit(values) }
+        ]
+      })
+    } else {
+      executeSubmit(values)
+    }
+  }
+
+  const executeSubmit = async (values: PersonFormValues) => {
     setSubmitError(null)
     const input = { name: values.name, kind: values.kind }
     try {

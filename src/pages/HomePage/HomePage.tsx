@@ -1,7 +1,8 @@
-import { IonContent, IonPage } from '@ionic/react'
+import { IonContent, IonPage, IonRefresher, IonRefresherContent } from '@ionic/react'
 import { archiveOutline, cubeOutline, hourglassOutline, pulseOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCurrentPerson } from '../../core/auth/useCurrentPerson'
 import { cairoGreeting } from '../../core/utils/cairoDate'
 import { useHomeSnapshot } from '../../features/home/useHomeSnapshot'
@@ -9,6 +10,7 @@ import { useLongRunningItems } from '../../features/home/useLongRunningItems'
 import { useLongStockedItems } from '../../features/home/useLongStockedItems'
 import { RECENT_ACTIVITY_PREVIEW_COUNT, useRecentActivity } from '../../features/home/useRecentActivity'
 import { useStartItem } from '../../features/items/useItemMutations'
+import { useCyclePeriod } from '../../features/periods/usePeriodMutations'
 import { HomeOSHeader } from '../../shared/components/HomeOSHeader'
 import { HeroSnapshotCard } from '../../shared/components/HeroSnapshotCard'
 import { SectionHeader } from '../../shared/components/SectionHeader'
@@ -35,19 +37,36 @@ function ListSkeleton({ rows }: { rows: number }) {
  */
 export function HomePage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { data: personName } = useCurrentPerson()
   const snapshot = useHomeSnapshot()
   const longRunning = useLongRunningItems()
   const longStocked = useLongStockedItems()
   const recentActivity = useRecentActivity()
   const startItem = useStartItem()
+  const cyclePeriod = useCyclePeriod()
   const [showAllActivity, setShowAllActivity] = useState(false)
   const hasMoreActivity = (recentActivity.data?.length ?? 0) > RECENT_ACTIVITY_PREVIEW_COUNT
 
   return (
     <IonPage>
       <IonContent fullscreen className="homeos-home-content">
-        <HomeOSHeader greeting={`${cairoGreeting()} 👋`} name={personName ?? ''} avatarInitial={personName?.charAt(0) ?? '?'} />
+        <IonRefresher
+          slot="fixed"
+          onIonRefresh={async (event) => {
+            await queryClient.invalidateQueries({ queryKey: ['home'] })
+            event.detail.complete()
+          }}
+        >
+          <IonRefresherContent />
+        </IonRefresher>
+        
+        <HomeOSHeader 
+          greeting={`${cairoGreeting()} 👋`} 
+          name={personName ?? ''} 
+          avatarInitial={personName?.charAt(0) ?? '?'} 
+          onAvatarClick={() => navigate('/app/settings')}
+        />
 
         <div className="homeos-home-body">
           <QueryState query={snapshot} skeleton={<Skeleton height={220} />} error="Couldn't load this month's snapshot.">
@@ -57,6 +76,8 @@ export function HomePage() {
                 amount={data.amount}
                 percentVsLastMonth={data.percentVsLastMonth}
                 travel={data.travel}
+                isCycling={cyclePeriod.isPending}
+                onCyclePeriod={() => cyclePeriod.mutate(data.activePeriodId)}
               />
             )}
           </QueryState>

@@ -40,6 +40,7 @@ export function AppShell() {
           <IonIcon icon={cubeOutline} />
           <IonLabel>Items</IonLabel>
         </IonTabButton>
+        <IonTabButton tab="spacer" disabled className="homeos-tab-bar-spacer" />
         <IonTabButton tab="expenses" href="/app/tabs/expenses">
           <IonIcon icon={walletOutline} />
           <IonLabel>Expenses</IonLabel>

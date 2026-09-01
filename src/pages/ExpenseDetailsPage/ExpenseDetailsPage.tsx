@@ -1,10 +1,15 @@
+import { useIonAlert } from '@ionic/react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { formatShortDate } from '../../core/utils/cairoDate'
 import { ExpenseForm, type ExpenseFormValues } from '../../features/expenses/ExpenseForm'
 import { useExpense } from '../../features/expenses/useExpenseDetails'
 import { useDeleteExpense, useUpdateExpense } from '../../features/expenses/useExpenseMutations'
 import { AppPage } from '../../shared/components/AppPage'
 import { ConfirmationSheet } from '../../shared/components/ConfirmationSheet'
+import { FactRow } from '../../shared/components/FactRow'
+import { GroupedCard } from '../../shared/components/GroupedCard'
+import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { QueryState } from '../../shared/components/QueryState'
 import { SecondaryButton } from '../../shared/components/SecondaryButton'
 import { Skeleton } from '../../shared/components/Skeleton'
@@ -16,10 +21,23 @@ export function ExpenseDetailsPage() {
   const expense = useExpense(expenseId)
   const updateExpense = useUpdateExpense()
   const deleteExpense = useDeleteExpense()
+  const [editing, setEditing] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [presentAlert] = useIonAlert()
 
-  const handleSubmit = async (values: ExpenseFormValues) => {
+  const handleConfirmSubmit = (values: ExpenseFormValues) => {
+    presentAlert({
+      header: 'Save Changes?',
+      message: 'Are you sure you want to save these changes?',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        { text: 'Save', handler: () => executeSubmit(values) }
+      ]
+    })
+  }
+
+  const executeSubmit = async (values: ExpenseFormValues) => {
     if (!expenseId) return
     setSubmitError(null)
     try {
@@ -37,6 +55,7 @@ export function ExpenseDetailsPage() {
           notes: values.notes?.trim() || null,
         },
       })
+      setEditing(false)
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Could not save changes. Try again.')
     }
@@ -63,29 +82,52 @@ export function ExpenseDetailsPage() {
               </button>
             )}
 
-            <ExpenseForm
-              defaultValues={{
-                expenseDate: detail.expenseDate,
-                amount: String(detail.amount),
-                description: detail.description,
-                merchant: detail.merchant ?? '',
-                categoryId: detail.categoryId,
-                scope: detail.scope,
-                personId: detail.personId,
-                accountId: detail.accountId,
-                notes: detail.notes ?? '',
-              }}
-              submitLabel="Save changes"
-              pendingLabel="Saving…"
-              isPending={updateExpense.isPending}
-              submitError={submitError}
-              onSubmit={handleSubmit}
-            />
+            {editing ? (
+              <>
+                <ExpenseForm
+                  defaultValues={{
+                    expenseDate: detail.expenseDate,
+                    amount: String(detail.amount),
+                    description: detail.description,
+                    merchant: detail.merchant ?? '',
+                    categoryId: detail.categoryId,
+                    scope: detail.scope,
+                    personId: detail.personId,
+                    accountId: detail.accountId,
+                    notes: detail.notes ?? '',
+                  }}
+                  submitLabel="Save changes"
+                  pendingLabel="Saving…"
+                  isPending={updateExpense.isPending}
+                  submitError={submitError}
+                  onSubmit={handleConfirmSubmit}
+                />
+                <SecondaryButton className="homeos-expense-details__cancel" onClick={() => setEditing(false)}>
+                  Cancel
+                </SecondaryButton>
+              </>
+            ) : (
+              <>
+                <GroupedCard className="homeos-expense-details__facts">
+                  <FactRow label="Description" value={detail.description} />
+                  <FactRow label="Date" value={formatShortDate(detail.expenseDate)} />
+                  <FactRow label="Amount" value={`EGP ${detail.amount.toLocaleString('en-US')}`} />
+                  {detail.merchant && <FactRow label="Merchant" value={detail.merchant} />}
+                  <FactRow label="Category" value={detail.categoryName} />
+                  <FactRow label="Scope" value={detail.scope === 'household' ? 'Household' : 'Personal'} />
+                  <FactRow label="Person" value={detail.personName} />
+                  <FactRow label="Account" value={detail.accountName} />
+                  {detail.notes && <FactRow label="Notes" value={detail.notes} />}
+                </GroupedCard>
 
-            {!detail.linkedItemId && (
-              <SecondaryButton className="homeos-expense-details__delete" onClick={() => setConfirmingDelete(true)}>
-                Delete expense
-              </SecondaryButton>
+                <PrimaryButton className="homeos-expense-details__edit" onClick={() => setEditing(true)}>Edit expense</PrimaryButton>
+
+                {!detail.linkedItemId && (
+                  <SecondaryButton className="homeos-expense-details__delete" onClick={() => setConfirmingDelete(true)}>
+                    Delete expense
+                  </SecondaryButton>
+                )}
+              </>
             )}
 
             <ConfirmationSheet
@@ -102,3 +144,4 @@ export function ExpenseDetailsPage() {
     </AppPage>
   )
 }
+

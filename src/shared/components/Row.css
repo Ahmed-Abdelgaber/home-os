@@ -5,6 +5,11 @@
   gap: var(--homeos-space-12);
   padding: var(--homeos-space-12) var(--homeos-space-16);
   min-height: 44px;
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-row:has(.homeos-row__action:not(.homeos-row__action--static):active) {
+  background-color: var(--homeos-soft-surface);
 }
 
 /* The tap target. Reset the button chrome, keep the layout the row expects. */
@@ -24,6 +29,18 @@
 
 .homeos-row__action--static {
   cursor: default;
+}
+
+.homeos-row__action:not(.homeos-row__action--static):active {
+  opacity: 0.72;
+}
+
+.homeos-row__chevron {
+  transition: transform var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-row:has(.homeos-row__action:not(.homeos-row__action--static):active) .homeos-row__chevron {
+  transform: translateX(2px);
 }
 
 .homeos-row__action:focus-visible {

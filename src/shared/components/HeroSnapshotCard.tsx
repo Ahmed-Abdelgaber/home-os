@@ -1,4 +1,4 @@
-import { IonIcon } from '@ionic/react'
+import { IonIcon, useIonAlert } from '@ionic/react'
 import { briefcaseOutline, checkmarkCircle, chevronForward, trendingUpOutline } from 'ionicons/icons'
 import './HeroSnapshotCard.css'
 
@@ -12,16 +12,52 @@ interface HeroSnapshotCardProps {
   /** null when last month had no spend to compare against. */
   percentVsLastMonth: number | null
   travel: TravelStatus
+  onCyclePeriod?: () => void
+  isCycling?: boolean
 }
 
 /**
  * One hero card per docs/06_HOME_SCREEN_SPEC.md §2 — spend and travel status
  * are shown together, never split into separate dashboard tiles.
  */
-export function HeroSnapshotCard({ currency, amount, percentVsLastMonth, travel }: HeroSnapshotCardProps) {
+export function HeroSnapshotCard({ currency, amount, percentVsLastMonth, travel, onCyclePeriod, isCycling }: HeroSnapshotCardProps) {
+  const [presentAlert] = useIonAlert()
+
+  const handleCycleClick = () => {
+    presentAlert({
+      header: 'End Current Period?',
+      message: 'Are you sure you want to seal the current period and start a new one? This will finalize all current expenses.',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'End Period',
+          role: 'destructive',
+          handler: () => {
+            if (onCyclePeriod) onCyclePeriod()
+          }
+        }
+      ]
+    })
+  }
+
   return (
     <div className="homeos-hero-card">
       <div className="homeos-hero-card__glow" aria-hidden="true" />
+      
+      {onCyclePeriod && (
+        <button 
+          type="button" 
+          className="homeos-hero-card__cycle" 
+          onClick={handleCycleClick} 
+          disabled={isCycling}
+          aria-label="End current period and start a new one"
+        >
+          {isCycling ? 'Starting...' : 'End Period'}
+        </button>
+      )}
 
       <div className="homeos-hero-card__spend">
         <p className="homeos-hero-card__label">This month's spend</p>

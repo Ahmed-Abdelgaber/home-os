@@ -14,9 +14,23 @@
   cursor: pointer;
 }
 
+.homeos-expense-details__facts {
+  margin-bottom: var(--homeos-space-20);
+}
+
+.homeos-expense-details__edit,
 .homeos-expense-details__delete {
   width: 100%;
-  margin-top: var(--homeos-space-20);
+  margin-top: var(--homeos-space-12);
+}
+
+.homeos-expense-details__cancel {
+  width: 100%;
+  margin-top: var(--homeos-space-16);
+}
+
+.homeos-expense-details__delete {
   border-color: var(--homeos-danger);
   color: var(--homeos-danger);
 }
+

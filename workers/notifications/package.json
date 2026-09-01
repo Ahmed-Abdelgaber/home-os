@@ -1,0 +1,23 @@
+{
+  "name": "homeos-notifications",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev --test-scheduled",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.8",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240320.1",
+    "@types/web-push": "^3.6.3",
+    "typescript": "^5.4.3",
+    "vitest": "^1.4.0",
+    "wrangler": "^3.42.0"
+  }
+}

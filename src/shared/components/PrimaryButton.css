@@ -9,10 +9,12 @@
   font-size: var(--homeos-text-body);
   font-weight: var(--homeos-weight-bold);
   cursor: pointer;
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease), transform var(--homeos-motion-fast) var(--homeos-ease);
 }
 
 .homeos-primary-button:active {
   background: var(--homeos-primary-600);
+  transform: scale(0.98);
 }
 
 .homeos-primary-button:disabled {

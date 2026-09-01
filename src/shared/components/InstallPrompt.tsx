@@ -1,3 +1,5 @@
+import { IonIcon } from '@ionic/react'
+import { close } from 'ionicons/icons'
 import { useState } from 'react'
 import './InstallPrompt.css'
 
@@ -34,7 +36,7 @@ export function InstallPrompt() {
         Install HomeOS: tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.
       </p>
       <button type="button" className="homeos-install-prompt__dismiss" aria-label="Dismiss" onClick={dismiss}>
-        ×
+        <IonIcon icon={close} />
       </button>
     </div>
   )

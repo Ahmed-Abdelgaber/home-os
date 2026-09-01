@@ -1,0 +1,15 @@
+.homeos-search-bar {
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: var(--homeos-space-16);
+  --background: var(--homeos-soft-surface);
+  --border-radius: var(--homeos-radius-md);
+  --icon-color: var(--homeos-ink-400);
+  --clear-button-color: var(--homeos-ink-400);
+  --placeholder-color: var(--homeos-ink-400);
+  --color: var(--homeos-ink-950);
+  padding: 0;
+  margin-bottom: var(--homeos-space-16);
+}
+

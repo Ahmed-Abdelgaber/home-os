@@ -35,9 +35,12 @@ export function usePurchaseProduct() {
       if (error) throw error
       return data as PurchaseProductResult
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['items'] })
-      queryClient.invalidateQueries({ queryKey: ['home'] })
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['items'] }),
+        queryClient.invalidateQueries({ queryKey: ['expenses'] }),
+        queryClient.invalidateQueries({ queryKey: ['home'] }),
+      ])
     },
   })
 }
