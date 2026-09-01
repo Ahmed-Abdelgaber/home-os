@@ -10,6 +10,7 @@ import {
   peopleOutline,
 } from 'ionicons/icons'
 import { useNavigate } from 'react-router-dom'
+import { IonIcon, useIonAlert } from '@ionic/react'
 import { supabase } from '../../core/supabase/client'
 import { AppPage } from '../../shared/components/AppPage'
 import { GroupedCard } from '../../shared/components/GroupedCard'
@@ -19,6 +20,22 @@ import './MorePage.css'
 
 export function MorePage() {
   const navigate = useNavigate()
+  const [presentAlert] = useIonAlert()
+
+  const handleLogout = () => {
+    presentAlert({
+      header: 'Log Out',
+      message: 'Are you sure you want to end your session?',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        { 
+          text: 'Log out', 
+          role: 'destructive', 
+          handler: () => supabase.auth.signOut() 
+        }
+      ]
+    })
+  }
 
   return (
     <AppPage title="More">
@@ -44,9 +61,10 @@ export function MorePage() {
         </GroupedCard>
       </section>
 
-      <GroupedCard className="homeos-more__logout">
-        <Row icon={logOutOutline} tone="danger" title="Logout" meta="End your session" onClick={() => supabase.auth.signOut()} />
-      </GroupedCard>
+      <button className="homeos-logout-button" onClick={handleLogout}>
+        <IonIcon icon={logOutOutline} />
+        Log out
+      </button>
     </AppPage>
   )
 }
