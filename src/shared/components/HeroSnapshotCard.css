@@ -12,20 +12,21 @@
   position: absolute;
   top: var(--homeos-space-16);
   right: var(--homeos-space-16);
-  background: var(--homeos-primary-100);
-  border: none;
+  background: var(--homeos-danger-soft);
+  border: 1px solid transparent;
   border-radius: var(--homeos-radius-button);
-  color: var(--homeos-primary-600);
+  color: var(--homeos-danger);
   padding: 6px 12px;
   font-size: var(--homeos-text-caption);
   font-weight: var(--homeos-weight-semibold);
   cursor: pointer;
   z-index: 2;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
 .homeos-hero-card__cycle:hover {
-  background: var(--homeos-primary-50);
+  background: var(--homeos-danger);
+  color: #ffffff;
 }
 
 .homeos-hero-card__cycle:disabled {
