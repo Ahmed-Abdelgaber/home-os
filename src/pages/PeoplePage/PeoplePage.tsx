@@ -28,7 +28,7 @@ export function PeoplePage() {
   const [sheet, setSheet] = useState<SheetState>(null)
 
   return (
-    <AppPage title="People" backHref="/app/tabs/more">
+    <AppPage title="People" backHref="/app/tabs/more" onRefresh={async () => { await people.refetch() }}>
       <PrimaryButton className="homeos-people__add" onClick={() => setSheet({ mode: 'add' })}>
         Add person
       </PrimaryButton>

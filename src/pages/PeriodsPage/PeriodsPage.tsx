@@ -16,7 +16,7 @@ export function PeriodsPage() {
   const endPeriod = useEndPeriod()
 
   return (
-    <AppPage title="Tracking Periods" backHref="/app/tabs/more">
+    <AppPage title="Tracking Periods" backHref="/app/tabs/more" onRefresh={async () => { await periods.refetch() }}>
       <QueryState
         query={periods}
         skeleton={

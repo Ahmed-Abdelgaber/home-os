@@ -32,7 +32,7 @@ export function CategoriesPage() {
   const [sheet, setSheet] = useState<SheetState>(null)
 
   return (
-    <AppPage title="Categories" backHref="/app/tabs/more">
+    <AppPage title="Categories" backHref="/app/tabs/more" onRefresh={async () => { await categories.refetch() }}>
       <PrimaryButton className="homeos-categories__add" onClick={() => setSheet({ mode: 'add' })}>
         Add category
       </PrimaryButton>

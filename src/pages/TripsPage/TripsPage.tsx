@@ -25,7 +25,7 @@ export function TripsPage() {
   const lowerSearch = search.toLowerCase()
 
   return (
-    <AppPage title="Trips" backHref="/app/tabs/more">
+    <AppPage title="Trips" backHref="/app/tabs/more" onRefresh={async () => { await trips.refetch() }}>
       <PrimaryButton className="homeos-trips__add" onClick={() => navigate('/app/trips/new')}>
         Add trip
       </PrimaryButton>

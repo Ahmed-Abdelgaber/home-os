@@ -30,7 +30,7 @@ export function AccountsPage() {
   const [sheet, setSheet] = useState<SheetState>(null)
 
   return (
-    <AppPage title="Accounts" backHref="/app/tabs/more">
+    <AppPage title="Accounts" backHref="/app/tabs/more" onRefresh={async () => { await accounts.refetch() }}>
       <PrimaryButton className="homeos-accounts__add" onClick={() => setSheet({ mode: 'add' })}>
         Add account
       </PrimaryButton>
