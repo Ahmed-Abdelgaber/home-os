@@ -10,6 +10,7 @@ import { useLongRunningItems } from '../../features/home/useLongRunningItems'
 import { useLongStockedItems } from '../../features/home/useLongStockedItems'
 import { RECENT_ACTIVITY_PREVIEW_COUNT, useRecentActivity } from '../../features/home/useRecentActivity'
 import { useStartItem } from '../../features/items/useItemMutations'
+import { useCyclePeriod } from '../../features/periods/usePeriodMutations'
 import { HomeOSHeader } from '../../shared/components/HomeOSHeader'
 import { HeroSnapshotCard } from '../../shared/components/HeroSnapshotCard'
 import { SectionHeader } from '../../shared/components/SectionHeader'
@@ -43,6 +44,7 @@ export function HomePage() {
   const longStocked = useLongStockedItems()
   const recentActivity = useRecentActivity()
   const startItem = useStartItem()
+  const cyclePeriod = useCyclePeriod()
   const [showAllActivity, setShowAllActivity] = useState(false)
   const hasMoreActivity = (recentActivity.data?.length ?? 0) > RECENT_ACTIVITY_PREVIEW_COUNT
 
@@ -59,7 +61,12 @@ export function HomePage() {
           <IonRefresherContent />
         </IonRefresher>
         
-        <HomeOSHeader greeting={`${cairoGreeting()} 👋`} name={personName ?? ''} avatarInitial={personName?.charAt(0) ?? '?'} />
+        <HomeOSHeader 
+          greeting={`${cairoGreeting()} 👋`} 
+          name={personName ?? ''} 
+          avatarInitial={personName?.charAt(0) ?? '?'} 
+          onAvatarClick={() => navigate('/app/settings')}
+        />
 
         <div className="homeos-home-body">
           <QueryState query={snapshot} skeleton={<Skeleton height={220} />} error="Couldn't load this month's snapshot.">
@@ -69,6 +76,8 @@ export function HomePage() {
                 amount={data.amount}
                 percentVsLastMonth={data.percentVsLastMonth}
                 travel={data.travel}
+                isCycling={cyclePeriod.isPending}
+                onCyclePeriod={() => cyclePeriod.mutate(data.activePeriodId)}
               />
             )}
           </QueryState>

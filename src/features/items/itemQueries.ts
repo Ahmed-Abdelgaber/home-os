@@ -98,7 +98,7 @@ export async function fetchAllStockedItems(): Promise<ItemSummary[]> {
       }
     })
     .sort((a, b) => b.purchaseDate.localeCompare(a.purchaseDate))
-    .map(({ purchaseDate: _, ...item }) => item)
+    .map(({ purchaseDate: _purchaseDate, ...item }) => item)
 }
 
 /** Finished Items, most recently finished first — for the Items tab Finished view. */

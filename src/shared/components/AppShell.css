@@ -31,3 +31,10 @@
   stroke: var(--homeos-border);
   stroke-width: 1px;
 }
+
+.homeos-tab-bar-spacer {
+  max-width: 64px;
+  min-width: 64px;
+  pointer-events: none;
+  background: transparent;
+}

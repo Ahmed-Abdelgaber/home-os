@@ -1,3 +1,8 @@
+.homeos-more__section {
+  margin-top: var(--homeos-space-32);
+  margin-bottom: var(--homeos-space-32);
+}
+
 .homeos-more__logout {
   margin-top: var(--homeos-space-16);
 }

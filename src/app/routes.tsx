@@ -10,11 +10,11 @@ import { ExpenseDetailsPage } from '../pages/ExpenseDetailsPage/ExpenseDetailsPa
 import { ProductCatalogPage } from '../pages/ProductCatalogPage/ProductCatalogPage'
 import { ProductDetailsPage } from '../pages/ProductDetailsPage/ProductDetailsPage'
 import { ProductFormPage } from '../pages/ProductFormPage/ProductFormPage'
-import { InactiveProductsPage } from '../pages/InactiveProductsPage/InactiveProductsPage'
 import { TripsPage } from '../pages/TripsPage/TripsPage'
 import { TripFormPage } from '../pages/TripFormPage/TripFormPage'
 import { AccountsPage } from '../pages/AccountsPage/AccountsPage'
 import { CategoriesPage } from '../pages/CategoriesPage/CategoriesPage'
+import { PeriodsPage } from '../pages/PeriodsPage/PeriodsPage'
 import { PeoplePage } from '../pages/PeoplePage/PeoplePage'
 import { SettingsPage } from '../pages/SettingsPage/SettingsPage'
 import { AppShell } from '../shared/components/AppShell'
@@ -35,7 +35,6 @@ const protectedRoutes: { path: string; element: ReactElement }[] = [
   { path: '/app/expenses/add', element: <AddExpensePage /> },
   { path: '/app/expenses/:expenseId', element: <ExpenseDetailsPage /> },
   { path: '/app/products', element: <ProductCatalogPage /> },
-  { path: '/app/products/inactive', element: <InactiveProductsPage /> },
   { path: '/app/products/new', element: <ProductFormPage /> },
   { path: '/app/products/:productId/edit', element: <ProductFormPage /> },
   { path: '/app/products/:productId', element: <ProductDetailsPage /> },
@@ -44,6 +43,7 @@ const protectedRoutes: { path: string; element: ReactElement }[] = [
   { path: '/app/trips/:tripId/edit', element: <TripFormPage /> },
   { path: '/app/accounts', element: <AccountsPage /> },
   { path: '/app/categories', element: <CategoriesPage /> },
+  { path: '/app/periods', element: <PeriodsPage /> },
   { path: '/app/people', element: <PeoplePage /> },
   { path: '/app/settings', element: <SettingsPage /> },
   { path: '/app/tabs/*', element: <AppShell /> },

@@ -1,30 +1,63 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { cubeOutline } from 'ionicons/icons'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useProductCatalog } from '../../features/products/useProductCatalog'
+import { useInactiveProducts } from '../../features/products/useInactiveProducts'
 import { AppPage } from '../../shared/components/AppPage'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { QueryState } from '../../shared/components/QueryState'
 import { Row } from '../../shared/components/Row'
 import { SearchBar } from '../../shared/components/SearchBar'
-import { SecondaryButton } from '../../shared/components/SecondaryButton'
 import { Skeleton } from '../../shared/components/Skeleton'
 import './ProductCatalogPage.css'
+
+type ProductsView = 'active' | 'inactive'
 
 export function ProductCatalogPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
-  const products = useProductCatalog(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const rawView = searchParams.get('view')
+  const view: ProductsView = rawView === 'inactive' ? 'inactive' : 'active'
+  const selectView = (next: ProductsView) => {
+    setSearchParams(next === 'active' ? {} : { view: next }, { replace: true })
+    setSearch('')
+  }
+
+  const activeProducts = useProductCatalog(false)
+  const inactiveProducts = useInactiveProducts()
+  const query = view === 'active' ? activeProducts : inactiveProducts
   const lowerSearch = search.toLowerCase()
 
   return (
     <AppPage title="Product Catalog" backHref="/app/tabs/more" onRefresh={() => queryClient.invalidateQueries({ queryKey: ['products'] })}>
-      <SearchBar value={search} onChange={setSearch} placeholder="Search products…" />
+      <div className="homeos-catalog-view-toggle" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === 'active'}
+          className={`homeos-catalog-view-toggle__option ${view === 'active' ? 'homeos-catalog-view-toggle__option--selected' : ''}`}
+          onClick={() => selectView('active')}
+        >
+          Active
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === 'inactive'}
+          className={`homeos-catalog-view-toggle__option ${view === 'inactive' ? 'homeos-catalog-view-toggle__option--selected' : ''}`}
+          onClick={() => selectView('inactive')}
+        >
+          Inactive
+        </button>
+      </div>
+
+      <SearchBar value={search} onChange={setSearch} placeholder={view === 'active' ? "Search products…" : "Search inactive products…"} />
 
       <QueryState
-        query={products}
+        query={query}
         skeleton={
           <div className="homeos-catalog-skeleton-stack">
             <Skeleton height={64} />
@@ -32,8 +65,8 @@ export function ProductCatalogPage() {
             <Skeleton height={64} />
           </div>
         }
-        error="Couldn't load the product catalog."
-        empty="No active products yet."
+        error={`Couldn't load ${view} products.`}
+        empty={view === 'active' ? "No active products yet." : "No inactive products."}
       >
         {(items) => {
           const filtered = lowerSearch
@@ -49,7 +82,7 @@ export function ProductCatalogPage() {
                   key={product.id}
                   icon={cubeOutline}
                   title={product.title}
-                  meta={product.meta}
+                  meta={view === 'inactive' ? [product.meta, 'Inactive'].filter(Boolean).join(' • ') : product.meta}
                   onClick={() => navigate(`/app/products/${product.id}`)}
                 />
               ))}
@@ -57,10 +90,6 @@ export function ProductCatalogPage() {
           )
         }}
       </QueryState>
-
-      <SecondaryButton className="homeos-catalog__inactive-link" onClick={() => navigate('/app/products/inactive')}>
-        View inactive products
-      </SecondaryButton>
     </AppPage>
   )
 }
