@@ -1,3 +1,4 @@
+import { useIonAlert } from '@ionic/react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { formatShortDate } from '../../core/utils/cairoDate'
@@ -23,8 +24,20 @@ export function ExpenseDetailsPage() {
   const [editing, setEditing] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [presentAlert] = useIonAlert()
 
-  const handleSubmit = async (values: ExpenseFormValues) => {
+  const handleConfirmSubmit = (values: ExpenseFormValues) => {
+    presentAlert({
+      header: 'Save Changes?',
+      message: 'Are you sure you want to save these changes?',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        { text: 'Save', handler: () => executeSubmit(values) }
+      ]
+    })
+  }
+
+  const executeSubmit = async (values: ExpenseFormValues) => {
     if (!expenseId) return
     setSubmitError(null)
     try {
@@ -87,7 +100,7 @@ export function ExpenseDetailsPage() {
                   pendingLabel="Saving…"
                   isPending={updateExpense.isPending}
                   submitError={submitError}
-                  onSubmit={handleSubmit}
+                  onSubmit={handleConfirmSubmit}
                 />
                 <SecondaryButton className="homeos-expense-details__cancel" onClick={() => setEditing(false)}>
                   Cancel

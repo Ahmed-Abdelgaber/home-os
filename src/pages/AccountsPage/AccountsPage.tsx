@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useIonAlert } from '@ionic/react'
 import { walletOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -89,7 +90,24 @@ function AccountForm({ initial, onSaved }: { initial?: AccountDetail; onSaved: (
     },
   })
 
+  const [presentAlert] = useIonAlert()
+
   const onSubmit = async (values: AccountFormValues) => {
+    if (initial) {
+      presentAlert({
+        header: 'Save Changes?',
+        message: 'Are you sure you want to save these changes?',
+        buttons: [
+          { text: 'Cancel', role: 'cancel' },
+          { text: 'Save', handler: () => executeSubmit(values) }
+        ]
+      })
+    } else {
+      executeSubmit(values)
+    }
+  }
+
+  const executeSubmit = async (values: AccountFormValues) => {
     setSubmitError(null)
     // Empty strings mean "not set" in the form but must reach the database as null.
     const input = { name: values.name, type: values.type || null, ownerId: values.ownerId || null }

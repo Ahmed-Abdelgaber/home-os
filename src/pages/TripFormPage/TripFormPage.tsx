@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useIonAlert } from '@ionic/react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -37,11 +38,27 @@ export function TripFormPage() {
   const createTrip = useCreateTrip()
   const updateTrip = useUpdateTrip()
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [presentAlert] = useIonAlert()
 
   const stillLoading = people.isLoading || (isEdit && existing.isLoading)
   const loadFailed = people.isError || !people.data || (isEdit && (existing.isError || !existing.data))
 
-  const handleSubmit = async (values: TripFormValues) => {
+  const handleConfirmSubmit = (values: TripFormValues) => {
+    if (isEdit) {
+      presentAlert({
+        header: 'Save Changes?',
+        message: 'Are you sure you want to save these changes?',
+        buttons: [
+          { text: 'Cancel', role: 'cancel' },
+          { text: 'Save', handler: () => executeSubmit(values) }
+        ]
+      })
+    } else {
+      executeSubmit(values)
+    }
+  }
+
+  const executeSubmit = async (values: TripFormValues) => {
     setSubmitError(null)
     const input = {
       name: values.name,
@@ -90,7 +107,7 @@ export function TripFormPage() {
           pendingLabel={isEdit ? 'Saving…' : 'Adding…'}
           isPending={isEdit ? updateTrip.isPending : createTrip.isPending}
           submitError={submitError}
-          onSubmit={handleSubmit}
+          onSubmit={handleConfirmSubmit}
         />
       )}
     </AppPage>

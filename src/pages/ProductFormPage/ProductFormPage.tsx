@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useIonAlert } from '@ionic/react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -35,11 +36,27 @@ export function ProductFormPage() {
   const createProduct = useCreateProduct()
   const updateProduct = useUpdateProduct()
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [presentAlert] = useIonAlert()
 
   const stillLoading = categories.isLoading || people.isLoading || (isEdit && existing.isLoading)
   const loadFailed = categories.isError || people.isError || !categories.data || !people.data || (isEdit && (existing.isError || !existing.data))
 
-  const handleSubmit = async (values: ProductFormValues) => {
+  const handleConfirmSubmit = (values: ProductFormValues) => {
+    if (isEdit) {
+      presentAlert({
+        header: 'Save Changes?',
+        message: 'Are you sure you want to save these changes?',
+        buttons: [
+          { text: 'Cancel', role: 'cancel' },
+          { text: 'Save', handler: () => executeSubmit(values) }
+        ]
+      })
+    } else {
+      executeSubmit(values)
+    }
+  }
+
+  const executeSubmit = async (values: ProductFormValues) => {
     setSubmitError(null)
     const input = {
       name: values.name,
@@ -90,7 +107,7 @@ export function ProductFormPage() {
           pendingLabel={isEdit ? 'Saving…' : 'Adding…'}
           isPending={isEdit ? updateProduct.isPending : createProduct.isPending}
           submitError={submitError}
-          onSubmit={handleSubmit}
+          onSubmit={handleConfirmSubmit}
         />
       )}
     </AppPage>
