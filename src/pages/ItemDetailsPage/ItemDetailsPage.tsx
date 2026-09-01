@@ -75,6 +75,7 @@ function ItemDetailsBody({
   onCancelDelete,
   onConfirmDelete,
 }: ItemDetailsBodyProps) {
+  const navigate = useNavigate()
   return (
     <>
       <div className="homeos-item-details__identity">
@@ -127,7 +128,7 @@ function ItemDetailsBody({
         </PrimaryButton>
       )}
 
-      <HistorySection title="Previous cycles" entries={historyEntries ?? []} />
+      <HistorySection title="Previous cycles" entries={historyEntries ?? []} onEntryClick={(id) => navigate(`/app/items/${id}`)} />
 
       <SecondaryButton className="homeos-item-details__delete" onClick={onRequestDelete}>
         Delete item

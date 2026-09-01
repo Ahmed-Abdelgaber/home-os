@@ -1,0 +1,5 @@
+.homeos-inactive-products-skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-8);
+}

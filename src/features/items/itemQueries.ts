@@ -1,5 +1,5 @@
 import { supabase } from '../../core/supabase/client'
-import { cairoDateMinusDays, cairoToday } from '../../core/utils/cairoDate'
+import { cairoDateMinusDays, cairoToday, formatShortDate } from '../../core/utils/cairoDate'
 
 export interface ItemSummary {
   id: string
@@ -47,7 +47,7 @@ export async function fetchActiveItems(limit?: number): Promise<ItemSummary[]> {
 }
 
 /** Stocked Items purchased >= 30 days ago, oldest-first — purchase date comes from the linked Expense. */
-export async function fetchStockedItems(limit?: number): Promise<ItemSummary[]> {
+export async function fetchLongStockedItems(limit?: number): Promise<ItemSummary[]> {
   const { data: items, error } = await supabase
     .from('items')
     .select('id, product:products(name), expense:expenses(expense_date)')
@@ -73,4 +73,51 @@ export async function fetchStockedItems(limit?: number): Promise<ItemSummary[]> 
     title: item.title,
     meta: `Stocked for ${daysBetween(item.purchaseDate, today)} days`,
   }))
+}
+
+/** All Stocked Items, newest purchase first — for the Items tab Stocked view. */
+export async function fetchAllStockedItems(): Promise<ItemSummary[]> {
+  const { data: items, error } = await supabase
+    .from('items')
+    .select('id, product:products(name), expense:expenses(expense_date)')
+    .eq('status', 'stocked')
+  if (error) throw error
+
+  const today = cairoToday()
+
+  return (items ?? [])
+    .map((item) => {
+      const product = item.product as unknown as { name: string } | null
+      const expense = item.expense as unknown as { expense_date: string } | null
+      const purchaseDate = expense?.expense_date
+      return {
+        id: item.id,
+        title: product?.name ?? 'Unknown product',
+        meta: purchaseDate ? `Stocked for ${daysBetween(purchaseDate, today)} days` : 'Stocked',
+        purchaseDate: purchaseDate ?? '',
+      }
+    })
+    .sort((a, b) => b.purchaseDate.localeCompare(a.purchaseDate))
+    .map(({ purchaseDate: _, ...item }) => item)
+}
+
+/** Finished Items, most recently finished first — for the Items tab Finished view. */
+export async function fetchFinishedItems(): Promise<ItemSummary[]> {
+  const { data: items, error } = await supabase
+    .from('items')
+    .select('id, started_date, finished_date, product:products(name)')
+    .eq('status', 'finished')
+    .order('finished_date', { ascending: false })
+  if (error) throw error
+
+  return (items ?? []).map((item) => {
+    const product = item.product as unknown as { name: string } | null
+    const started = item.started_date as string
+    const finished = item.finished_date as string
+    return {
+      id: item.id,
+      title: product?.name ?? 'Unknown product',
+      meta: `${formatShortDate(started)} → ${formatShortDate(finished)} • ${daysBetween(started, finished) + 1} days`,
+    }
+  })
 }

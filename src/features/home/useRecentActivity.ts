@@ -60,7 +60,7 @@ export function useRecentActivity() {
 
       // Only direct Expenses (no linked Item) — a purchase's own Expense is already represented by "Bought X".
       const directExpenses = (expensesRes.data ?? [])
-        .filter((expense) => Array.isArray(expense.items) && expense.items.length === 0)
+        .filter((expense) => !expense.items || (Array.isArray(expense.items) && expense.items.length === 0))
         .map((expense) => ({
           id: `expense-${expense.id}`,
           icon: cardOutline,

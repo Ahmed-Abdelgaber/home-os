@@ -1,39 +1,36 @@
-import { useQueryClient } from '@tanstack/react-query'
 import { cubeOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useProductCatalog } from '../../features/products/useProductCatalog'
+import { useInactiveProducts } from '../../features/products/useInactiveProducts'
 import { AppPage } from '../../shared/components/AppPage'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { QueryState } from '../../shared/components/QueryState'
 import { Row } from '../../shared/components/Row'
 import { SearchBar } from '../../shared/components/SearchBar'
-import { SecondaryButton } from '../../shared/components/SecondaryButton'
 import { Skeleton } from '../../shared/components/Skeleton'
-import './ProductCatalogPage.css'
+import './InactiveProductsPage.css'
 
-export function ProductCatalogPage() {
+export function InactiveProductsPage() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
-  const products = useProductCatalog(false)
+  const products = useInactiveProducts()
   const lowerSearch = search.toLowerCase()
 
   return (
-    <AppPage title="Product Catalog" backHref="/app/tabs/more" onRefresh={() => queryClient.invalidateQueries({ queryKey: ['products'] })}>
-      <SearchBar value={search} onChange={setSearch} placeholder="Search products…" />
+    <AppPage title="Inactive Products" backHref="/app/products">
+      <SearchBar value={search} onChange={setSearch} placeholder="Search inactive products…" />
 
       <QueryState
         query={products}
         skeleton={
-          <div className="homeos-catalog-skeleton-stack">
+          <div className="homeos-inactive-products-skeleton-stack">
             <Skeleton height={64} />
             <Skeleton height={64} />
             <Skeleton height={64} />
           </div>
         }
-        error="Couldn't load the product catalog."
-        empty="No active products yet."
+        error="Couldn't load inactive products."
+        empty="No inactive products."
       >
         {(items) => {
           const filtered = lowerSearch
@@ -49,7 +46,7 @@ export function ProductCatalogPage() {
                   key={product.id}
                   icon={cubeOutline}
                   title={product.title}
-                  meta={product.meta}
+                  meta={[product.meta, 'Inactive'].filter(Boolean).join(' • ')}
                   onClick={() => navigate(`/app/products/${product.id}`)}
                 />
               ))}
@@ -57,11 +54,6 @@ export function ProductCatalogPage() {
           )
         }}
       </QueryState>
-
-      <SecondaryButton className="homeos-catalog__inactive-link" onClick={() => navigate('/app/products/inactive')}>
-        View inactive products
-      </SecondaryButton>
     </AppPage>
   )
 }
-
