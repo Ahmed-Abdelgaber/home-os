@@ -139,24 +139,30 @@ async function checkSpendWarnings(supabase: SupabaseClient, env: Env, cairoTime:
   
   if (!settings || settings.length === 0) { console.log("No settings"); return }
 
-  const monthStart = formatInTimeZone(startOfMonth(cairoTime), 'Africa/Cairo', 'yyyy-MM-dd')
-  const monthEnd = formatInTimeZone(endOfMonth(cairoTime), 'Africa/Cairo', 'yyyy-MM-dd')
+  const { data: activePeriod } = await supabase
+    .from('periods')
+    .select('id, start_date')
+    .eq('is_active', true)
+    .maybeSingle()
+    
+  if (!activePeriod) return
 
   const { data: expenses } = await supabase
     .from('expenses')
     .select('amount')
-    .gte('expense_date', monthStart)
-    .lte('expense_date', monthEnd)
+    .gte('expense_date', activePeriod.start_date)
 
   if (!expenses) return
 
   const totalHouseholdSpend = expenses.reduce((sum, e) => sum + Number(e.amount), 0)
 
+  const periodDedupeKey = `${activePeriod.start_date}:active`
+
   for (const s of settings as NotificationSettings[]) {
     if (s.monthly_spend_limit && totalHouseholdSpend >= s.monthly_spend_limit) {
-      await sendPushToUser(supabase, env, s.user_id, 'spend_threshold', currentMonthStr, {
+      await sendPushToUser(supabase, env, s.user_id, 'spend_threshold', periodDedupeKey, {
         title: 'Spending warning',
-        body: `Household spending reached EGP ${totalHouseholdSpend.toLocaleString('en-US')} and passed your EGP ${s.monthly_spend_limit.toLocaleString('en-US')} limit.`,
+        body: `Household spending reached EGP ${totalHouseholdSpend.toLocaleString('en-US')} and passed your EGP ${s.monthly_spend_limit.toLocaleString('en-US')} limit for this period.`,
         type: 'spend'
       })
     }
