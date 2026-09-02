@@ -1,4 +1,4 @@
-import webpush from 'web-push'
+import { buildPushPayload } from '@block65/webcrypto-web-push'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz'
 import { addDays, differenceInDays, startOfMonth, endOfMonth } from 'date-fns'
@@ -31,12 +31,6 @@ type NotificationSettings = {
 
 // Main entry point for logic
 export async function checkAndSendNotifications(supabase: SupabaseClient, env: Env, now: Date) {
-  webpush.setVapidDetails(
-    env.VAPID_SUBJECT,
-    env.VAPID_PUBLIC_KEY,
-    env.VAPID_PRIVATE_KEY
-  )
-
   const cairoTime = toZonedTime(now, 'Africa/Cairo')
   const currentHour = cairoTime.getHours()
   const todayDateStr = formatInTimeZone(cairoTime, 'Africa/Cairo', 'yyyy-MM-dd')
@@ -44,18 +38,19 @@ export async function checkAndSendNotifications(supabase: SupabaseClient, env: E
   const currentMonthStr = formatInTimeZone(cairoTime, 'Africa/Cairo', 'yyyy-MM')
 
   // Monthly spend warning
-  await checkSpendWarnings(supabase, cairoTime, currentMonthStr)
+  await checkSpendWarnings(supabase, env, cairoTime, currentMonthStr)
 
   // Daily checks (around 9 AM Cairo time)
   if (currentHour === 9) {
-    await checkTripStarts(supabase, tomorrowDateStr)
-    await checkTripEnds(supabase, tomorrowDateStr)
-    await checkLongStockedItems(supabase, cairoTime)
+    await checkTripStarts(supabase, env, tomorrowDateStr)
+    await checkTripEnds(supabase, env, tomorrowDateStr)
+    await checkLongStockedItems(supabase, env, cairoTime)
   }
 }
 
 async function sendPushToUser(
   supabase: SupabaseClient,
+  env: Env,
   userId: string,
   type: string,
   dedupeKey: string,
@@ -82,27 +77,45 @@ async function sendPushToUser(
 
   let sentCount = 0
 
+  const vapid = {
+    subject: env.VAPID_SUBJECT,
+    publicKey: env.VAPID_PUBLIC_KEY,
+    privateKey: env.VAPID_PRIVATE_KEY
+  }
+
   for (const sub of subs as PushSubscriptionRow[]) {
     try {
-      await webpush.sendNotification(
-        {
-          endpoint: sub.endpoint,
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth
-          }
-        },
-        JSON.stringify(payload)
-      )
-      sentCount++
-    } catch (err: any) {
-      if (err.statusCode === 404 || err.statusCode === 410) {
-        // subscription expired or invalid
-        await supabase.from('push_subscriptions').delete().eq('id', sub.id)
-      } else {
-        console.error('Push error:', err)
-        throw err
+      const subscription = {
+        endpoint: sub.endpoint,
+        expirationTime: null,
+        keys: {
+          p256dh: sub.p256dh,
+          auth: sub.auth
+        }
       }
+
+      const requestInit = await buildPushPayload({ data: payload }, subscription, vapid)
+      const res = await fetch(sub.endpoint, {
+        method: requestInit.method,
+        headers: requestInit.headers,
+        body: requestInit.body.buffer as ArrayBuffer
+      })
+
+      if (!res.ok) {
+        if (res.status === 404 || res.status === 410) {
+          // subscription expired or invalid
+          await supabase.from('push_subscriptions').delete().eq('id', sub.id)
+        } else {
+          const text = await res.text()
+          console.error(`Push error: ${res.status} ${text}`)
+          throw new Error(`Push failed with status: ${res.status}`)
+        }
+      } else {
+        sentCount++
+      }
+    } catch (err: any) {
+      console.error('Push error:', err)
+      throw err
     }
   }
 
@@ -117,7 +130,7 @@ async function sendPushToUser(
   }
 }
 
-async function checkSpendWarnings(supabase: SupabaseClient, cairoTime: Date, currentMonthStr: string) {
+async function checkSpendWarnings(supabase: SupabaseClient, env: Env, cairoTime: Date, currentMonthStr: string) {
   const { data: settings } = await supabase
     .from('notification_settings')
     .select('*')
@@ -141,7 +154,7 @@ async function checkSpendWarnings(supabase: SupabaseClient, cairoTime: Date, cur
 
   for (const s of settings as NotificationSettings[]) {
     if (s.monthly_spend_limit && totalHouseholdSpend >= s.monthly_spend_limit) {
-      await sendPushToUser(supabase, s.user_id, 'spend_threshold', currentMonthStr, {
+      await sendPushToUser(supabase, env, s.user_id, 'spend_threshold', currentMonthStr, {
         title: 'Spending warning',
         body: `Household spending reached EGP ${totalHouseholdSpend.toLocaleString('en-US')} and passed your EGP ${s.monthly_spend_limit.toLocaleString('en-US')} limit.`,
         type: 'spend'
@@ -150,7 +163,7 @@ async function checkSpendWarnings(supabase: SupabaseClient, cairoTime: Date, cur
   }
 }
 
-async function checkTripStarts(supabase: SupabaseClient, tomorrowDateStr: string) {
+async function checkTripStarts(supabase: SupabaseClient, env: Env, tomorrowDateStr: string) {
   const { data: settings } = await supabase
     .from('notification_settings')
     .select('user_id')
@@ -169,7 +182,7 @@ async function checkTripStarts(supabase: SupabaseClient, tomorrowDateStr: string
   for (const trip of trips) {
     for (const s of settings) {
       const personName = (trip.people as any)?.name ?? 'Household'
-      await sendPushToUser(supabase, s.user_id, 'trip_start', trip.id, {
+      await sendPushToUser(supabase, env, s.user_id, 'trip_start', trip.id, {
         title: 'Trip starts tomorrow ✈️',
         body: `${personName} • ${trip.name}`,
         type: 'trip'
@@ -178,7 +191,7 @@ async function checkTripStarts(supabase: SupabaseClient, tomorrowDateStr: string
   }
 }
 
-async function checkTripEnds(supabase: SupabaseClient, tomorrowDateStr: string) {
+async function checkTripEnds(supabase: SupabaseClient, env: Env, tomorrowDateStr: string) {
   const { data: settings } = await supabase
     .from('notification_settings')
     .select('user_id')
@@ -196,7 +209,7 @@ async function checkTripEnds(supabase: SupabaseClient, tomorrowDateStr: string) 
   for (const trip of trips) {
     for (const s of settings) {
       const personName = (trip.people as any)?.name ?? 'Household'
-      await sendPushToUser(supabase, s.user_id, 'trip_end', trip.id, {
+      await sendPushToUser(supabase, env, s.user_id, 'trip_end', trip.id, {
         title: 'Back home tomorrow 🏠',
         body: `${trip.name} trip ends tomorrow.`,
         type: 'trip'
@@ -205,7 +218,7 @@ async function checkTripEnds(supabase: SupabaseClient, tomorrowDateStr: string) 
   }
 }
 
-async function checkLongStockedItems(supabase: SupabaseClient, cairoTime: Date) {
+async function checkLongStockedItems(supabase: SupabaseClient, env: Env, cairoTime: Date) {
   const { data: settings } = await supabase
     .from('notification_settings')
     .select('user_id, long_stocked_days')
@@ -230,7 +243,7 @@ async function checkLongStockedItems(supabase: SupabaseClient, cairoTime: Date) 
 
     for (const s of settings as NotificationSettings[]) {
       if (diffDays >= s.long_stocked_days) {
-        await sendPushToUser(supabase, s.user_id, 'long_stocked', item.id, {
+        await sendPushToUser(supabase, env, s.user_id, 'long_stocked', item.id, {
           title: 'Still in stock 📦',
           body: `${item.name} has been stocked for ${diffDays} days.`,
           type: 'long_stocked'

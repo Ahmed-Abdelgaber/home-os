@@ -34,14 +34,20 @@ function createMockSupabase(mockData: any) {
   } as any
 }
 
-// Mock web-push
-vi.mock('web-push', () => ({
-  default: {
-    setVapidDetails: vi.fn(),
-    sendNotification: vi.fn().mockResolvedValue({})
-  }
+vi.mock('@block65/webcrypto-web-push', () => ({
+  buildPushPayload: vi.fn().mockResolvedValue({
+    method: 'POST',
+    headers: { 'Content-Type': 'application/octet-stream' },
+    body: new Uint8Array()
+  })
 }))
-import webpush from 'web-push'
+
+// Mock global fetch for web-push
+global.fetch = vi.fn().mockResolvedValue({
+  ok: true,
+  status: 200,
+  text: vi.fn().mockResolvedValue('OK')
+})
 
 describe('Notification Logic', () => {
   const env: Env = {
@@ -65,7 +71,7 @@ describe('Notification Logic', () => {
 
     await checkAndSendNotifications(supabase, env, now)
 
-    expect(webpush.sendNotification).toHaveBeenCalled()
+    expect(global.fetch).toHaveBeenCalled()
     expect(supabase.from('notification_log').insert).toHaveBeenCalledWith(
       expect.objectContaining({
         notification_type: 'spend_threshold',
@@ -86,7 +92,7 @@ describe('Notification Logic', () => {
     const now = new Date('2024-10-15T06:00:00Z')
     await checkAndSendNotifications(supabase, env, now)
 
-    expect(webpush.sendNotification).not.toHaveBeenCalled()
+    expect(global.fetch).not.toHaveBeenCalled()
   })
 
   it('Trip starts tomorrow', async () => {
@@ -101,7 +107,7 @@ describe('Notification Logic', () => {
     const now = new Date('2024-10-15T06:00:00Z')
     await checkAndSendNotifications(supabase, env, now)
 
-    expect(webpush.sendNotification).toHaveBeenCalled()
+    expect(global.fetch).toHaveBeenCalled()
     expect(supabase.from('notification_log').insert).toHaveBeenCalledWith(
       expect.objectContaining({
         notification_type: 'trip_start',
@@ -123,7 +129,7 @@ describe('Notification Logic', () => {
     const now = new Date('2024-10-15T06:00:00Z')
     await checkAndSendNotifications(supabase, env, now)
 
-    expect(webpush.sendNotification).toHaveBeenCalled()
+    expect(global.fetch).toHaveBeenCalled()
     expect(supabase.from('notification_log').insert).toHaveBeenCalledWith(
       expect.objectContaining({
         notification_type: 'long_stocked',

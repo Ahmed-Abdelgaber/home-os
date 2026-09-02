@@ -8,14 +8,13 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@block65/webcrypto-web-push": "^1.0.2",
     "@supabase/supabase-js": "^2.39.8",
     "date-fns": "^4.1.0",
-    "date-fns-tz": "^3.2.0",
-    "web-push": "^3.6.7"
+    "date-fns-tz": "^3.2.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240320.1",
-    "@types/web-push": "^3.6.3",
     "typescript": "^5.4.3",
     "vitest": "^1.4.0",
     "wrangler": "^3.42.0"
