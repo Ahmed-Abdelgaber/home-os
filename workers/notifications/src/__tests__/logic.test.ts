@@ -4,15 +4,30 @@ import { toZonedTime } from 'date-fns-tz'
 
 // A mock Supabase client for testing logic without DB connection
 function createMockSupabase(mockData: any) {
-  const queryBuilder = (data: any) => ({
-    select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    not: vi.fn().mockReturnThis(),
-    gte: vi.fn().mockReturnThis(),
-    lte: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue({ data }),
-    then: (resolve: any) => resolve({ data })
-  })
+  const queryBuilder = (data: any[]) => {
+    let filteredData = [...(data || [])]
+    const builder: any = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      not: vi.fn().mockReturnThis(),
+      gte: vi.fn((col: string, val: any) => {
+        if (col === 'expense_date') {
+          filteredData = filteredData.filter(d => d.expense_date >= val)
+        }
+        return builder
+      }),
+      lte: vi.fn((col: string, val: any) => {
+        if (col === 'expense_date') {
+          filteredData = filteredData.filter(d => d.expense_date <= val)
+        }
+        return builder
+      }),
+      maybeSingle: vi.fn().mockImplementation(() => Promise.resolve({ data: filteredData[0] || null })),
+      single: vi.fn().mockImplementation(() => Promise.resolve({ data: filteredData[0] })),
+      then: (resolve: any) => resolve({ data: filteredData })
+    }
+    return builder
+  }
 
   const notificationLogMock = {
     select: vi.fn().mockReturnThis(),
@@ -34,14 +49,20 @@ function createMockSupabase(mockData: any) {
   } as any
 }
 
-// Mock web-push
-vi.mock('web-push', () => ({
-  default: {
-    setVapidDetails: vi.fn(),
-    sendNotification: vi.fn().mockResolvedValue({})
-  }
+vi.mock('@block65/webcrypto-web-push', () => ({
+  buildPushPayload: vi.fn().mockResolvedValue({
+    method: 'POST',
+    headers: { 'Content-Type': 'application/octet-stream' },
+    body: new Uint8Array()
+  })
 }))
-import webpush from 'web-push'
+
+// Mock global fetch for web-push
+global.fetch = vi.fn().mockResolvedValue({
+  ok: true,
+  status: 200,
+  text: vi.fn().mockResolvedValue('OK')
+})
 
 describe('Notification Logic', () => {
   const env: Env = {
@@ -52,10 +73,11 @@ describe('Notification Logic', () => {
     VAPID_SUBJECT: 'test'
   }
 
-  it('Monthly threshold evaluation - above threshold', async () => {
+  it('Period threshold evaluation - above threshold', async () => {
     const supabase = createMockSupabase({
       notification_settings: [{ user_id: 'u1', monthly_spend_limit: 1000 }],
-      expenses: [{ amount: 500 }, { amount: 600 }], // 1100 total
+      periods: [{ id: 'p1', start_date: '2024-10-10', is_active: true }],
+      expenses: [{ amount: 500, expense_date: '2024-10-11' }, { amount: 600, expense_date: '2024-10-12' }], // 1100 total
       subscriptions: [{ id: 's1', user_id: 'u1', endpoint: 'url', p256dh: 'x', auth: 'y' }],
       existingLog: false
     })
@@ -65,20 +87,22 @@ describe('Notification Logic', () => {
 
     await checkAndSendNotifications(supabase, env, now)
 
-    expect(webpush.sendNotification).toHaveBeenCalled()
+    expect(global.fetch).toHaveBeenCalled()
     expect(supabase.from('notification_log').insert).toHaveBeenCalledWith(
       expect.objectContaining({
         notification_type: 'spend_threshold',
-        dedupe_key: '2024-10'
+        dedupe_key: '2024-10-10:active'
       })
     )
   })
 
-  it('Monthly threshold evaluation - below threshold', async () => {
+  it('Period threshold evaluation - below threshold due to old expenses', async () => {
     vi.clearAllMocks()
     const supabase = createMockSupabase({
       notification_settings: [{ user_id: 'u1', monthly_spend_limit: 1000 }],
-      expenses: [{ amount: 500 }, { amount: 400 }], // 900 total
+      periods: [{ id: 'p1', start_date: '2024-10-10', is_active: true }],
+      // Old expense from Oct 9 should be filtered out
+      expenses: [{ amount: 500, expense_date: '2024-10-11' }, { amount: 600, expense_date: '2024-10-09' }], // only 500 counts
       subscriptions: [{ id: 's1', user_id: 'u1', endpoint: 'url', p256dh: 'x', auth: 'y' }],
       existingLog: false
     })
@@ -86,7 +110,23 @@ describe('Notification Logic', () => {
     const now = new Date('2024-10-15T06:00:00Z')
     await checkAndSendNotifications(supabase, env, now)
 
-    expect(webpush.sendNotification).not.toHaveBeenCalled()
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it('Period threshold evaluation - below threshold', async () => {
+    vi.clearAllMocks()
+    const supabase = createMockSupabase({
+      notification_settings: [{ user_id: 'u1', monthly_spend_limit: 1000 }],
+      periods: [{ id: 'p1', start_date: '2024-10-10', is_active: true }],
+      expenses: [{ amount: 500, expense_date: '2024-10-11' }, { amount: 400, expense_date: '2024-10-12' }], // 900 total
+      subscriptions: [{ id: 's1', user_id: 'u1', endpoint: 'url', p256dh: 'x', auth: 'y' }],
+      existingLog: false
+    })
+
+    const now = new Date('2024-10-15T06:00:00Z')
+    await checkAndSendNotifications(supabase, env, now)
+
+    expect(global.fetch).not.toHaveBeenCalled()
   })
 
   it('Trip starts tomorrow', async () => {
@@ -101,7 +141,7 @@ describe('Notification Logic', () => {
     const now = new Date('2024-10-15T06:00:00Z')
     await checkAndSendNotifications(supabase, env, now)
 
-    expect(webpush.sendNotification).toHaveBeenCalled()
+    expect(global.fetch).toHaveBeenCalled()
     expect(supabase.from('notification_log').insert).toHaveBeenCalledWith(
       expect.objectContaining({
         notification_type: 'trip_start',
@@ -123,7 +163,7 @@ describe('Notification Logic', () => {
     const now = new Date('2024-10-15T06:00:00Z')
     await checkAndSendNotifications(supabase, env, now)
 
-    expect(webpush.sendNotification).toHaveBeenCalled()
+    expect(global.fetch).toHaveBeenCalled()
     expect(supabase.from('notification_log').insert).toHaveBeenCalledWith(
       expect.objectContaining({
         notification_type: 'long_stocked',

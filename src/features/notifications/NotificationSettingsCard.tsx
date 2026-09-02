@@ -58,8 +58,8 @@ export function NotificationSettingsCard() {
         <GroupedCard>
           <Row 
             icon={walletOutline}
-            title="Monthly Spend Warning"
-            meta="Alert when passing a threshold"
+            title="Period spending limit"
+            meta="Warn me when spending in the current period passes"
             trailing={
               <IonToggle 
                 checked={settings?.spend_warning_enabled ?? false} 
