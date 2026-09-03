@@ -41,15 +41,15 @@ export function useExpense(expenseId: string | undefined) {
         .single()
       if (error) throw error
 
-      const items = data.items as unknown as
-        | {
-            id: string
-            status: string
-            product_id: string
-            product: { id: string; name: string } | null
-          }[]
-        | null
-      const firstItem = items && items.length > 0 ? items[0] : null
+      // PostgREST might return an array (one-to-many) or a single object (one-to-one if unique constraint exists)
+      const itemsData = data.items as any
+      let firstItem = null
+      if (Array.isArray(itemsData) && itemsData.length > 0) {
+        firstItem = itemsData[0]
+      } else if (itemsData && !Array.isArray(itemsData)) {
+        firstItem = itemsData
+      }
+
       const category = data.category as unknown as { name: string } | null
       const person = data.person as unknown as { name: string } | null
       const account = data.account as unknown as { name: string } | null

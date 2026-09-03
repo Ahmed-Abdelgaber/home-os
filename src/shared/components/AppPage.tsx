@@ -1,4 +1,4 @@
-import { IonBackButton, IonButtons, IonContent, IonHeader, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar } from '@ionic/react'
+import { IonBackButton, IonButtons, IonContent, IonFooter, IonHeader, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar } from '@ionic/react'
 import type { ReactNode } from 'react'
 
 interface AppPageProps {
@@ -11,6 +11,8 @@ interface AppPageProps {
   backHref?: string
   /** When provided, pull-to-refresh triggers this callback. Should return a promise (e.g. query invalidation). */
   onRefresh?: () => Promise<void>
+  /** Optional sticky footer content rendered outside the scrollable area. */
+  footer?: ReactNode
   children: ReactNode
 }
 
@@ -19,7 +21,7 @@ interface AppPageProps {
  * Every screen except Home and Login is this shape, and each was spelling out the same
  * six Ionic elements.
  */
-export function AppPage({ title, backHref, onRefresh, children }: AppPageProps) {
+export function AppPage({ title, backHref, onRefresh, footer, children }: AppPageProps) {
   return (
     <IonPage>
       <IonHeader>
@@ -48,6 +50,11 @@ export function AppPage({ title, backHref, onRefresh, children }: AppPageProps) 
           {children}
         </div>
       </IonContent>
+      {footer && (
+        <IonFooter className="ion-no-border">
+          {footer}
+        </IonFooter>
+      )}
     </IonPage>
   )
 }

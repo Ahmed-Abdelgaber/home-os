@@ -40,27 +40,42 @@ export function ShoppingListPage() {
     })
   }
 
+  const items = shoppingList.data || []
+  const selectedCount = selectedProductIds.size
+
+  const handleBuySelected = () => {
+    const selectedItems = items.filter((i) => selectedProductIds.has(i.productId))
+    if (selectedItems.length === 0) return
+    navigate('/app/shopping-list/buy', {
+      state: { selectedItems },
+    })
+  }
+
+  const footer = items.length > 0 ? (
+    <div className="homeos-shopping-list__footer">
+      <PrimaryButton onClick={handleBuySelected} disabled={selectedCount === 0}>
+        Buy selected {selectedCount > 0 ? `(${selectedCount})` : ''}
+      </PrimaryButton>
+    </div>
+  ) : null
+
   return (
-    <AppPage title="Shopping List" backHref="/app/tabs/more">
+    <AppPage 
+      title="Shopping List" 
+      backHref="/app/tabs/more" 
+      footer={footer}
+      onRefresh={async () => { await shoppingList.refetch() }}
+    >
       <QueryState query={shoppingList} skeleton={<Skeleton height={200} />} error="Couldn't load your shopping list.">
-        {(items) => {
-          if (items.length === 0) {
+        {(resolvedItems) => {
+          if (resolvedItems.length === 0) {
             return (
               <EmptyState message="Shopping list is clear. Everything you need is already covered." />
             )
           }
 
-          const automaticItems = items.filter((i) => i.source === 'automatic')
-          const manualItems = items.filter((i) => i.source === 'manual')
-          const selectedCount = selectedProductIds.size
-
-          const handleBuySelected = () => {
-            const selectedItems = items.filter((i) => selectedProductIds.has(i.productId))
-            if (selectedItems.length === 0) return
-            navigate('/app/shopping-list/buy', {
-              state: { selectedItems },
-            })
-          }
+          const automaticItems = resolvedItems.filter((i) => i.source === 'automatic')
+          const manualItems = resolvedItems.filter((i) => i.source === 'manual')
 
           return (
             <div className="homeos-shopping-list">
@@ -135,12 +150,6 @@ export function ShoppingListPage() {
                   </GroupedCard>
                 </section>
               )}
-
-              <div className="homeos-shopping-list__footer">
-                <PrimaryButton onClick={handleBuySelected} disabled={selectedCount === 0}>
-                  Buy selected {selectedCount > 0 ? `(${selectedCount})` : ''}
-                </PrimaryButton>
-              </div>
             </div>
           )
         }}
