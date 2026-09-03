@@ -19,6 +19,8 @@ import { PeoplePage } from '../pages/PeoplePage/PeoplePage'
 import { SettingsPage } from '../pages/SettingsPage/SettingsPage'
 import { ShoppingListPage } from '../pages/ShoppingListPage/ShoppingListPage'
 import { BuySelectedPage } from '../pages/BuySelectedPage/BuySelectedPage'
+import { PendingTransactionsPage } from '../pages/PendingTransactionsPage/PendingTransactionsPage'
+import { PendingTransactionDetailsPage } from '../pages/PendingTransactionDetailsPage/PendingTransactionDetailsPage'
 import { AppShell } from '../shared/components/AppShell'
 
 /**
@@ -36,6 +38,8 @@ const protectedRoutes: { path: string; element: ReactElement }[] = [
   { path: '/app/purchase', element: <PurchaseProductPage /> },
   { path: '/app/shopping-list', element: <ShoppingListPage /> },
   { path: '/app/shopping-list/buy', element: <BuySelectedPage /> },
+  { path: '/app/pending-transactions', element: <PendingTransactionsPage /> },
+  { path: '/app/pending-transactions/:transactionId', element: <PendingTransactionDetailsPage /> },
   { path: '/app/expenses/add', element: <AddExpensePage /> },
   { path: '/app/expenses/:expenseId', element: <ExpenseDetailsPage /> },
   { path: '/app/products', element: <ProductCatalogPage /> },

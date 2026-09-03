@@ -3,6 +3,7 @@ import { cardOutline, searchOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useExpenses } from '../../features/expenses/useExpenses'
+import { PendingTransactionsSection } from '../../features/bank-transactions/PendingTransactionsSection'
 import { AppPage } from '../../shared/components/AppPage'
 import { EmptyState } from '../../shared/components/EmptyState'
 import { GroupedCard } from '../../shared/components/GroupedCard'
@@ -20,8 +21,18 @@ export function ExpensesPage() {
   const lowerSearch = search.toLowerCase()
 
   return (
-    <AppPage title="Expenses" onRefresh={() => queryClient.invalidateQueries({ queryKey: ['expenses'] })}>
+    <AppPage
+      title="Expenses"
+      onRefresh={async () => {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['expenses'] }),
+          queryClient.invalidateQueries({ queryKey: ['bank_transactions'] }),
+        ])
+      }}
+    >
       <SearchBar value={search} onChange={setSearch} placeholder="Search expenses…" />
+
+      {!lowerSearch && <PendingTransactionsSection />}
 
       <QueryState
         query={expenses}

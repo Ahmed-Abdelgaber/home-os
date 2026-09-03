@@ -1,5 +1,6 @@
 import {
   airplaneOutline,
+  cardOutline,
   cartOutline,
   cubeOutline,
   logOutOutline,
@@ -55,6 +56,13 @@ export function MorePage() {
           title="Product Catalog"
           meta="Products, categories, consumption modes"
           onClick={() => navigate('/app/products')}
+        />
+        <Row
+          icon={cardOutline}
+          tone="warning"
+          title="Pending Transactions"
+          meta="Review bank SMS & imported debits"
+          onClick={() => navigate('/app/pending-transactions')}
         />
         <Row tone="neutral" icon={settingsOutline} title="Settings" meta="Your account" onClick={() => navigate('/app/settings')} />
       </GroupedCard>

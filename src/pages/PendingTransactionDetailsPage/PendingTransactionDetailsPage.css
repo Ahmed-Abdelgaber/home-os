@@ -1,0 +1,97 @@
+.homeos-tx-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.homeos-tx-details-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-16);
+}
+
+.homeos-tx-details__identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--homeos-space-12);
+  margin-bottom: var(--homeos-space-20);
+}
+
+.homeos-tx-details__title {
+  margin: 0;
+  color: var(--homeos-ink-950);
+  font-size: var(--homeos-text-heading);
+  font-weight: var(--homeos-weight-bold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.homeos-tx-details__amount-card {
+  padding: var(--homeos-space-20);
+  background: var(--homeos-surface);
+  border: 1px solid var(--homeos-border);
+  border-radius: var(--homeos-radius-card);
+  box-shadow: var(--homeos-shadow-subtle);
+  text-align: center;
+  margin-bottom: var(--homeos-space-24);
+}
+
+.homeos-tx-details__amount-label {
+  margin: 0;
+  color: var(--homeos-ink-500);
+  font-size: var(--homeos-text-footnote);
+  font-weight: var(--homeos-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.homeos-tx-details__amount-value {
+  margin: var(--homeos-space-8) 0 0;
+  color: var(--homeos-ink-950);
+  font-size: var(--homeos-text-display-sm);
+  font-weight: var(--homeos-weight-bold);
+  line-height: 1.1;
+}
+
+.homeos-tx-details__facts {
+  margin-bottom: var(--homeos-space-24);
+}
+
+.homeos-tx-details__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-12);
+  margin-bottom: var(--homeos-space-32);
+}
+
+.homeos-tx-details__source-expandable {
+  margin-top: var(--homeos-space-8);
+}
+
+.homeos-tx-details__source-summary {
+  font-size: var(--homeos-text-footnote);
+  font-weight: var(--homeos-weight-medium);
+  color: var(--homeos-ink-500);
+  cursor: pointer;
+  user-select: none;
+  padding: var(--homeos-space-8) 0;
+}
+
+.homeos-tx-details__source-summary:hover {
+  color: var(--homeos-ink-700);
+}
+
+.homeos-tx-details__raw-message {
+  margin-top: var(--homeos-space-8);
+  padding: var(--homeos-space-16);
+  background: var(--homeos-soft-surface);
+  border: 1px solid var(--homeos-border);
+  border-radius: var(--homeos-radius-control);
+  color: var(--homeos-ink-600);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--homeos-text-caption);
+  line-height: 1.5;
+  word-break: break-word;
+  white-space: pre-wrap;
+}

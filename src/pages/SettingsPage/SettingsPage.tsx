@@ -4,10 +4,10 @@ import { AppPage } from '../../shared/components/AppPage'
 import { FactRow } from '../../shared/components/FactRow'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { NotificationSettingsCard } from '../../features/notifications/NotificationSettingsCard'
+import { BankSmsSettingsCard } from '../../features/bank-sms/BankSmsSettingsCard'
 
 /**
- * No Settings screen spec exists in the docs — kept minimal and read-only rather than
- * inventing preference toggles (theme, notifications, etc.) that aren't documented anywhere.
+ * Settings screen: User profile, push notifications, and Bank SMS Capture setup.
  */
 export function SettingsPage() {
   const { session } = useAuth()
@@ -19,6 +19,8 @@ export function SettingsPage() {
         <FactRow label="Name" value={personName ?? '—'} />
         <FactRow label="Email" value={session?.user.email ?? '—'} />
       </GroupedCard>
+
+      <BankSmsSettingsCard />
 
       <NotificationSettingsCard />
     </AppPage>

@@ -1,0 +1,40 @@
+.homeos-transactions-toggle {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: var(--homeos-space-16);
+  background: var(--homeos-soft-surface);
+  border-radius: var(--homeos-radius-button);
+}
+
+.homeos-transactions-toggle__option {
+  flex: 1;
+  min-height: 40px;
+  border: none;
+  border-radius: var(--homeos-radius-control);
+  background: none;
+  color: var(--homeos-ink-600);
+  font-family: inherit;
+  font-size: var(--homeos-text-body-sm);
+  font-weight: var(--homeos-weight-semibold);
+  cursor: pointer;
+  transition: all var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-transactions-toggle__option--selected {
+  background: var(--homeos-surface);
+  color: var(--homeos-ink-950);
+  box-shadow: var(--homeos-shadow-row);
+}
+
+.homeos-transactions-skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: var(--homeos-radius-card);
+  overflow: hidden;
+}
+
+.homeos-transactions-skeleton-stack .homeos-skeleton {
+  border-radius: 0;
+}
