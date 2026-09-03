@@ -120,7 +120,7 @@ export function FulfillTransactionModal({
           </button>
         </header>
 
-        <div className="homeos-fulfill-modal__body">
+        <div className="homeos-fulfill-modal__body homeos-page-rise">
           {/* Summary Card */}
           {!isPartiallyAllocated ? (
             <div className="homeos-fulfill-summary">

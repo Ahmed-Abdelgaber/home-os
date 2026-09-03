@@ -6,6 +6,7 @@
   text-align: center;
   padding: var(--homeos-space-40) var(--homeos-space-20);
   gap: var(--homeos-space-8);
+  animation: homeos-fade-scale-in var(--homeos-motion-normal) var(--homeos-ease) both;
 }
 
 .homeos-empty-state__icon-container {

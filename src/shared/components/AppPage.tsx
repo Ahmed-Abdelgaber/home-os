@@ -44,7 +44,9 @@ export function AppPage({ title, backHref, onRefresh, children }: AppPageProps) 
             <IonRefresherContent />
           </IonRefresher>
         )}
-        {children}
+        <div className="homeos-page-rise">
+          {children}
+        </div>
       </IonContent>
     </IonPage>
   )
