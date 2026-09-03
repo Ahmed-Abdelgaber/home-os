@@ -90,6 +90,11 @@
   color: var(--homeos-success);
 }
 
+.homeos-row__media--warning {
+  background: var(--homeos-warning-soft);
+  color: var(--homeos-warning);
+}
+
 .homeos-row__media--danger {
   background: var(--homeos-danger-soft);
   color: var(--homeos-danger);

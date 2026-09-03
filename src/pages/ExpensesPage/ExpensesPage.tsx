@@ -52,7 +52,7 @@ export function ExpensesPage() {
                 <Row
                   key={expense.id}
                   icon={cardOutline}
-                  tone="primary"
+                  tone="neutral"
                   title={expense.title}
                   meta={expense.meta}
                   accessory={expense.amount}

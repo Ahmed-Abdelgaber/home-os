@@ -22,8 +22,8 @@
 }
 
 .homeos-product-details__badge--active {
-  background: var(--homeos-primary-100);
-  color: var(--homeos-primary-600);
+  background: var(--homeos-success-soft);
+  color: var(--homeos-success);
 }
 
 .homeos-product-details__badge--inactive {

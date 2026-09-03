@@ -2,6 +2,7 @@
   background: var(--homeos-surface);
   border: 1px solid var(--homeos-border);
   border-radius: var(--homeos-radius-card);
+  box-shadow: var(--homeos-shadow-subtle);
   overflow: hidden;
 }
 

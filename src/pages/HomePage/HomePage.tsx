@@ -132,6 +132,7 @@ export function HomePage() {
                     <Row
                       key={item.id}
                       icon={cubeOutline}
+                      tone="warning"
                       title={item.title}
                       meta={item.meta}
                       onClick={() => navigate(`/app/items/${item.id}`)}

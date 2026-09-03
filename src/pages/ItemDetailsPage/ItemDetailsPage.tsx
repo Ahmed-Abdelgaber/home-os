@@ -153,7 +153,7 @@ function ItemDetailsBody({
 
       {detail.metrics && (
         <div className="homeos-item-details__metrics">
-          <div className="homeos-item-details__metric">
+          <div className={`homeos-item-details__metric ${detail.status === 'active' ? 'homeos-item-details__metric--highlight' : ''}`}>
             <p className="homeos-item-details__metric-value">{detail.metrics.activeUsageDays}</p>
             <p className="homeos-item-details__metric-label">Active usage days</p>
           </div>

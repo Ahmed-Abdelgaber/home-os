@@ -1,7 +1,41 @@
 .homeos-empty-state {
-  margin: 0;
-  padding: var(--homeos-space-20);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  padding: var(--homeos-space-40) var(--homeos-space-20);
+  gap: var(--homeos-space-8);
+}
+
+.homeos-empty-state__icon-container {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--homeos-radius-circle);
+  background: var(--homeos-soft-surface);
+  color: var(--homeos-ink-500);
+  font-size: var(--homeos-text-heading-lg);
+  margin-bottom: var(--homeos-space-4);
+}
+
+.homeos-empty-state__title {
+  margin: 0;
+  color: var(--homeos-ink-950);
+  font-size: var(--homeos-text-body-lg);
+  font-weight: var(--homeos-weight-semibold);
+}
+
+.homeos-empty-state__message {
+  margin: 0;
+  max-width: 320px;
   color: var(--homeos-ink-500);
   font-size: var(--homeos-text-body-sm);
+  line-height: 1.45;
+}
+
+.homeos-empty-state__action {
+  margin-top: var(--homeos-space-12);
 }

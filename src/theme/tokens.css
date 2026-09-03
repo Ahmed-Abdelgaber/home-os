@@ -52,6 +52,8 @@
 
   /* Elevation. Named by the role the surface plays, not by blur radius, so a card and a
      modal can't drift into using each other's depth. */
+  --homeos-border-subtle: rgba(var(--homeos-ink-950-rgb), 0.06);
+  --homeos-shadow-subtle: 0 1px 3px rgba(var(--homeos-ink-950-rgb), 0.03), 0 4px 12px rgba(var(--homeos-ink-950-rgb), 0.02);
   --homeos-shadow-row: 0 1px 4px rgba(var(--homeos-ink-950-rgb), 0.1);
   --homeos-shadow-card: 0 6px 20px rgba(var(--homeos-ink-950-rgb), 0.08);
   --homeos-shadow-modal: 0 12px 28px rgba(var(--homeos-ink-950-rgb), 0.14);

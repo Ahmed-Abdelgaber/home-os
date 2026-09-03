@@ -3,7 +3,7 @@ import { chevronForward } from 'ionicons/icons'
 import type { ReactNode } from 'react'
 import './Row.css'
 
-export type RowTone = 'neutral' | 'primary' | 'info' | 'success' | 'danger'
+export type RowTone = 'neutral' | 'primary' | 'info' | 'success' | 'warning' | 'danger'
 
 interface RowProps {
   icon: string

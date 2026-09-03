@@ -93,6 +93,7 @@ export function ItemsPage() {
                 <Row
                   key={item.id}
                   icon={cubeOutline}
+                  tone={view === 'active' ? 'success' : view === 'stocked' ? 'info' : 'neutral'}
                   title={item.title}
                   meta={item.meta}
                   onClick={() => navigate(`/app/items/${item.id}`)}
