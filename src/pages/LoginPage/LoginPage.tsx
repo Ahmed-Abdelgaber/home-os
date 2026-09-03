@@ -9,8 +9,8 @@ import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import './LoginPage.css'
 
 const loginSchema = z.object({
-  email: z.string().email('Enter a valid email address'),
-  password: z.string().min(1, 'Enter your password'),
+  email: z.email('Enter a valid email address'),
+  password: z.string().min(8, 'Enter your password'),
 })
 
 type LoginFormValues = z.infer<typeof loginSchema>
@@ -43,7 +43,7 @@ export function LoginPage() {
               <span className="homeos-login-panel__wordmark">HomeOS</span>
             </div>
             <h1 className="homeos-login-panel__title">Your home.<br />All in one place.</h1>
-            <p className="homeos-login-panel__tagline">Sign in to manage your household<br/>with ease and confidence.</p>
+            <p className="homeos-login-panel__tagline">Sign in to manage your household<br />with ease and confidence.</p>
           </div>
 
           <div className="homeos-login-card">
@@ -103,7 +103,7 @@ export function LoginPage() {
               <PrimaryButton type="submit" disabled={isSubmitting} className="homeos-login-btn">
                 {isSubmitting ? 'Logging in…' : 'Log in'}
               </PrimaryButton>
-              
+
               <div className="homeos-login-privacy">
                 <IonIcon icon={shieldCheckmarkOutline} />
                 <span>Your household data stays private</span>
