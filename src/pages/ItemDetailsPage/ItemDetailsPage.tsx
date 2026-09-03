@@ -11,7 +11,7 @@ import { AppPage } from '../../shared/components/AppPage'
 import { ConfirmationSheet } from '../../shared/components/ConfirmationSheet'
 import { FactRow } from '../../shared/components/FactRow'
 import { GroupedCard } from '../../shared/components/GroupedCard'
-import { HistorySection } from '../../shared/components/HistorySection'
+import { HistorySection, type HistoryEntry } from '../../shared/components/HistorySection'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { QueryState } from '../../shared/components/QueryState'
 import { Row } from '../../shared/components/Row'
@@ -237,7 +237,47 @@ function ItemDetailsBody({
         </GroupedCard>
       </section>
 
-      <HistorySection title="Previous cycles" entries={historyEntries ?? []} onEntryClick={(id) => navigate(`/app/items/${id}`)} />
+      {(() => {
+        const formattedHistory: HistoryEntry[] = (historyEntries ?? []).map((h) => {
+          let title = 'Not started'
+          if (h.startedDate && h.finishedDate) {
+            title = `${formatShortDate(h.startedDate)} → ${formatShortDate(h.finishedDate)}`
+          } else if (h.startedDate) {
+            title = `${formatShortDate(h.startedDate)} → In progress`
+          }
+
+          let subtitle: string | undefined = undefined
+          if (h.metrics) {
+            const usage = `${h.metrics.activeUsageDays} usage day${h.metrics.activeUsageDays === 1 ? '' : 's'}`
+            const away = h.metrics.awayDays > 0 ? ` · ${h.metrics.awayDays} away day${h.metrics.awayDays === 1 ? '' : 's'}` : ''
+            subtitle = `${usage}${away}`
+          } else if (h.status === 'stocked') {
+            subtitle = 'Stocked'
+          }
+
+          let meta: string | undefined = undefined
+          if (h.expense) {
+            const parts: string[] = [`EGP ${h.expense.amount.toLocaleString('en-US')}`]
+            if (h.expense.merchant) parts.push(h.expense.merchant)
+            meta = parts.join(' · ')
+          }
+
+          return {
+            id: h.id,
+            title,
+            subtitle,
+            meta,
+          }
+        })
+
+        return (
+          <HistorySection
+            title="Previous cycles"
+            entries={formattedHistory}
+            onEntryClick={(id) => navigate(`/app/items/${id}`)}
+          />
+        )
+      })()}
 
       <SecondaryButton className="homeos-item-details__delete" onClick={onRequestDelete}>
         Delete item
