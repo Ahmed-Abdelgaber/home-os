@@ -44,6 +44,13 @@
   margin-bottom: var(--homeos-space-24);
 }
 
+.homeos-item-details__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-12);
+  margin-bottom: var(--homeos-space-24);
+}
+
 .homeos-item-details__delete {
   width: 100%;
   margin-top: var(--homeos-space-24);

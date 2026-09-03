@@ -36,6 +36,18 @@ export function ItemDetailsPage() {
             isStarting={startItem.isPending}
             onFinish={() => finishItem.mutate(detail.id)}
             isFinishing={finishItem.isPending}
+            onBuyAgain={() => {
+              navigate('/app/purchase', {
+                state: {
+                  productId: detail.productId,
+                  productName: detail.productName,
+                  quantity: detail.quantity,
+                  merchant: detail.expense?.merchant ?? null,
+                  accountId: detail.expense?.accountId ?? null,
+                  previousAmount: detail.expense?.amount ?? null,
+                },
+              })
+            }}
             confirmingDelete={confirmingDelete}
             onRequestDelete={() => setConfirmingDelete(true)}
             onCancelDelete={() => setConfirmingDelete(false)}
@@ -57,6 +69,7 @@ interface ItemDetailsBodyProps {
   isStarting: boolean
   onFinish: () => void
   isFinishing: boolean
+  onBuyAgain: () => void
   confirmingDelete: boolean
   onRequestDelete: () => void
   onCancelDelete: () => void
@@ -70,6 +83,7 @@ function ItemDetailsBody({
   isStarting,
   onFinish,
   isFinishing,
+  onBuyAgain,
   confirmingDelete,
   onRequestDelete,
   onCancelDelete,
@@ -117,16 +131,19 @@ function ItemDetailsBody({
         {detail.notes && <FactRow label="Notes" value={detail.notes} />}
       </GroupedCard>
 
-      {detail.status === 'stocked' && (
-        <PrimaryButton onClick={onStart} disabled={isStarting}>
-          {isStarting ? 'Starting…' : 'Start using'}
-        </PrimaryButton>
-      )}
-      {detail.status === 'active' && (
-        <PrimaryButton onClick={onFinish} disabled={isFinishing}>
-          {isFinishing ? 'Finishing…' : 'Finish item'}
-        </PrimaryButton>
-      )}
+      <div className="homeos-item-details__actions">
+        {detail.status === 'stocked' && (
+          <PrimaryButton onClick={onStart} disabled={isStarting}>
+            {isStarting ? 'Starting…' : 'Start using'}
+          </PrimaryButton>
+        )}
+        {detail.status === 'active' && (
+          <PrimaryButton onClick={onFinish} disabled={isFinishing}>
+            {isFinishing ? 'Finishing…' : 'Finish item'}
+          </PrimaryButton>
+        )}
+        <SecondaryButton onClick={onBuyAgain}>Buy again</SecondaryButton>
+      </div>
 
       <HistorySection title="Previous cycles" entries={historyEntries ?? []} onEntryClick={(id) => navigate(`/app/items/${id}`)} />
 

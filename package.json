@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "test": "node scripts/buy-again.test.mjs",
     "preview": "vite preview",
     "smoke-test": "node --env-file=.env scripts/smoke-test.mjs"
   },

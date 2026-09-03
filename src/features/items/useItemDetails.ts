@@ -12,7 +12,13 @@ export interface ItemDetail {
   notes: string | null
   productId: string
   productName: string
-  expense: { amount: number; merchant: string | null; date: string; account: string | null } | null
+  expense: {
+    amount: number
+    merchant: string | null
+    date: string
+    account: string | null
+    accountId: string | null
+  } | null
   metrics: { calendarDays: number; awayDays: number; activeUsageDays: number } | null
 }
 
@@ -24,7 +30,7 @@ export function useItem(itemId: string | undefined) {
       const { data: item, error } = await supabase
         .from('items')
         .select(
-          'id, status, started_date, finished_date, quantity, notes, product_id, product:products(name), expense:expenses(amount, merchant, expense_date, account:accounts(name))',
+          'id, status, started_date, finished_date, quantity, notes, product_id, product:products(name), expense:expenses(amount, merchant, expense_date, account_id, account:accounts(name))',
         )
         .eq('id', itemId as string)
         .single()
@@ -38,7 +44,13 @@ export function useItem(itemId: string | undefined) {
 
       const product = item.product as unknown as { name: string } | null
       const expense = item.expense as unknown as
-        | { amount: number; merchant: string | null; expense_date: string; account: { name: string } | null }
+        | {
+            amount: number
+            merchant: string | null
+            expense_date: string
+            account_id: string | null
+            account: { name: string } | null
+          }
         | null
 
       return {
@@ -51,7 +63,13 @@ export function useItem(itemId: string | undefined) {
         productId: item.product_id,
         productName: product?.name ?? 'Unknown product',
         expense: expense
-          ? { amount: Number(expense.amount), merchant: expense.merchant, date: expense.expense_date, account: expense.account?.name ?? null }
+          ? {
+              amount: Number(expense.amount),
+              merchant: expense.merchant,
+              date: expense.expense_date,
+              account: expense.account?.name ?? null,
+              accountId: expense.account_id ?? null,
+            }
           : null,
         metrics: metrics
           ? { calendarDays: metrics.calendar_days, awayDays: metrics.away_days, activeUsageDays: metrics.active_usage_days }

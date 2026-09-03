@@ -1,7 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useProductHistory } from '../../features/items/useItemDetails'
 import { CONSUMPTION_MODE_LABELS } from '../../features/products/consumptionMode'
-import { useProduct } from '../../features/products/useProductDetail'
+import { useLatestProductPurchase } from '../../features/products/useLatestProductPurchase'
+import { type ProductDetail, useProduct } from '../../features/products/useProductDetail'
 import { useSetProductActive } from '../../features/products/useProductMutations'
 import { AppPage } from '../../shared/components/AppPage'
 import { FactRow } from '../../shared/components/FactRow'
@@ -18,7 +19,22 @@ export function ProductDetailsPage() {
   const navigate = useNavigate()
   const product = useProduct(productId)
   const history = useProductHistory(productId, undefined)
+  const latestPurchase = useLatestProductPurchase(productId)
   const setActive = useSetProductActive()
+
+  const handleBuyAgain = (detail: ProductDetail) => {
+    const purchase = latestPurchase.data
+    navigate('/app/purchase', {
+      state: {
+        productId: detail.id,
+        productName: detail.name,
+        quantity: purchase?.quantity ?? 1,
+        merchant: purchase?.merchant ?? null,
+        accountId: purchase?.accountId ?? null,
+        previousAmount: purchase?.amount ?? null,
+      },
+    })
+  }
 
   return (
     <AppPage title="Product Details" backHref="/app/products">
@@ -43,15 +59,26 @@ export function ProductDetailsPage() {
               {detail.notes && <FactRow label="Notes" value={detail.notes} />}
             </GroupedCard>
 
-            <PrimaryButton onClick={() => navigate(`/app/products/${detail.id}/edit`)}>Edit product</PrimaryButton>
+            <div className="homeos-product-details__actions">
+              <PrimaryButton
+                disabled={!detail.isActive}
+                onClick={() => handleBuyAgain(detail)}
+              >
+                Buy again
+              </PrimaryButton>
 
-            <SecondaryButton
-              className="homeos-product-details__toggle"
-              disabled={setActive.isPending}
-              onClick={() => setActive.mutate({ id: detail.id, isActive: !detail.isActive })}
-            >
-              {detail.isActive ? 'Archive product' : 'Reactivate product'}
-            </SecondaryButton>
+              <SecondaryButton onClick={() => navigate(`/app/products/${detail.id}/edit`)}>
+                Edit product
+              </SecondaryButton>
+
+              <SecondaryButton
+                className="homeos-product-details__toggle"
+                disabled={setActive.isPending}
+                onClick={() => setActive.mutate({ id: detail.id, isActive: !detail.isActive })}
+              >
+                {detail.isActive ? 'Archive product' : 'Reactivate product'}
+              </SecondaryButton>
+            </div>
 
             <HistorySection title="Previous purchases" entries={history.data ?? []} onEntryClick={(id) => navigate(`/app/items/${id}`)} />
           </>
