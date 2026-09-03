@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../core/supabase/client'
 
 export type BankTransactionStatus = 'pending' | 'partially_fulfilled' | 'fulfilled' | 'ignored'
@@ -269,13 +269,17 @@ export function useBankTransactionAllocations(transactionId: string | undefined)
           id: row.id,
           bankTransactionId: row.bank_transaction_id,
           expenseId: row.expense_id,
-          allocatedAmount: typeof row.allocated_amount === 'string' ? parseFloat(row.allocated_amount) : Number(row.allocated_amount),
+          allocatedAmount:
+            typeof row.allocated_amount === 'string'
+              ? parseFloat(row.allocated_amount)
+              : Number(row.allocated_amount),
           createdAt: row.created_at,
           expense: exp
             ? {
                 id: exp.id,
                 description: exp.description,
-                amount: typeof exp.amount === 'string' ? parseFloat(exp.amount) : Number(exp.amount),
+                amount:
+                  typeof exp.amount === 'string' ? parseFloat(exp.amount) : Number(exp.amount),
                 expenseDate: exp.expense_date,
                 merchant: exp.merchant,
                 categoryId: exp.category_id,
@@ -290,6 +294,197 @@ export function useBankTransactionAllocations(transactionId: string | undefined)
             : undefined,
         }
       })
+    },
+  })
+}
+
+export interface FulfillBankExpenseInput {
+  bankTransactionId: string
+  expenseDate: string
+  amount: number
+  description: string
+  merchant: string | null
+  categoryId: string
+  scope: 'household' | 'personal' | string
+  personId: string
+  accountId: string
+  notes: string | null
+}
+
+export interface FulfillBankExpenseResult {
+  expense_id: string
+  allocation_id: string
+  transaction_status: BankTransactionStatus
+  remaining_amount: number
+}
+
+/**
+ * Fulfills a Bank Transaction as a regular Expense atomically via the backend RPC.
+ */
+export function useFulfillBankTransactionExpense() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (input: FulfillBankExpenseInput): Promise<FulfillBankExpenseResult> => {
+      const { data, error } = await supabase.rpc('fulfill_bank_transaction_expense', {
+        p_bank_transaction_id: input.bankTransactionId,
+        p_expense_date: input.expenseDate,
+        p_amount: input.amount,
+        p_description: input.description,
+        p_merchant: input.merchant,
+        p_category_id: input.categoryId,
+        p_scope: input.scope,
+        p_person_id: input.personId,
+        p_account_id: input.accountId,
+        p_notes: input.notes,
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      const row = Array.isArray(data) ? data[0] : data
+      return row as FulfillBankExpenseResult
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['bank_transactions'] }),
+        queryClient.invalidateQueries({ queryKey: ['bank_transaction_allocations'] }),
+        queryClient.invalidateQueries({ queryKey: ['expenses'] }),
+        queryClient.invalidateQueries({ queryKey: ['home'] }),
+      ])
+    },
+  })
+}
+
+export interface FulfillBankPurchaseInput {
+  bankTransactionId: string
+  productId: string
+  purchaseDate: string
+  amount: number
+  merchant: string | null
+  accountId: string
+  quantity: number
+  notes: string | null
+  startNow: boolean
+}
+
+export interface FulfillBankPurchaseResult {
+  item_id: string
+  expense_id: string
+  allocation_id: string
+  transaction_status: BankTransactionStatus
+  remaining_amount: number
+}
+
+/**
+ * Fulfills a Bank Transaction as a Product Purchase atomically via the backend RPC.
+ */
+export function useFulfillBankTransactionPurchase() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (input: FulfillBankPurchaseInput): Promise<FulfillBankPurchaseResult> => {
+      const { data, error } = await supabase.rpc('fulfill_bank_transaction_purchase', {
+        p_bank_transaction_id: input.bankTransactionId,
+        p_product_id: input.productId,
+        p_purchase_date: input.purchaseDate,
+        p_amount: input.amount,
+        p_merchant: input.merchant,
+        p_account_id: input.accountId,
+        p_quantity: input.quantity,
+        p_notes: input.notes,
+        p_start_now: input.startNow,
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      const row = Array.isArray(data) ? data[0] : data
+      return row as FulfillBankPurchaseResult
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['bank_transactions'] }),
+        queryClient.invalidateQueries({ queryKey: ['bank_transaction_allocations'] }),
+        queryClient.invalidateQueries({ queryKey: ['expenses'] }),
+        queryClient.invalidateQueries({ queryKey: ['items'] }),
+        queryClient.invalidateQueries({ queryKey: ['products'] }),
+        queryClient.invalidateQueries({ queryKey: ['shopping-list'] }),
+        queryClient.invalidateQueries({ queryKey: ['home'] }),
+      ])
+    },
+  })
+}
+
+export interface AllocateBankTransactionInput {
+  bankTransactionId: string
+  expenseId: string
+  allocatedAmount: number
+}
+
+export interface AllocateBankTransactionResult {
+  allocation_id: string
+  transaction_status: BankTransactionStatus
+  remaining_amount: number
+}
+
+/**
+ * Links an already existing Expense to a Bank Transaction via the backend RPC.
+ */
+export function useAllocateBankTransaction() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (input: AllocateBankTransactionInput): Promise<AllocateBankTransactionResult> => {
+      const { data, error } = await supabase.rpc('allocate_bank_transaction', {
+        p_bank_transaction_id: input.bankTransactionId,
+        p_expense_id: input.expenseId,
+        p_allocated_amount: input.allocatedAmount,
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      const row = Array.isArray(data) ? data[0] : data
+      return row as AllocateBankTransactionResult
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['bank_transactions'] }),
+        queryClient.invalidateQueries({ queryKey: ['bank_transaction_allocations'] }),
+        queryClient.invalidateQueries({ queryKey: ['expenses'] }),
+        queryClient.invalidateQueries({ queryKey: ['home'] }),
+      ])
+    },
+  })
+}
+
+/**
+ * Marks a Bank Transaction as ignored via the backend RPC.
+ */
+export function useIgnoreBankTransaction() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (transactionId: string) => {
+      const { data, error } = await supabase.rpc('ignore_bank_transaction', {
+        p_transaction_id: transactionId,
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      return data
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['bank_transactions'] }),
+        queryClient.invalidateQueries({ queryKey: ['home'] }),
+      ])
     },
   })
 }

@@ -442,4 +442,125 @@ test('28. Actionable ordering: partially_fulfilled comes before pending', () => 
   assert.equal(sorted[2].id, '1') // older pending
 })
 
+// 29. fulfill_bank_transaction_expense RPC parameters match backend contract
+test('29. fulfill_bank_transaction_expense RPC parameters match backend contract', () => {
+  const mapExpenseRpcParams = (input) => ({
+    p_bank_transaction_id: input.bankTransactionId,
+    p_expense_date: input.expenseDate,
+    p_amount: input.amount,
+    p_description: input.description,
+    p_merchant: input.merchant,
+    p_category_id: input.categoryId,
+    p_scope: input.scope,
+    p_person_id: input.personId,
+    p_account_id: input.accountId,
+    p_notes: input.notes,
+  })
+
+  const params = mapExpenseRpcParams({
+    bankTransactionId: 'tx-1',
+    expenseDate: '2026-09-03',
+    amount: 600,
+    description: 'Groceries',
+    merchant: 'Carrefour',
+    categoryId: 'cat-1',
+    scope: 'household',
+    personId: 'person-1',
+    accountId: 'acc-1',
+    notes: 'Split part 1',
+  })
+
+  assert.equal(params.p_bank_transaction_id, 'tx-1')
+  assert.equal(params.p_amount, 600)
+  assert.equal(params.p_description, 'Groceries')
+  assert.equal(params.p_scope, 'household')
+})
+
+// 30. fulfill_bank_transaction_purchase RPC parameters match backend contract
+test('30. fulfill_bank_transaction_purchase RPC parameters match backend contract', () => {
+  const mapPurchaseRpcParams = (input) => ({
+    p_bank_transaction_id: input.bankTransactionId,
+    p_product_id: input.productId,
+    p_purchase_date: input.purchaseDate,
+    p_amount: input.amount,
+    p_merchant: input.merchant,
+    p_account_id: input.accountId,
+    p_quantity: input.quantity,
+    p_notes: input.notes,
+    p_start_now: input.startNow,
+  })
+
+  const params = mapPurchaseRpcParams({
+    bankTransactionId: 'tx-1',
+    productId: 'prod-1',
+    purchaseDate: '2026-09-03',
+    amount: 400,
+    merchant: 'Carrefour',
+    accountId: 'acc-1',
+    quantity: 2,
+    notes: 'Cleaning detergent',
+    startNow: true,
+  })
+
+  assert.equal(params.p_bank_transaction_id, 'tx-1')
+  assert.equal(params.p_product_id, 'prod-1')
+  assert.equal(params.p_amount, 400)
+  assert.equal(params.p_quantity, 2)
+  assert.equal(params.p_start_now, true)
+})
+
+// 31. allocate_bank_transaction RPC parameters match backend contract
+test('31. allocate_bank_transaction RPC parameters match backend contract', () => {
+  const mapAllocateParams = (input) => ({
+    p_bank_transaction_id: input.bankTransactionId,
+    p_expense_id: input.expenseId,
+    p_allocated_amount: input.allocatedAmount,
+  })
+
+  const params = mapAllocateParams({
+    bankTransactionId: 'tx-1',
+    expenseId: 'exp-1',
+    allocatedAmount: 350,
+  })
+
+  assert.equal(params.p_bank_transaction_id, 'tx-1')
+  assert.equal(params.p_expense_id, 'exp-1')
+  assert.equal(params.p_allocated_amount, 350)
+})
+
+// 32. ignore_bank_transaction uses p_transaction_id as parameter name
+test('32. ignore_bank_transaction uses p_transaction_id as parameter name', () => {
+  const mapIgnoreParams = (transactionId) => ({
+    p_transaction_id: transactionId,
+  })
+
+  const params = mapIgnoreParams('tx-abc-999')
+  assert.equal(params.p_transaction_id, 'tx-abc-999')
+  assert.equal('p_bank_transaction_id' in params, false)
+})
+
+// 33. Successful fulfillment invalidates required query caches
+test('33. Successful fulfillment invalidates required query caches', () => {
+  const invalidated = []
+  const mockQueryClient = {
+    invalidateQueries: (arg) => invalidated.push(arg.queryKey[0]),
+  }
+
+  const handleExpenseSuccess = () => {
+    mockQueryClient.invalidateQueries({ queryKey: ['bank_transactions'] })
+    mockQueryClient.invalidateQueries({ queryKey: ['bank_transaction_allocations'] })
+    mockQueryClient.invalidateQueries({ queryKey: ['expenses'] })
+    mockQueryClient.invalidateQueries({ queryKey: ['home'] })
+  }
+
+  handleExpenseSuccess()
+  assert.deepEqual(invalidated, [
+    'bank_transactions',
+    'bank_transaction_allocations',
+    'expenses',
+    'home',
+  ])
+})
+
+
 

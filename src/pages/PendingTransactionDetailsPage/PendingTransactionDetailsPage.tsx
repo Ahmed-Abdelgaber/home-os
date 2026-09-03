@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useIonToast } from '@ionic/react'
 import { formatShortDate } from '../../core/utils/cairoDate'
 import { BankTransactionAllocationsList } from '../../features/bank-transactions/BankTransactionAllocationsList'
 import { FulfillTransactionModal } from '../../features/bank-transactions/FulfillTransactionModal'
@@ -7,20 +8,28 @@ import {
   calculateAllocationSummary,
   useBankTransactionAllocations,
   useBankTransactionDetails,
+  useIgnoreBankTransaction,
 } from '../../features/bank-transactions/useBankTransactions'
 import { AppPage } from '../../shared/components/AppPage'
+import { ConfirmationSheet } from '../../shared/components/ConfirmationSheet'
 import { FactRow } from '../../shared/components/FactRow'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
+import { SecondaryButton } from '../../shared/components/SecondaryButton'
 import { QueryState } from '../../shared/components/QueryState'
 import { Skeleton } from '../../shared/components/Skeleton'
 import './PendingTransactionDetailsPage.css'
 
 export function PendingTransactionDetailsPage() {
   const { transactionId } = useParams<{ transactionId: string }>()
+  const navigate = useNavigate()
+  const [presentToast] = useIonToast()
   const transaction = useBankTransactionDetails(transactionId)
   const allocations = useBankTransactionAllocations(transactionId)
+  const ignoreMutation = useIgnoreBankTransaction()
+
   const [showFulfillModal, setShowFulfillModal] = useState(false)
+  const [showIgnoreConfirm, setShowIgnoreConfirm] = useState(false)
 
   return (
     <AppPage title="Transaction" backHref="/app/pending-transactions">
@@ -77,6 +86,28 @@ export function PendingTransactionDetailsPage() {
 
           const canFulfill =
             tx.status !== 'ignored' && tx.status !== 'fulfilled' && !isFullyAllocated && remaining > 0
+
+          const canIgnore = tx.status === 'pending' && totalAllocated === 0
+
+          const handleIgnore = async () => {
+            try {
+              await ignoreMutation.mutateAsync(tx.id)
+              setShowIgnoreConfirm(false)
+              presentToast({
+                message: 'Transaction marked as ignored',
+                duration: 2000,
+                position: 'bottom',
+              })
+              navigate('/app/pending-transactions', { replace: true })
+            } catch (err: any) {
+              presentToast({
+                message: err.message || 'Could not ignore transaction',
+                duration: 3000,
+                position: 'bottom',
+                color: 'danger',
+              })
+            }
+          }
 
           return (
             <div className="homeos-tx-details">
@@ -135,6 +166,17 @@ export function PendingTransactionDetailsPage() {
                 <FactRow label="Remaining" value={formattedRemaining} />
               </GroupedCard>
 
+              {canIgnore && (
+                <div className="homeos-tx-details__secondary-actions">
+                  <SecondaryButton
+                    disabled={ignoreMutation.isPending}
+                    onClick={() => setShowIgnoreConfirm(true)}
+                  >
+                    {ignoreMutation.isPending ? 'Updating…' : 'Ignore transaction'}
+                  </SecondaryButton>
+                </div>
+              )}
+
               <details className="homeos-tx-details__source-expandable">
                 <summary className="homeos-tx-details__source-summary">Original bank message</summary>
                 <div className="homeos-tx-details__raw-message">
@@ -148,6 +190,15 @@ export function PendingTransactionDetailsPage() {
                 transaction={tx}
                 remainingAmount={remaining}
                 totalAllocated={totalAllocated}
+              />
+
+              <ConfirmationSheet
+                isOpen={showIgnoreConfirm}
+                header="Ignore Transaction?"
+                message="This bank transaction will be marked as ignored. It will not create an Expense or Item in HomeOS."
+                confirmLabel="Ignore"
+                onConfirm={handleIgnore}
+                onCancel={() => setShowIgnoreConfirm(false)}
               />
             </div>
           )

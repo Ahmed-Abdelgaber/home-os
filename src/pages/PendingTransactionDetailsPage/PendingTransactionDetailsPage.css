@@ -108,6 +108,11 @@
   margin-bottom: var(--homeos-space-24);
 }
 
+.homeos-tx-details__secondary-actions {
+  margin-top: var(--homeos-space-8);
+  margin-bottom: var(--homeos-space-24);
+}
+
 .homeos-tx-details__source-expandable {
   margin-top: var(--homeos-space-8);
 }

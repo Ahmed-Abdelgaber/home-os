@@ -9,6 +9,7 @@ import { useActiveAccounts } from '../../features/master-data/useAccounts'
 import { useProduct } from '../../features/products/useProductDetail'
 import { type ActiveProduct, useActiveProducts } from '../../features/products/useProducts'
 import { usePurchaseProduct } from '../../features/products/usePurchaseProduct'
+import { useFulfillBankTransactionPurchase } from '../../features/bank-transactions/useBankTransactions'
 import { AppPage } from '../../shared/components/AppPage'
 import { EmptyState } from '../../shared/components/EmptyState'
 import { GroupedCard } from '../../shared/components/GroupedCard'
@@ -55,6 +56,10 @@ export function PurchaseProductPage() {
 
   const productQuery = useProduct(prefillProductId)
 
+  const backHref = prefill?.bankTransactionId
+    ? `/app/pending-transactions/${prefill.bankTransactionId}`
+    : '/app/tabs/home'
+
   const handleChangeProduct = () => {
     setClearedPrefill(true)
     setPickedProduct(null)
@@ -64,7 +69,7 @@ export function PurchaseProductPage() {
   if (prefillProductId && !clearedPrefill) {
     if (productQuery.isLoading) {
       return (
-        <AppPage title="Buy Product" backHref="/app/tabs/home">
+        <AppPage title={prefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
           <div className="homeos-purchase-skeleton-stack">
             <Skeleton height={60} />
             <Skeleton height={60} />
@@ -76,7 +81,7 @@ export function PurchaseProductPage() {
 
     if (productQuery.isError || !productQuery.data) {
       return (
-        <AppPage title="Buy Product" backHref="/app/tabs/home">
+        <AppPage title={prefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
           <EmptyState message="Couldn't load product for purchase." />
         </AppPage>
       )
@@ -84,7 +89,7 @@ export function PurchaseProductPage() {
 
     if (!productQuery.data.isActive) {
       return (
-        <AppPage title="Buy Product" backHref="/app/tabs/home">
+        <AppPage title={prefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
           <div className="homeos-purchase-inactive-card">
             <h2 className="homeos-purchase-inactive-title">{productQuery.data.name} is archived</h2>
             <p className="homeos-purchase-inactive-desc">
@@ -110,7 +115,7 @@ export function PurchaseProductPage() {
     }
 
     return (
-      <AppPage title="Buy Product" backHref="/app/tabs/home">
+      <AppPage title={prefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
         <PurchaseForm
           product={prefilledActiveProduct}
           prefill={activePrefill}
@@ -122,7 +127,7 @@ export function PurchaseProductPage() {
   }
 
   return (
-    <AppPage title="Buy Product" backHref="/app/tabs/home">
+    <AppPage title={prefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
       {pickedProduct ? (
         <PurchaseForm
           product={pickedProduct}
@@ -184,8 +189,10 @@ function PurchaseForm({
   onChangeProduct: () => void
   onPurchased: (itemId: string) => void
 }) {
+  const navigate = useNavigate()
   const accounts = useActiveAccounts()
   const purchaseProduct = usePurchaseProduct()
+  const fulfillBankPurchase = useFulfillBankTransactionPurchase()
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const initialQuantity =
@@ -224,17 +231,32 @@ function PurchaseForm({
   const onSubmit = async (values: PurchaseFormValues) => {
     setSubmitError(null)
     try {
-      const result = await purchaseProduct.mutateAsync({
-        productId: product.id,
-        purchaseDate: values.purchaseDate,
-        amount: Number(values.amount),
-        merchant: values.merchant?.trim() || null,
-        accountId: values.accountId,
-        quantity: Number(values.quantity),
-        notes: values.notes?.trim() || null,
-        startNow: values.startNow,
-      })
-      onPurchased(result.item_id)
+      if (prefill?.bankTransactionId) {
+        await fulfillBankPurchase.mutateAsync({
+          bankTransactionId: prefill.bankTransactionId,
+          productId: product.id,
+          purchaseDate: values.purchaseDate,
+          amount: Number(values.amount),
+          merchant: values.merchant?.trim() || null,
+          accountId: values.accountId,
+          quantity: Number(values.quantity),
+          notes: values.notes?.trim() || null,
+          startNow: values.startNow,
+        })
+        navigate(`/app/pending-transactions/${prefill.bankTransactionId}`, { replace: true })
+      } else {
+        const result = await purchaseProduct.mutateAsync({
+          productId: product.id,
+          purchaseDate: values.purchaseDate,
+          amount: Number(values.amount),
+          merchant: values.merchant?.trim() || null,
+          accountId: values.accountId,
+          quantity: Number(values.quantity),
+          notes: values.notes?.trim() || null,
+          startNow: values.startNow,
+        })
+        onPurchased(result.item_id)
+      }
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Purchase failed. Try again.')
     }
@@ -306,8 +328,15 @@ function PurchaseForm({
         </p>
       )}
 
-      <PrimaryButton type="submit" disabled={isSubmitting || accounts.isLoading}>
-        {isSubmitting ? 'Buying…' : `Buy ${product.name}`}
+      <PrimaryButton
+        type="submit"
+        disabled={isSubmitting || accounts.isLoading || purchaseProduct.isPending || fulfillBankPurchase.isPending}
+      >
+        {isSubmitting || purchaseProduct.isPending || fulfillBankPurchase.isPending
+          ? 'Saving…'
+          : prefill?.bankTransactionId
+          ? `Fulfill ${product.name}`
+          : `Buy ${product.name}`}
       </PrimaryButton>
     </form>
   )
