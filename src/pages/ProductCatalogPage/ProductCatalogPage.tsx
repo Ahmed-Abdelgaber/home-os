@@ -1,10 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { cubeOutline } from 'ionicons/icons'
+import { cubeOutline, searchOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useProductCatalog } from '../../features/products/useProductCatalog'
 import { useInactiveProducts } from '../../features/products/useInactiveProducts'
 import { AppPage } from '../../shared/components/AppPage'
+import { EmptyState } from '../../shared/components/EmptyState'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { QueryState } from '../../shared/components/QueryState'
 import { Row } from '../../shared/components/Row'
@@ -73,7 +74,13 @@ export function ProductCatalogPage() {
             ? items.filter((p) => p.title.toLowerCase().includes(lowerSearch) || p.meta.toLowerCase().includes(lowerSearch))
             : items
           if (filtered.length === 0 && lowerSearch) {
-            return <p className="homeos-items-empty-search">No products match "{search}".</p>
+            return (
+              <EmptyState
+                icon={searchOutline}
+                title="No matching products"
+                message={`No ${view} products match "${search}".`}
+              />
+            )
           }
           return (
             <GroupedCard>

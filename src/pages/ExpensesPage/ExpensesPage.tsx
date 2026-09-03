@@ -1,9 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { cardOutline } from 'ionicons/icons'
+import { cardOutline, searchOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useExpenses } from '../../features/expenses/useExpenses'
 import { AppPage } from '../../shared/components/AppPage'
+import { EmptyState } from '../../shared/components/EmptyState'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { QueryState } from '../../shared/components/QueryState'
 import { Row } from '../../shared/components/Row'
@@ -44,7 +45,13 @@ export function ExpensesPage() {
               )
             : items
           if (filtered.length === 0 && lowerSearch) {
-            return <p className="homeos-items-empty-search">No expenses match "{search}".</p>
+            return (
+              <EmptyState
+                icon={searchOutline}
+                title="No matching expenses"
+                message={`No expenses match "${search}".`}
+              />
+            )
           }
           return (
             <GroupedCard>
