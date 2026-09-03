@@ -1,93 +1,94 @@
 :root {
-  /* Brand */
-  --homeos-primary-500: #6c5ce7;
-  --homeos-primary-600: #5b4be0;
-  --homeos-primary-100: #ece9ff;
-  --homeos-primary-50: #f6f4ff;
+   /* Brand */
+   --homeos-primary-500: #6c5ce7;
+   --homeos-primary-600: #5b4be0;
+   --homeos-primary-100: #ece9ff;
+   --homeos-primary-50: #f6f4ff;
 
-  /* Channel values for the two colors that appear inside rgba() (shadows, scrims).
+   /* Channel values for the two colors that appear inside rgba() (shadows, scrims).
      CSS can't decompose a hex var, so these are maintained alongside their hex twins. */
-  --homeos-primary-500-rgb: 108, 92, 231;
-  --homeos-ink-950-rgb: 18, 19, 26;
+   --homeos-primary-500-rgb: 108, 92, 231;
+   --homeos-ink-950-rgb: 18, 19, 26;
 
-  /* Neutral */
-  --homeos-ink-950: #12131a;
-  --homeos-ink-800: #242631;
-  --homeos-ink-600: #5f6475;
-  --homeos-ink-500: #787e91;
-  --homeos-surface: #ffffff;
-  --homeos-background: #f7f8fc;
-  --homeos-soft-surface: #f1f3f8;
-  --homeos-border: #e7e9f0;
-  --homeos-header: #14171d;
+   /* Neutral */
+   --homeos-ink-950: #12131a;
+   --homeos-ink-800: #242631;
+   --homeos-ink-600: #5f6475;
+   --homeos-ink-500: #787e91;
+   --homeos-surface: #ffffff;
+   --homeos-background: #f7f8fc;
+   --homeos-soft-surface: #f1f3f8;
+   --homeos-border: #e7e9f0;
+   --homeos-header: #14171d;
 
-  /* Semantic */
-  --homeos-success: #34b653;
-  --homeos-success-soft: #eaf8ee;
-  --homeos-warning: #e4a11b;
-  --homeos-warning-soft: #fff6dc;
-  --homeos-danger: #ec4964;
-  --homeos-danger-soft: #fdecef;
-  --homeos-info: #4285f4;
-  --homeos-info-soft: #eaf2ff;
+   /* Semantic */
+   --homeos-success: #34b653;
+   --homeos-success-soft: #eaf8ee;
+   --homeos-warning: #e4a11b;
+   --homeos-warning-soft: #fff6dc;
+   --homeos-danger: #ec4964;
+   --homeos-danger-soft: #fdecef;
+   --homeos-info: #4285f4;
+   --homeos-info-soft: #eaf2ff;
 
-  /* Spacing (8pt system) */
-  --homeos-space-4: 4px;
-  --homeos-space-8: 8px;
-  --homeos-space-12: 12px;
-  --homeos-space-16: 16px;
-  --homeos-space-20: 20px;
-  --homeos-space-24: 24px;
-  --homeos-space-32: 32px;
-  --homeos-space-40: 40px;
-  --homeos-page-padding-x: 20px;
+   /* Spacing (8pt system) */
+   --homeos-space-4: 4px;
+   --homeos-space-8: 8px;
+   --homeos-space-12: 12px;
+   --homeos-space-16: 16px;
+   --homeos-space-20: 20px;
+   --homeos-space-24: 24px;
+   --homeos-space-32: 32px;
+   --homeos-space-40: 40px;
+   --homeos-space-64: 64px;
+   --homeos-page-padding-x: 20px;
 
-  /* Radius */
-  --homeos-radius-control: 12px;
-  --homeos-radius-button: 14px;
-  --homeos-radius-card: 20px;
-  --homeos-radius-hero: 24px;
-  --homeos-radius-sheet: 28px;
-  --homeos-radius-circle: 999px;
+   /* Radius */
+   --homeos-radius-control: 12px;
+   --homeos-radius-button: 14px;
+   --homeos-radius-card: 20px;
+   --homeos-radius-hero: 24px;
+   --homeos-radius-sheet: 28px;
+   --homeos-radius-circle: 999px;
 
-  /* Elevation. Named by the role the surface plays, not by blur radius, so a card and a
+   /* Elevation. Named by the role the surface plays, not by blur radius, so a card and a
      modal can't drift into using each other's depth. */
-  --homeos-shadow-row: 0 1px 4px rgba(var(--homeos-ink-950-rgb), 0.1);
-  --homeos-shadow-card: 0 6px 20px rgba(var(--homeos-ink-950-rgb), 0.08);
-  --homeos-shadow-modal: 0 12px 28px rgba(var(--homeos-ink-950-rgb), 0.14);
-  --homeos-shadow-overlay: 0 6px 20px rgba(var(--homeos-ink-950-rgb), 0.25);
-  /* Primary-tinted, for a floating control that sits on brand color. */
-  --homeos-shadow-raised: 0 6px 16px rgba(var(--homeos-primary-500-rgb), 0.35);
+   --homeos-shadow-row: 0 1px 4px rgba(var(--homeos-ink-950-rgb), 0.1);
+   --homeos-shadow-card: 0 6px 20px rgba(var(--homeos-ink-950-rgb), 0.08);
+   --homeos-shadow-modal: 0 12px 28px rgba(var(--homeos-ink-950-rgb), 0.14);
+   --homeos-shadow-overlay: 0 6px 20px rgba(var(--homeos-ink-950-rgb), 0.25);
+   /* Primary-tinted, for a floating control that sits on brand color. */
+   --homeos-shadow-raised: 0 6px 16px rgba(var(--homeos-primary-500-rgb), 0.35);
 
-  /* Typography */
-  --homeos-font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', 'Segoe UI', sans-serif;
+   /* Typography */
+   --homeos-font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', 'Segoe UI', sans-serif;
 
-  /* Type scale. These are the sizes the app already shipped, now named by role — nothing
+   /* Type scale. These are the sizes the app already shipped, now named by role — nothing
      moved. Twelve steps is more than a scale should carry; several neighbours (13/14,
      20/22, 24/26) exist only because they were typed at different times and are worth
      merging once someone can eyeball the result. Reach for a token, never a raw px. */
-  --homeos-text-caption: 12px;
-  --homeos-text-footnote: 13px;
-  --homeos-text-body-sm: 14px;
-  --homeos-text-body: 15px;
-  --homeos-text-body-lg: 16px;
-  --homeos-text-title-sm: 18px;
-  --homeos-text-title: 20px;
-  --homeos-text-title-lg: 22px;
-  --homeos-text-heading: 24px;
-  --homeos-text-heading-lg: 26px;
-  --homeos-text-display: 30px;
-  --homeos-text-display-lg: 36px;
+   --homeos-text-caption: 12px;
+   --homeos-text-footnote: 13px;
+   --homeos-text-body-sm: 14px;
+   --homeos-text-body: 15px;
+   --homeos-text-body-lg: 16px;
+   --homeos-text-title-sm: 18px;
+   --homeos-text-title: 20px;
+   --homeos-text-title-lg: 22px;
+   --homeos-text-heading: 24px;
+   --homeos-text-heading-lg: 26px;
+   --homeos-text-display: 30px;
+   --homeos-text-display-lg: 36px;
 
-  /* Decorative glyphs sized independently of the text scale (the global add "+"). */
-  --homeos-glyph-lg: 28px;
+   /* Decorative glyphs sized independently of the text scale (the global add "+"). */
+   --homeos-glyph-lg: 28px;
 
-  --homeos-weight-medium: 500;
-  --homeos-weight-semibold: 600;
-  --homeos-weight-bold: 700;
+   --homeos-weight-medium: 500;
+   --homeos-weight-semibold: 600;
+   --homeos-weight-bold: 700;
 
-  /* Motion */
-  --homeos-motion-fast: 150ms;
-  --homeos-motion-normal: 250ms;
-  --homeos-ease: cubic-bezier(0.4, 0, 0.2, 1);
+   /* Motion */
+   --homeos-motion-fast: 150ms;
+   --homeos-motion-normal: 250ms;
+   --homeos-ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
