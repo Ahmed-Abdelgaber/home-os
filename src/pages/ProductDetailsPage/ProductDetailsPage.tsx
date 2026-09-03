@@ -148,6 +148,7 @@ export function ProductDetailsPage() {
 
                 <SecondaryButton
                   className="homeos-product-details__toggle"
+                  tone={detail.isActive ? 'danger' : 'brand'}
                   disabled={setActive.isPending}
                   onClick={() => setActive.mutate({ id: detail.id, isActive: !detail.isActive })}
                 >

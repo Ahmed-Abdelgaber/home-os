@@ -197,18 +197,30 @@ function ItemDetailsBody({
           </PrimaryButton>
         )}
         {detail.status === 'finished' && (
+          <PrimaryButton onClick={onBuyAgain}>
+            Buy again
+          </PrimaryButton>
+        )}
+        
+        {detail.status !== 'finished' && (
+          <SecondaryButton onClick={onBuyAgain}>
+            Buy again
+          </SecondaryButton>
+        )}
+        
+        {detail.status === 'finished' && (
           <SecondaryButton onClick={onRequestEditFinishDate}>
             Edit finish date
           </SecondaryButton>
         )}
-        <SecondaryButton onClick={onBuyAgain}>Buy again</SecondaryButton>
+        
         {(detail.status === 'active' || detail.status === 'finished') && (
           isOnShoppingList ? (
             <SecondaryButton onClick={() => navigate('/app/shopping-list')}>
               On shopping list
             </SecondaryButton>
           ) : (
-            <SecondaryButton onClick={onAddToShoppingList} disabled={isAddingToShoppingList}>
+            <SecondaryButton tone="brand" onClick={onAddToShoppingList} disabled={isAddingToShoppingList}>
               {isAddingToShoppingList ? 'Adding…' : 'Add to shopping list'}
             </SecondaryButton>
           )
