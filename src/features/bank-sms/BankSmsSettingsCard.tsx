@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { IonIcon, IonToggle, useIonToast } from '@ionic/react'
-import { copyOutline, phonePortraitOutline } from 'ionicons/icons'
+import { chevronForward, copyOutline, phonePortraitOutline, refreshOutline } from 'ionicons/icons'
 import { ConfirmationSheet } from '../../shared/components/ConfirmationSheet'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { Row } from '../../shared/components/Row'
@@ -101,7 +101,6 @@ export function BankSmsSettingsCard() {
         <GroupedCard>
           <div className="homeos-bank-sms-settings__skeleton">
             <Skeleton height={56} />
-            <Skeleton height={56} />
           </div>
         </GroupedCard>
       ) : isError ? (
@@ -116,7 +115,7 @@ export function BankSmsSettingsCard() {
             icon={phonePortraitOutline}
             tone={isEnabled ? 'success' : 'neutral'}
             title="Bank SMS Capture"
-            meta={isEnabled ? 'Active' : 'Disabled'}
+            meta="Automatically capture bank purchases"
             trailing={
               <IonToggle
                 checked={isEnabled}
@@ -135,33 +134,27 @@ export function BankSmsSettingsCard() {
             >
               <div className="homeos-shortcut-key-row__content">
                 <span className="homeos-shortcut-key-row__label">Shortcut Key</span>
-                <code className="homeos-shortcut-key-row__value">{ingestionKey}</code>
+                <span className="homeos-shortcut-key-row__value">{ingestionKey}</span>
               </div>
-              <IonIcon icon={copyOutline} className="homeos-shortcut-key-row__icon" aria-hidden="true" />
+              <div className="homeos-shortcut-key-row__icon-wrap" aria-hidden="true">
+                <IonIcon icon={copyOutline} className="homeos-shortcut-key-row__icon" />
+              </div>
             </button>
           )}
 
           {isEnabled && ingestionKey && (
-            <div className="homeos-bank-sms-settings__footer">
-              <button
-                type="button"
-                className="homeos-bank-sms-settings__regenerate-link"
-                disabled={isPending}
-                onClick={() => setShowRegenerateConfirm(true)}
-              >
-                Regenerate Key
-              </button>
-            </div>
-          )}
-
-          {!isEnabled && (
-            <div className="homeos-bank-sms-settings__hint-box">
-              <p className="homeos-bank-sms-settings__hint">
-                {ingestionKey
-                  ? 'Capture is paused. Turn on to resume importing transactions.'
-                  : 'Turn on capture to generate a Shortcut Key for your iPhone.'}
-              </p>
-            </div>
+            <button
+              type="button"
+              className="homeos-regenerate-row"
+              disabled={isPending}
+              onClick={() => setShowRegenerateConfirm(true)}
+            >
+              <div className="homeos-regenerate-row__left">
+                <IonIcon icon={refreshOutline} className="homeos-regenerate-row__icon" aria-hidden="true" />
+                <span className="homeos-regenerate-row__title">Regenerate Shortcut Key</span>
+              </div>
+              <IonIcon icon={chevronForward} className="homeos-regenerate-row__chevron" aria-hidden="true" />
+            </button>
           )}
         </GroupedCard>
       )}
