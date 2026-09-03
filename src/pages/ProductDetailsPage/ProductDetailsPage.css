@@ -22,8 +22,8 @@
 }
 
 .homeos-product-details__badge--active {
-  background: var(--homeos-primary-100);
-  color: var(--homeos-primary-600);
+  background: var(--homeos-success-soft);
+  color: var(--homeos-success);
 }
 
 .homeos-product-details__badge--inactive {
@@ -35,7 +35,13 @@
   margin-bottom: var(--homeos-space-20);
 }
 
+.homeos-product-details__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-12);
+  margin-bottom: var(--homeos-space-24);
+}
+
 .homeos-product-details__toggle {
   width: 100%;
-  margin-top: var(--homeos-space-12);
 }

@@ -1,0 +1,106 @@
+.homeos-buy-selected {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-24);
+  padding-bottom: 96px;
+}
+
+.homeos-buy-selected__shared {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-16);
+  padding: var(--homeos-space-16);
+}
+
+.homeos-buy-selected__product-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-16);
+  padding: var(--homeos-space-16);
+}
+
+.homeos-buy-selected__product-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--homeos-border);
+  padding-bottom: var(--homeos-space-12);
+}
+
+.homeos-buy-selected__product-title {
+  margin: 0;
+  font-size: var(--homeos-text-title-sm);
+  font-weight: var(--homeos-weight-bold);
+  color: var(--homeos-ink-950);
+}
+
+.homeos-buy-selected__product-meta {
+  font-size: var(--homeos-text-caption);
+  color: var(--homeos-ink-500);
+}
+
+.homeos-buy-selected__row-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--homeos-space-12);
+}
+
+.homeos-buy-selected__state-selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-8);
+}
+
+.homeos-buy-selected__state-label {
+  font-size: var(--homeos-text-caption);
+  font-weight: var(--homeos-weight-medium);
+  color: var(--homeos-ink-600);
+}
+
+.homeos-buy-selected__state-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--homeos-space-8);
+}
+
+.homeos-buy-selected__state-btn {
+  padding: var(--homeos-space-10) var(--homeos-space-12);
+  border-radius: var(--homeos-radius-control);
+  font-size: var(--homeos-text-body);
+  font-weight: var(--homeos-weight-semibold);
+  border: 1px solid var(--homeos-border);
+  background: var(--homeos-surface);
+  color: var(--homeos-ink-600);
+  cursor: pointer;
+  transition: all var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-buy-selected__state-btn--active {
+  background: var(--homeos-ink-950);
+  color: #fff;
+  border-color: var(--homeos-ink-950);
+}
+
+.homeos-buy-selected__product-error {
+  margin: 0;
+  padding: var(--homeos-space-8) var(--homeos-space-12);
+  background: var(--homeos-danger-soft);
+  color: var(--homeos-danger);
+  border-radius: var(--homeos-radius-control);
+  font-size: var(--homeos-text-footnote);
+  font-weight: var(--homeos-weight-medium);
+}
+
+.homeos-buy-selected__footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: var(--homeos-app-max-width);
+  margin: 0 auto;
+  padding: var(--homeos-space-16);
+  padding-bottom: calc(env(safe-area-inset-bottom) + var(--homeos-space-16));
+  background: var(--homeos-surface);
+  border-top: 1px solid var(--homeos-border);
+  z-index: 10;
+}

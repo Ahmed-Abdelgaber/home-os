@@ -1,6 +1,7 @@
 import { useIonAlert } from '@ionic/react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { cubeOutline, linkOutline } from 'ionicons/icons'
 import { formatShortDate } from '../../core/utils/cairoDate'
 import { ExpenseForm, type ExpenseFormValues } from '../../features/expenses/ExpenseForm'
 import { useExpense } from '../../features/expenses/useExpenseDetails'
@@ -11,7 +12,9 @@ import { FactRow } from '../../shared/components/FactRow'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { QueryState } from '../../shared/components/QueryState'
+import { Row } from '../../shared/components/Row'
 import { SecondaryButton } from '../../shared/components/SecondaryButton'
+import { SectionHeader } from '../../shared/components/SectionHeader'
 import { Skeleton } from '../../shared/components/Skeleton'
 import './ExpenseDetailsPage.css'
 
@@ -119,6 +122,28 @@ export function ExpenseDetailsPage() {
                   <FactRow label="Account" value={detail.accountName} />
                   {detail.notes && <FactRow label="Notes" value={detail.notes} />}
                 </GroupedCard>
+
+                {detail.linkedItem && (
+                  <section className="homeos-expense-details__related" style={{ marginTop: 'var(--homeos-space-20)' }}>
+                    <SectionHeader icon={linkOutline} title="Related" />
+                    <GroupedCard>
+                      <Row
+                        icon={cubeOutline}
+                        tone="primary"
+                        title={detail.linkedItem.productName}
+                        meta="View item"
+                        onClick={() => navigate(`/app/items/${detail.linkedItem!.id}`)}
+                      />
+                      <Row
+                        icon={cubeOutline}
+                        tone="neutral"
+                        title={detail.linkedItem.productName}
+                        meta="View product"
+                        onClick={() => navigate(`/app/products/${detail.linkedItem!.productId}`)}
+                      />
+                    </GroupedCard>
+                  </section>
+                )}
 
                 <PrimaryButton className="homeos-expense-details__edit" onClick={() => setEditing(true)}>Edit expense</PrimaryButton>
 

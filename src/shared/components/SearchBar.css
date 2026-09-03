@@ -1,15 +1,84 @@
 .homeos-search-bar {
-  --padding-start: 0;
-  --padding-end: 0;
-  --padding-top: 0;
-  --padding-bottom: var(--homeos-space-16);
-  --background: var(--homeos-soft-surface);
-  --border-radius: var(--homeos-radius-md);
-  --icon-color: var(--homeos-ink-400);
-  --clear-button-color: var(--homeos-ink-400);
-  --placeholder-color: var(--homeos-ink-400);
-  --color: var(--homeos-ink-950);
-  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--homeos-space-8);
+  height: 46px;
+  background: var(--homeos-surface);
+  border: 1px solid var(--homeos-border);
+  border-radius: var(--homeos-radius-control);
+  box-shadow: 0 1px 2px rgba(var(--homeos-ink-950-rgb), 0.03);
+  padding: 0 var(--homeos-space-12);
   margin-bottom: var(--homeos-space-16);
+  transition: border-color var(--homeos-motion-fast) var(--homeos-ease),
+    box-shadow var(--homeos-motion-fast) var(--homeos-ease),
+    background-color var(--homeos-motion-fast) var(--homeos-ease);
 }
 
+.homeos-search-bar:focus-within {
+  border-color: var(--homeos-primary-500);
+  box-shadow: 0 0 0 3px rgba(var(--homeos-primary-500-rgb), 0.12),
+    0 1px 2px rgba(var(--homeos-ink-950-rgb), 0.04);
+}
+
+.homeos-search-bar__icon {
+  font-size: 19px;
+  color: var(--homeos-ink-500);
+  flex-shrink: 0;
+  transition: color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-search-bar:focus-within .homeos-search-bar__icon {
+  color: var(--homeos-primary-500);
+}
+
+.homeos-search-bar__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--homeos-text-body);
+  color: var(--homeos-ink-950);
+  padding: 0;
+  margin: 0;
+  line-height: normal;
+}
+
+.homeos-search-bar__input::placeholder {
+  color: var(--homeos-ink-500);
+}
+
+.homeos-search-bar__clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  color: var(--homeos-ink-500);
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: var(--homeos-radius-circle);
+  flex-shrink: 0;
+  transition: color var(--homeos-motion-fast) var(--homeos-ease),
+    transform var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-search-bar__clear:active {
+  transform: scale(0.9);
+  color: var(--homeos-ink-950);
+}
+
+.homeos-search-bar--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--homeos-soft-surface);
+}
+
+.homeos-search-bar--disabled .homeos-search-bar__input {
+  cursor: not-allowed;
+}

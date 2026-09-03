@@ -1,5 +1,7 @@
 import {
   airplaneOutline,
+  cardOutline,
+  cartOutline,
   cubeOutline,
   logOutOutline,
   pricetagOutline,
@@ -40,6 +42,13 @@ export function MorePage() {
   return (
     <AppPage title="More">
       <GroupedCard>
+        <Row
+          icon={cartOutline}
+          tone="primary"
+          title="Shopping List"
+          meta="Suggested and planned purchases"
+          onClick={() => navigate('/app/shopping-list')}
+        />
         <Row icon={airplaneOutline} tone="info" title="Trips" meta="Current, upcoming, and past" onClick={() => navigate('/app/trips')} />
         <Row
           icon={cubeOutline}
@@ -47,6 +56,13 @@ export function MorePage() {
           title="Product Catalog"
           meta="Products, categories, consumption modes"
           onClick={() => navigate('/app/products')}
+        />
+        <Row
+          icon={cardOutline}
+          tone="warning"
+          title="Pending Transactions"
+          meta="Review bank SMS & imported debits"
+          onClick={() => navigate('/app/pending-transactions')}
         />
         <Row tone="neutral" icon={settingsOutline} title="Settings" meta="Your account" onClick={() => navigate('/app/settings')} />
       </GroupedCard>

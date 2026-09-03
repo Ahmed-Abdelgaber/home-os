@@ -1,0 +1,162 @@
+.homeos-bank-sms-settings {
+  margin-top: var(--homeos-space-32);
+}
+
+.homeos-bank-sms-settings__skeleton {
+  padding: var(--homeos-space-12) var(--homeos-space-16);
+}
+
+.homeos-bank-sms-settings__error {
+  margin: 0;
+  padding: var(--homeos-space-16);
+  color: var(--homeos-danger);
+  font-size: var(--homeos-text-body-sm);
+  text-align: center;
+}
+
+/* Shortcut Key Row (Row 2) */
+.homeos-shortcut-key-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--homeos-space-12);
+  width: 100%;
+  padding: var(--homeos-space-12) var(--homeos-space-16);
+  min-height: 52px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  margin: 0;
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-shortcut-key-row:hover {
+  background-color: var(--homeos-soft-surface);
+}
+
+.homeos-shortcut-key-row:active {
+  background-color: rgba(var(--homeos-ink-950-rgb), 0.04);
+}
+
+.homeos-shortcut-key-row__content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.homeos-shortcut-key-row__label {
+  font-size: var(--homeos-text-caption);
+  font-weight: var(--homeos-weight-semibold);
+  color: var(--homeos-ink-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.homeos-shortcut-key-row__value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: clamp(11px, 3.1vw, 13px);
+  font-weight: var(--homeos-weight-medium);
+  color: var(--homeos-ink-950);
+  word-break: break-all;
+  line-height: 1.4;
+  letter-spacing: -0.2px;
+}
+
+.homeos-shortcut-key-row__icon-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--homeos-radius-control);
+  background: var(--homeos-soft-surface);
+  color: var(--homeos-ink-600);
+  transition: transform var(--homeos-motion-fast) var(--homeos-ease),
+              background-color var(--homeos-motion-fast) var(--homeos-ease),
+              color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-shortcut-key-row:hover .homeos-shortcut-key-row__icon-wrap {
+  background: var(--homeos-border);
+  color: var(--homeos-ink-950);
+}
+
+.homeos-shortcut-key-row:active .homeos-shortcut-key-row__icon-wrap {
+  transform: scale(0.92);
+}
+
+.homeos-shortcut-key-row__icon {
+  font-size: 16px;
+}
+
+/* Regenerate Action Row (Row 3) */
+.homeos-regenerate-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--homeos-space-12);
+  width: 100%;
+  padding: var(--homeos-space-12) var(--homeos-space-16);
+  min-height: 48px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  margin: 0;
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-regenerate-row:hover {
+  background-color: var(--homeos-soft-surface);
+}
+
+.homeos-regenerate-row:active {
+  background-color: rgba(var(--homeos-ink-950-rgb), 0.04);
+}
+
+.homeos-regenerate-row__left {
+  display: flex;
+  align-items: center;
+  gap: var(--homeos-space-10);
+  flex: 1;
+  min-width: 0;
+}
+
+.homeos-regenerate-row__icon {
+  font-size: 18px;
+  color: var(--homeos-ink-500);
+  flex-shrink: 0;
+  transition: color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-regenerate-row__title {
+  font-size: var(--homeos-text-body-sm);
+  font-weight: var(--homeos-weight-medium);
+  color: var(--homeos-ink-800);
+  transition: color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-regenerate-row:hover .homeos-regenerate-row__title {
+  color: var(--homeos-ink-950);
+}
+
+.homeos-regenerate-row:hover .homeos-regenerate-row__icon {
+  color: var(--homeos-ink-800);
+}
+
+.homeos-regenerate-row__chevron {
+  font-size: 16px;
+  color: var(--homeos-ink-500);
+  flex-shrink: 0;
+  transition: transform var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-regenerate-row:active .homeos-regenerate-row__chevron {
+  transform: translateX(2px);
+}

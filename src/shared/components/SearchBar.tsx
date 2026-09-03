@@ -1,21 +1,56 @@
-import { IonSearchbar } from '@ionic/react'
+import { IonIcon } from '@ionic/react'
+import { closeCircle, searchOutline } from 'ionicons/icons'
 import './SearchBar.css'
 
-interface SearchBarProps {
+export interface SearchBarProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
+  disabled?: boolean
+  ariaLabel?: string
+  className?: string
 }
 
-/** Reusable search/filter input for list pages. Filtering is client-side. */
-export function SearchBar({ value, onChange, placeholder = 'Search…' }: SearchBarProps) {
+/**
+ * Premium HomeOS search bar.
+ * Built with native HTML/React primitives for predictable cross-platform behavior,
+ * accessible keyboard interactions, and a restrained brand focus state.
+ */
+export function SearchBar({
+  value,
+  onChange,
+  placeholder = 'Search…',
+  disabled = false,
+  ariaLabel,
+  className = '',
+}: SearchBarProps) {
   return (
-    <IonSearchbar
-      className="homeos-search-bar"
-      value={value}
-      onIonInput={(e) => onChange(e.detail.value ?? '')}
-      placeholder={placeholder}
-      mode="ios" // Force iOS mode for a cleaner pill look if desired, or remove to use platform default
-    />
+    <div className={`homeos-search-bar ${disabled ? 'homeos-search-bar--disabled' : ''} ${className}`}>
+      <IonIcon icon={searchOutline} className="homeos-search-bar__icon" aria-hidden="true" />
+      <input
+        type="text"
+        className="homeos-search-bar__input"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        disabled={disabled}
+        aria-label={ariaLabel || placeholder}
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck="false"
+      />
+      {value.length > 0 && !disabled && (
+        <button
+          type="button"
+          className="homeos-search-bar__clear"
+          aria-label="Clear search"
+          onClick={() => onChange('')}
+        >
+          <IonIcon icon={closeCircle} />
+        </button>
+      )}
+    </div>
   )
 }
+
+export const HomeOSSearchBar = SearchBar

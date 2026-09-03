@@ -21,7 +21,7 @@ export function QuickAddSheet({ isOpen, title, onClose, children }: QuickAddShee
             <IonIcon icon={close} />
           </button>
         </div>
-        <div className="homeos-quick-add-sheet__body">{children}</div>
+        <div className="homeos-quick-add-sheet__body homeos-page-rise">{children}</div>
       </div>
     </IonModal>
   )

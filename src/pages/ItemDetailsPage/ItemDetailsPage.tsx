@@ -1,18 +1,26 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useIonToast } from '@ionic/react'
+import { cubeOutline, linkOutline, walletOutline } from 'ionicons/icons'
 import { formatShortDate } from '../../core/utils/cairoDate'
 import { useItem, useProductHistory } from '../../features/items/useItemDetails'
-import { useDeleteItem, useFinishItem, useStartItem } from '../../features/items/useItemMutations'
+import { useDeleteItem, useFinishItem, useStartItem, useUpdateItemFinishedDate } from '../../features/items/useItemMutations'
+import { useShoppingList } from '../../features/shopping-list/useShoppingList'
+import { useAddToShoppingList } from '../../features/shopping-list/useShoppingListMutations'
 import { AppPage } from '../../shared/components/AppPage'
 import { ConfirmationSheet } from '../../shared/components/ConfirmationSheet'
 import { FactRow } from '../../shared/components/FactRow'
 import { GroupedCard } from '../../shared/components/GroupedCard'
-import { HistorySection } from '../../shared/components/HistorySection'
+import { HistorySection, type HistoryEntry } from '../../shared/components/HistorySection'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { QueryState } from '../../shared/components/QueryState'
+import { Row } from '../../shared/components/Row'
 import { SecondaryButton } from '../../shared/components/SecondaryButton'
+import { SectionHeader } from '../../shared/components/SectionHeader'
 import { Skeleton } from '../../shared/components/Skeleton'
 import { StatusChip } from '../../shared/components/StatusChip'
+import { EditFinishDateSheet } from './EditFinishDateSheet'
+import { FinishItemSheet } from './FinishItemSheet'
 import './ItemDetailsPage.css'
 
 export function ItemDetailsPage() {
@@ -20,31 +28,83 @@ export function ItemDetailsPage() {
   const navigate = useNavigate()
   const item = useItem(itemId)
   const history = useProductHistory(item.data?.productId, itemId)
+  const shoppingList = useShoppingList()
+  const addToShoppingList = useAddToShoppingList()
   const startItem = useStartItem()
   const finishItem = useFinishItem()
+  const updateFinishedDate = useUpdateItemFinishedDate()
   const deleteItem = useDeleteItem()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [finishingItem, setFinishingItem] = useState(false)
+  const [editingFinishDate, setEditingFinishDate] = useState(false)
+  const [presentToast] = useIonToast()
 
   return (
     <AppPage title="Item Details" backHref="/app/tabs/items">
       <QueryState query={item} skeleton={<Skeleton height={220} />} error="Couldn't load this item.">
-        {(detail) => (
-          <ItemDetailsBody
-            detail={detail}
-            historyEntries={history.data ?? []}
-            onStart={() => startItem.mutate(detail.id)}
-            isStarting={startItem.isPending}
-            onFinish={() => finishItem.mutate(detail.id)}
-            isFinishing={finishItem.isPending}
-            confirmingDelete={confirmingDelete}
-            onRequestDelete={() => setConfirmingDelete(true)}
-            onCancelDelete={() => setConfirmingDelete(false)}
-            onConfirmDelete={() => {
-              setConfirmingDelete(false)
-              deleteItem.mutate(detail.id, { onSuccess: () => navigate('/app/tabs/items', { replace: true }) })
-            }}
-          />
-        )}
+        {(detail) => {
+          const isOnShoppingList = (shoppingList.data ?? []).some((entry) => entry.productId === detail.productId)
+          return (
+            <>
+              <ItemDetailsBody
+                detail={detail}
+                historyEntries={history.data ?? []}
+                onStart={() => startItem.mutate(detail.id)}
+                isStarting={startItem.isPending}
+                onRequestFinish={() => setFinishingItem(true)}
+                onRequestEditFinishDate={() => setEditingFinishDate(true)}
+                isOnShoppingList={isOnShoppingList}
+                isAddingToShoppingList={addToShoppingList.isPending}
+                onAddToShoppingList={() => addToShoppingList.mutate({ productId: detail.productId, source: 'manual' })}
+                onBuyAgain={() => {
+                  navigate('/app/purchase', {
+                    state: {
+                      productId: detail.productId,
+                      productName: detail.productName,
+                      quantity: detail.quantity,
+                      merchant: detail.expense?.merchant ?? null,
+                      accountId: detail.expense?.accountId ?? null,
+                      previousAmount: detail.expense?.amount ?? null,
+                    },
+                  })
+                }}
+                confirmingDelete={confirmingDelete}
+                onRequestDelete={() => setConfirmingDelete(true)}
+                onCancelDelete={() => setConfirmingDelete(false)}
+                onConfirmDelete={() => {
+                  setConfirmingDelete(false)
+                  deleteItem.mutate(detail.id, { onSuccess: () => navigate('/app/tabs/items', { replace: true }) })
+                }}
+              />
+
+              <FinishItemSheet
+                isOpen={finishingItem}
+                startedDate={detail.startedDate}
+                isPending={finishItem.isPending}
+                onClose={() => setFinishingItem(false)}
+                onConfirmFinish={async (finishedDate) => {
+                  await finishItem.mutateAsync({ itemId: detail.id, finishedDate })
+                }}
+              />
+
+              <EditFinishDateSheet
+                isOpen={editingFinishDate}
+                currentFinishedDate={detail.finishedDate}
+                startedDate={detail.startedDate}
+                isPending={updateFinishedDate.isPending}
+                onClose={() => setEditingFinishDate(false)}
+                onConfirmSave={async (finishedDate) => {
+                  await updateFinishedDate.mutateAsync({ itemId: detail.id, finishedDate })
+                  presentToast({
+                    message: 'Finish date updated',
+                    duration: 2000,
+                    position: 'bottom',
+                  })
+                }}
+              />
+            </>
+          )
+        }}
       </QueryState>
     </AppPage>
   )
@@ -55,8 +115,12 @@ interface ItemDetailsBodyProps {
   historyEntries: ReturnType<typeof useProductHistory>['data']
   onStart: () => void
   isStarting: boolean
-  onFinish: () => void
-  isFinishing: boolean
+  onRequestFinish: () => void
+  onRequestEditFinishDate: () => void
+  isOnShoppingList: boolean
+  isAddingToShoppingList: boolean
+  onAddToShoppingList: () => void
+  onBuyAgain: () => void
   confirmingDelete: boolean
   onRequestDelete: () => void
   onCancelDelete: () => void
@@ -68,8 +132,12 @@ function ItemDetailsBody({
   historyEntries,
   onStart,
   isStarting,
-  onFinish,
-  isFinishing,
+  onRequestFinish,
+  onRequestEditFinishDate,
+  isOnShoppingList,
+  isAddingToShoppingList,
+  onAddToShoppingList,
+  onBuyAgain,
   confirmingDelete,
   onRequestDelete,
   onCancelDelete,
@@ -85,7 +153,7 @@ function ItemDetailsBody({
 
       {detail.metrics && (
         <div className="homeos-item-details__metrics">
-          <div className="homeos-item-details__metric">
+          <div className={`homeos-item-details__metric ${detail.status === 'active' ? 'homeos-item-details__metric--highlight' : ''}`}>
             <p className="homeos-item-details__metric-value">{detail.metrics.activeUsageDays}</p>
             <p className="homeos-item-details__metric-label">Active usage days</p>
           </div>
@@ -117,18 +185,111 @@ function ItemDetailsBody({
         {detail.notes && <FactRow label="Notes" value={detail.notes} />}
       </GroupedCard>
 
-      {detail.status === 'stocked' && (
-        <PrimaryButton onClick={onStart} disabled={isStarting}>
-          {isStarting ? 'Starting…' : 'Start using'}
-        </PrimaryButton>
-      )}
-      {detail.status === 'active' && (
-        <PrimaryButton onClick={onFinish} disabled={isFinishing}>
-          {isFinishing ? 'Finishing…' : 'Finish item'}
-        </PrimaryButton>
-      )}
+      <div className="homeos-item-details__actions">
+        {detail.status === 'stocked' && (
+          <PrimaryButton onClick={onStart} disabled={isStarting}>
+            {isStarting ? 'Starting…' : 'Start using'}
+          </PrimaryButton>
+        )}
+        {detail.status === 'active' && (
+          <PrimaryButton onClick={onRequestFinish}>
+            Finish item
+          </PrimaryButton>
+        )}
+        {detail.status === 'finished' && (
+          <PrimaryButton onClick={onBuyAgain}>
+            Buy again
+          </PrimaryButton>
+        )}
+        
+        {detail.status !== 'finished' && (
+          <SecondaryButton onClick={onBuyAgain}>
+            Buy again
+          </SecondaryButton>
+        )}
+        
+        {detail.status === 'finished' && (
+          <SecondaryButton onClick={onRequestEditFinishDate}>
+            Edit finish date
+          </SecondaryButton>
+        )}
+        
+        {(detail.status === 'active' || detail.status === 'finished') && (
+          isOnShoppingList ? (
+            <SecondaryButton onClick={() => navigate('/app/shopping-list')}>
+              On shopping list
+            </SecondaryButton>
+          ) : (
+            <SecondaryButton tone="brand" onClick={onAddToShoppingList} disabled={isAddingToShoppingList}>
+              {isAddingToShoppingList ? 'Adding…' : 'Add to shopping list'}
+            </SecondaryButton>
+          )
+        )}
+      </div>
 
-      <HistorySection title="Previous cycles" entries={historyEntries ?? []} onEntryClick={(id) => navigate(`/app/items/${id}`)} />
+      <section className="homeos-item-details__related">
+        <SectionHeader icon={linkOutline} title="Related" />
+        <GroupedCard>
+          <Row
+            icon={cubeOutline}
+            tone="primary"
+            title={detail.productName}
+            meta="View product"
+            onClick={() => navigate(`/app/products/${detail.productId}`)}
+          />
+          {detail.expenseId && (
+            <Row
+              icon={walletOutline}
+              tone="info"
+              title={detail.expense ? `EGP ${detail.expense.amount.toLocaleString('en-US')}` : 'Linked expense'}
+              meta={detail.expense?.merchant ? `${detail.expense.merchant} • View expense` : 'View expense'}
+              onClick={() => navigate(`/app/expenses/${detail.expenseId}`)}
+            />
+          )}
+        </GroupedCard>
+      </section>
+
+      {(() => {
+        const formattedHistory: HistoryEntry[] = (historyEntries ?? []).map((h) => {
+          let title = 'Not started'
+          if (h.startedDate && h.finishedDate) {
+            title = `${formatShortDate(h.startedDate)} → ${formatShortDate(h.finishedDate)}`
+          } else if (h.startedDate) {
+            title = `${formatShortDate(h.startedDate)} → In progress`
+          }
+
+          let subtitle: string | undefined = undefined
+          if (h.metrics) {
+            const usage = `${h.metrics.activeUsageDays} usage day${h.metrics.activeUsageDays === 1 ? '' : 's'}`
+            const away = h.metrics.awayDays > 0 ? ` · ${h.metrics.awayDays} away day${h.metrics.awayDays === 1 ? '' : 's'}` : ''
+            subtitle = `${usage}${away}`
+          } else if (h.status === 'stocked') {
+            subtitle = 'Stocked'
+          }
+
+          let meta: string | undefined = undefined
+          if (h.expense) {
+            const parts: string[] = [`EGP ${h.expense.amount.toLocaleString('en-US')}`]
+            if (h.expense.merchant) parts.push(h.expense.merchant)
+            meta = parts.join(' · ')
+          }
+
+          return {
+            id: h.id,
+            title,
+            subtitle,
+            meta,
+          }
+        })
+
+        return (
+          <HistorySection
+            title="Previous cycles"
+            entries={formattedHistory}
+            onEntryClick={(id) => navigate(`/app/items/${id}`)}
+          />
+        )
+      })()}
 
       <SecondaryButton className="homeos-item-details__delete" onClick={onRequestDelete}>
         Delete item

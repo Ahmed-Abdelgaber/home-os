@@ -1,9 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { cardOutline } from 'ionicons/icons'
+import { cardOutline, searchOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useExpenses } from '../../features/expenses/useExpenses'
+import { PendingTransactionsSection } from '../../features/bank-transactions/PendingTransactionsSection'
 import { AppPage } from '../../shared/components/AppPage'
+import { EmptyState } from '../../shared/components/EmptyState'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { QueryState } from '../../shared/components/QueryState'
 import { Row } from '../../shared/components/Row'
@@ -19,8 +21,18 @@ export function ExpensesPage() {
   const lowerSearch = search.toLowerCase()
 
   return (
-    <AppPage title="Expenses" onRefresh={() => queryClient.invalidateQueries({ queryKey: ['expenses'] })}>
+    <AppPage
+      title="Expenses"
+      onRefresh={async () => {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['expenses'] }),
+          queryClient.invalidateQueries({ queryKey: ['bank_transactions'] }),
+        ])
+      }}
+    >
       <SearchBar value={search} onChange={setSearch} placeholder="Search expenses…" />
+
+      {!lowerSearch && <PendingTransactionsSection />}
 
       <QueryState
         query={expenses}
@@ -44,7 +56,13 @@ export function ExpensesPage() {
               )
             : items
           if (filtered.length === 0 && lowerSearch) {
-            return <p className="homeos-items-empty-search">No expenses match "{search}".</p>
+            return (
+              <EmptyState
+                icon={searchOutline}
+                title="No matching expenses"
+                message={`No expenses match "${search}".`}
+              />
+            )
           }
           return (
             <GroupedCard>
@@ -52,7 +70,7 @@ export function ExpensesPage() {
                 <Row
                   key={expense.id}
                   icon={cardOutline}
-                  tone="primary"
+                  tone="neutral"
                   title={expense.title}
                   meta={expense.meta}
                   accessory={expense.amount}

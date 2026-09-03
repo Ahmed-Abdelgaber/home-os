@@ -34,7 +34,7 @@ export function LoginPage() {
   return (
     <IonPage>
       <IonContent fullscreen className="homeos-login-content" scrollY={false}>
-        <div className="homeos-login-wrapper">
+        <div className="homeos-login-wrapper homeos-page-rise">
           <div className="homeos-login-panel">
             <div className="homeos-login-panel__brand">
               <span className="homeos-login-panel__mark">

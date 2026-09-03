@@ -1,6 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../core/supabase/client'
 
+export interface LinkedItemDetail {
+  id: string
+  status: string
+  productId: string
+  productName: string
+}
+
 export interface ExpenseDetail {
   id: string
   expenseDate: string
@@ -17,6 +24,7 @@ export interface ExpenseDetail {
   notes: string | null
   /** Set when this Expense was created by purchase_product — direct delete is blocked per docs/01 §11. */
   linkedItemId: string | null
+  linkedItem: LinkedItemDetail | null
 }
 
 export function useExpense(expenseId: string | undefined) {
@@ -26,15 +34,34 @@ export function useExpense(expenseId: string | undefined) {
     queryFn: async (): Promise<ExpenseDetail> => {
       const { data, error } = await supabase
         .from('expenses')
-        .select('id, expense_date, amount, description, merchant, category_id, scope, person_id, account_id, notes, items(id), category:categories(name), person:people(name), account:accounts(name)')
+        .select(
+          'id, expense_date, amount, description, merchant, category_id, scope, person_id, account_id, notes, items(id, status, product_id, product:products(id, name)), category:categories(name), person:people(name), account:accounts(name)',
+        )
         .eq('id', expenseId as string)
         .single()
       if (error) throw error
 
-      const items = data.items as unknown as { id: string }[] | null
+      const items = data.items as unknown as
+        | {
+            id: string
+            status: string
+            product_id: string
+            product: { id: string; name: string } | null
+          }[]
+        | null
+      const firstItem = items && items.length > 0 ? items[0] : null
       const category = data.category as unknown as { name: string } | null
       const person = data.person as unknown as { name: string } | null
       const account = data.account as unknown as { name: string } | null
+
+      const linkedItem: LinkedItemDetail | null = firstItem
+        ? {
+            id: firstItem.id,
+            status: firstItem.status,
+            productId: firstItem.product_id,
+            productName: firstItem.product?.name ?? 'Unknown product',
+          }
+        : null
 
       return {
         id: data.id,
@@ -50,7 +77,8 @@ export function useExpense(expenseId: string | undefined) {
         accountId: data.account_id,
         accountName: account?.name ?? 'Unknown',
         notes: data.notes,
-        linkedItemId: items && items.length > 0 ? items[0].id : null,
+        linkedItemId: linkedItem ? linkedItem.id : null,
+        linkedItem,
       }
     },
   })

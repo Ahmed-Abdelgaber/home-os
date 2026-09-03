@@ -8,16 +8,21 @@
 }
 
 .homeos-status-chip--stocked {
+  background: var(--homeos-info-soft);
+  color: var(--homeos-info);
+}
+
+.homeos-status-chip--active {
+  background: var(--homeos-success-soft);
+  color: var(--homeos-success);
+}
+
+.homeos-status-chip--finished {
   background: var(--homeos-soft-surface);
   color: var(--homeos-ink-600);
 }
 
-.homeos-status-chip--active {
-  background: var(--homeos-primary-100);
-  color: var(--homeos-primary-600);
-}
-
-.homeos-status-chip--finished {
-  background: var(--homeos-success-soft);
-  color: var(--homeos-success);
+.homeos-status-chip--warning {
+  background: var(--homeos-warning-soft);
+  color: var(--homeos-warning);
 }
