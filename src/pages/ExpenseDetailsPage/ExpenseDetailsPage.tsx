@@ -134,13 +134,6 @@ export function ExpenseDetailsPage() {
                         meta="View item"
                         onClick={() => navigate(`/app/items/${detail.linkedItem!.id}`)}
                       />
-                      <Row
-                        icon={cubeOutline}
-                        tone="neutral"
-                        title={detail.linkedItem.productName}
-                        meta="View product"
-                        onClick={() => navigate(`/app/products/${detail.linkedItem!.productId}`)}
-                      />
                     </GroupedCard>
                   </section>
                 )}
