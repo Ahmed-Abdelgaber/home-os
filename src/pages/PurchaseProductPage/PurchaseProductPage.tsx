@@ -22,9 +22,12 @@ export interface PurchasePrefillState {
   productId?: string
   productName?: string
   quantity?: number | string
+  amount?: number | string
   merchant?: string | null
   accountId?: string | null
   previousAmount?: number | null
+  purchaseDate?: string
+  bankTransactionId?: string
 }
 
 const purchaseSchema = z.object({
@@ -197,10 +200,10 @@ function PurchaseForm({
     resolver: zodResolver(purchaseSchema),
     defaultValues: {
       quantity: initialQuantity,
-      amount: '',
+      amount: prefill?.amount != null && Number(prefill.amount) > 0 ? String(prefill.amount) : '',
       merchant: prefill?.merchant ?? '',
       accountId: prefill?.accountId ?? '',
-      purchaseDate: cairoToday(),
+      purchaseDate: prefill?.purchaseDate || cairoToday(),
       notes: '',
       startNow: true,
     },

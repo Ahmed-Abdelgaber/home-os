@@ -319,3 +319,127 @@ test('23. Card last4 is informational only (no detected_account_id)', () => {
   assert.equal(tx.cardLast4, '6511')
 })
 
+// 24. Allocation calculation: totalAllocated, remaining, and isFullyAllocated
+test('24. Allocation calculation: totalAllocated, remaining, and isFullyAllocated', () => {
+  const calculateAllocationSummary = (txAmount, allocations) => {
+    const totalAllocated = allocations.reduce((sum, a) => sum + a.allocatedAmount, 0)
+    const remaining = Math.max(0, txAmount - totalAllocated)
+    return {
+      totalAllocated,
+      remaining,
+      isFullyAllocated: remaining === 0 && allocations.length > 0,
+    }
+  }
+
+  const txAmount = 1500
+  const noAllocations = []
+  assert.deepEqual(calculateAllocationSummary(txAmount, noAllocations), {
+    totalAllocated: 0,
+    remaining: 1500,
+    isFullyAllocated: false,
+  })
+
+  const partialAllocations = [
+    { allocatedAmount: 500 },
+    { allocatedAmount: 200 },
+  ]
+  assert.deepEqual(calculateAllocationSummary(txAmount, partialAllocations), {
+    totalAllocated: 700,
+    remaining: 800,
+    isFullyAllocated: false,
+  })
+
+  const fullAllocations = [
+    { allocatedAmount: 1000 },
+    { allocatedAmount: 500 },
+  ]
+  assert.deepEqual(calculateAllocationSummary(txAmount, fullAllocations), {
+    totalAllocated: 1500,
+    remaining: 0,
+    isFullyAllocated: true,
+  })
+})
+
+// 25. Split allocation prevents allocation > remaining amount
+test('25. Split allocation prevents allocation > remaining amount', () => {
+  const remaining = 800
+  const validateSplitAmount = (input, maxRemaining) => {
+    const num = Number(input)
+    if (isNaN(num) || num <= 0) return 'Invalid amount'
+    if (num > maxRemaining) return 'Exceeds remaining'
+    return null
+  }
+
+  assert.equal(validateSplitAmount('500', remaining), null)
+  assert.equal(validateSplitAmount('800', remaining), null)
+  assert.equal(validateSplitAmount('850', remaining), 'Exceeds remaining')
+  assert.equal(validateSplitAmount('0', remaining), 'Invalid amount')
+  assert.equal(validateSplitAmount('-50', remaining), 'Invalid amount')
+})
+
+// 26. Fulfill prefill sets amount, merchant, date, and transaction ID for Expense
+test('26. Fulfill prefill sets amount, merchant, date, and transaction ID for Expense', () => {
+  const tx = {
+    id: 'tx-123',
+    merchantRaw: 'CARREFOUR MAADI',
+    transactionAt: '2026-09-03T18:42:00Z',
+  }
+  const effectiveAmount = 750
+
+  const prefill = {
+    amount: effectiveAmount,
+    merchant: tx.merchantRaw,
+    expenseDate: tx.transactionAt.split('T')[0],
+    bankTransactionId: tx.id,
+  }
+
+  assert.equal(prefill.amount, 750)
+  assert.equal(prefill.merchant, 'CARREFOUR MAADI')
+  assert.equal(prefill.expenseDate, '2026-09-03')
+  assert.equal(prefill.bankTransactionId, 'tx-123')
+})
+
+// 27. Fulfill prefill sets amount, merchant, date, and transaction ID for Purchase
+test('27. Fulfill prefill sets amount, merchant, date, and transaction ID for Purchase', () => {
+  const tx = {
+    id: 'tx-456',
+    merchantRaw: 'AMAZON EG',
+    transactionAt: '2026-09-02T14:10:00Z',
+  }
+  const effectiveAmount = 1200
+
+  const prefill = {
+    amount: effectiveAmount,
+    merchant: tx.merchantRaw,
+    purchaseDate: tx.transactionAt.split('T')[0],
+    bankTransactionId: tx.id,
+  }
+
+  assert.equal(prefill.amount, 1200)
+  assert.equal(prefill.merchant, 'AMAZON EG')
+  assert.equal(prefill.purchaseDate, '2026-09-02')
+  assert.equal(prefill.bankTransactionId, 'tx-456')
+})
+
+// 28. Actionable ordering: partially_fulfilled comes before pending
+test('28. Actionable ordering: partially_fulfilled comes before pending', () => {
+  const items = [
+    { id: '1', status: 'pending', receivedAt: '2026-09-03T12:00:00Z' },
+    { id: '2', status: 'partially_fulfilled', receivedAt: '2026-09-02T12:00:00Z' },
+    { id: '3', status: 'pending', receivedAt: '2026-09-03T14:00:00Z' },
+  ]
+
+  const sorted = [...items].sort((a, b) => {
+    if (a.status !== b.status) {
+      if (a.status === 'partially_fulfilled') return -1
+      if (b.status === 'partially_fulfilled') return 1
+    }
+    return new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime()
+  })
+
+  assert.equal(sorted[0].id, '2') // partially_fulfilled first even if older
+  assert.equal(sorted[1].id, '3') // newest pending
+  assert.equal(sorted[2].id, '1') // older pending
+})
+
+

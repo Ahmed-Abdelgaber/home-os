@@ -21,6 +21,29 @@ export interface BankTransaction {
   updatedAt: string
 }
 
+export interface BankTransactionAllocation {
+  id: string
+  bankTransactionId: string
+  expenseId: string
+  allocatedAmount: number
+  createdAt: string
+  expense?: {
+    id: string
+    description: string
+    amount: number
+    expenseDate: string
+    merchant: string | null
+    categoryId?: string
+    categoryName?: string
+    accountId?: string
+    accountName?: string
+    personId?: string
+    personName?: string
+    itemId?: string | null
+    productName?: string | null
+  }
+}
+
 interface BankTransactionRow {
   id: string
   source_user_id?: string | null
@@ -60,17 +83,66 @@ function mapRowToTransaction(row: BankTransactionRow): BankTransaction {
 }
 
 /**
- * Queries active pending bank transactions (status: 'pending' or 'partially_fulfilled').
- * Ordered by received_at desc (newest first).
+ * Calculates total allocated and remaining unallocated amounts.
+ */
+export function calculateAllocationSummary(
+  transactionAmount: number,
+  allocations: BankTransactionAllocation[]
+) {
+  const totalAllocated = allocations.reduce((sum, a) => sum + a.allocatedAmount, 0)
+  const remaining = Math.max(0, transactionAmount - totalAllocated)
+  return {
+    totalAllocated,
+    remaining,
+    isFullyAllocated: remaining === 0 && allocations.length > 0,
+  }
+}
+
+/**
+ * Queries actionable bank transactions (partially_fulfilled, then pending, then newest).
  */
 export function usePendingBankTransactions() {
   return useQuery({
-    queryKey: ['bank_transactions', { status: 'pending_or_partially_fulfilled' }],
+    queryKey: ['bank_transactions', { status: 'actionable' }],
     queryFn: async (): Promise<BankTransaction[]> => {
       const { data, error } = await supabase
         .from('bank_transactions')
         .select('*')
         .in('status', ['pending', 'partially_fulfilled'])
+        .order('received_at', { ascending: false })
+
+      if (error) {
+        if (error.code === '42P01' || error.message.includes('relation "bank_transactions" does not exist')) {
+          return []
+        }
+        throw new Error(error.message)
+      }
+
+      const items = (data ?? []).map(mapRowToTransaction)
+
+      // Priority ordering: partially_fulfilled first, then pending, then newest first
+      return items.sort((a, b) => {
+        if (a.status !== b.status) {
+          if (a.status === 'partially_fulfilled') return -1
+          if (b.status === 'partially_fulfilled') return 1
+        }
+        return new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime()
+      })
+    },
+  })
+}
+
+/**
+ * Queries completed bank transactions (fulfilled and ignored).
+ */
+export function useCompletedBankTransactions() {
+  return useQuery({
+    queryKey: ['bank_transactions', { status: 'completed' }],
+    queryFn: async (): Promise<BankTransaction[]> => {
+      const { data, error } = await supabase
+        .from('bank_transactions')
+        .select('*')
+        .in('status', ['fulfilled', 'ignored'])
         .order('received_at', { ascending: false })
 
       if (error) {
@@ -88,7 +160,7 @@ export function usePendingBankTransactions() {
 /**
  * Queries bank transactions filtered optionally by status (default: all).
  */
-export function useBankTransactions(statusFilter?: BankTransactionStatus) {
+export function useBankTransactions(statusFilter?: BankTransactionStatus | 'all') {
   return useQuery({
     queryKey: ['bank_transactions', { status: statusFilter ?? 'all' }],
     queryFn: async (): Promise<BankTransaction[]> => {
@@ -97,7 +169,7 @@ export function useBankTransactions(statusFilter?: BankTransactionStatus) {
         .select('*')
         .order('received_at', { ascending: false })
 
-      if (statusFilter) {
+      if (statusFilter && statusFilter !== 'all') {
         query = query.eq('status', statusFilter)
       }
 
@@ -138,6 +210,86 @@ export function useBankTransactionDetails(transactionId: string | undefined) {
       }
 
       return mapRowToTransaction(data as BankTransactionRow)
+    },
+  })
+}
+
+/**
+ * Queries persisted allocations for a given bank transaction.
+ * Gracefully returns empty array if the backend table does not exist yet.
+ */
+export function useBankTransactionAllocations(transactionId: string | undefined) {
+  return useQuery({
+    queryKey: ['bank_transaction_allocations', transactionId],
+    enabled: Boolean(transactionId),
+    queryFn: async (): Promise<BankTransactionAllocation[]> => {
+      if (!transactionId) return []
+
+      const { data, error } = await supabase
+        .from('bank_transaction_allocations')
+        .select(`
+          id,
+          bank_transaction_id,
+          expense_id,
+          allocated_amount,
+          created_at,
+          expenses (
+            id,
+            description,
+            amount,
+            expense_date,
+            merchant,
+            category_id,
+            account_id,
+            person_id,
+            categories ( name ),
+            accounts ( name ),
+            people ( name ),
+            items (
+              id,
+              products ( name )
+            )
+          )
+        `)
+        .eq('bank_transaction_id', transactionId)
+        .order('created_at', { ascending: true })
+
+      if (error) {
+        // If table doesn't exist yet, return empty list gracefully
+        if (error.code === '42P01' || error.message.includes('relation "bank_transaction_allocations" does not exist')) {
+          return []
+        }
+        throw new Error(error.message)
+      }
+
+      return (data ?? []).map((row: any) => {
+        const exp = row.expenses
+        const item = exp?.items?.[0]
+        return {
+          id: row.id,
+          bankTransactionId: row.bank_transaction_id,
+          expenseId: row.expense_id,
+          allocatedAmount: typeof row.allocated_amount === 'string' ? parseFloat(row.allocated_amount) : Number(row.allocated_amount),
+          createdAt: row.created_at,
+          expense: exp
+            ? {
+                id: exp.id,
+                description: exp.description,
+                amount: typeof exp.amount === 'string' ? parseFloat(exp.amount) : Number(exp.amount),
+                expenseDate: exp.expense_date,
+                merchant: exp.merchant,
+                categoryId: exp.category_id,
+                categoryName: exp.categories?.name,
+                accountId: exp.account_id,
+                accountName: exp.accounts?.name,
+                personId: exp.person_id,
+                personName: exp.people?.name,
+                itemId: item?.id ?? null,
+                productName: item?.products?.name ?? null,
+              }
+            : undefined,
+        }
+      })
     },
   })
 }

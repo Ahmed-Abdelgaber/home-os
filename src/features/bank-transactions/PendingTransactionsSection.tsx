@@ -32,9 +32,16 @@ export function PendingTransactionsSection({ showHeader = true }: PendingTransac
         {pendingItems.map((tx) => {
           const dateStr = tx.transactionAt ? formatShortDate(tx.transactionAt) : formatShortDate(tx.receivedAt)
           const cardHint = tx.cardLast4 ? `Card •••• ${tx.cardLast4}` : 'Card'
-          const formattedAmount = `${tx.currency} ${tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+          const formattedAmount = `${tx.currency} ${tx.amount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`
           const merchant = tx.merchantRaw || 'Unknown Merchant'
-          const meta = `${merchant} • ${cardHint} • ${dateStr}`
+
+          const isPartial = tx.status === 'partially_fulfilled'
+          const meta = isPartial
+            ? `${merchant} • Partially Fulfilled • ${dateStr}`
+            : `${merchant} • ${cardHint} • ${dateStr}`
 
           return (
             <Row
@@ -45,7 +52,7 @@ export function PendingTransactionsSection({ showHeader = true }: PendingTransac
               meta={meta}
               accessory={
                 <span className="homeos-status-chip homeos-status-chip--warning">
-                  Pending
+                  {isPartial ? 'Partially Fulfilled' : 'Pending'}
                 </span>
               }
               onClick={() => navigate(`/app/pending-transactions/${tx.id}`)}
