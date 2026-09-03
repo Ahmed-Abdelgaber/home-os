@@ -20,9 +20,52 @@ export function useStartItem() {
   return useItemLifecycleMutation('start_item')
 }
 
-/** Active → Finished per docs/02 §3 `finish_item` RPC — finish date defaults to current Cairo date. */
+interface FinishItemInput {
+  itemId: string
+  finishedDate?: string
+}
+
+/** Active → Finished per docs/02 §3 `finish_item` RPC — supports optional custom finished_date. */
 export function useFinishItem() {
-  return useItemLifecycleMutation('finish_item')
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ itemId, finishedDate }: FinishItemInput) => {
+      const { error } = await supabase.rpc('finish_item', {
+        p_item_id: itemId,
+        p_finished_date: finishedDate || null,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] })
+      queryClient.invalidateQueries({ queryKey: ['home'] })
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
+  })
+}
+
+interface UpdateItemFinishedDateInput {
+  itemId: string
+  finishedDate: string
+}
+
+/** Updates ONLY finished_date for an already Finished Item per v2.1 specifications. */
+export function useUpdateItemFinishedDate() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ itemId, finishedDate }: UpdateItemFinishedDateInput) => {
+      const { error } = await supabase.rpc('update_item_finished_date', {
+        p_item_id: itemId,
+        p_finished_date: finishedDate,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] })
+      queryClient.invalidateQueries({ queryKey: ['home'] })
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
+  })
 }
 
 /** Deleting an Item cascades to delete its linked Expense per docs/01 §11. */
