@@ -8,11 +8,35 @@
   transition: background-color var(--homeos-motion-fast) var(--homeos-ease);
 }
 
-.homeos-row:has(.homeos-row__action:not(.homeos-row__action--static):active) {
+.homeos-row--clickable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.homeos-row--clickable:hover {
   background-color: var(--homeos-soft-surface);
 }
 
-/* The tap target. Reset the button chrome, keep the layout the row expects. */
+.homeos-row--clickable:active {
+  background-color: var(--homeos-soft-surface);
+  opacity: 0.85;
+}
+
+.homeos-row--clickable:active .homeos-row__chevron {
+  transform: translateX(2px);
+}
+
+.homeos-row--clickable:focus-visible {
+  outline: 2px solid var(--homeos-primary-500);
+  outline-offset: -2px;
+}
+
+.homeos-row--clickable .homeos-row__accessory,
+.homeos-row--clickable .homeos-row__chevron {
+  pointer-events: none;
+}
+
+/* The inner button wraps only the icon + text so trailing stays out of the button. */
 .homeos-row__action {
   flex: 1;
   min-width: 0;
@@ -25,22 +49,11 @@
   font-family: inherit;
   text-align: left;
   cursor: pointer;
+  color: inherit;
 }
 
 .homeos-row__action--static {
   cursor: default;
-}
-
-.homeos-row__action:not(.homeos-row__action--static):active {
-  opacity: 0.72;
-}
-
-.homeos-row__chevron {
-  transition: transform var(--homeos-motion-fast) var(--homeos-ease);
-}
-
-.homeos-row:has(.homeos-row__action:not(.homeos-row__action--static):active) .homeos-row__chevron {
-  transform: translateX(2px);
 }
 
 .homeos-row__action:focus-visible {
@@ -132,4 +145,5 @@
 .homeos-row__chevron {
   flex-shrink: 0;
   color: var(--homeos-ink-500);
+  transition: transform var(--homeos-motion-fast) var(--homeos-ease);
 }

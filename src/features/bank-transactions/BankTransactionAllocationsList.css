@@ -1,4 +1,12 @@
 .homeos-tx-allocations {
-  margin-top: var(--homeos-space-24);
-  margin-bottom: var(--homeos-space-16);
+  margin-top: var(--homeos-space-20);
+  margin-bottom: var(--homeos-space-8);
+}
+
+.homeos-tx-allocations .homeos-alloc-amount {
+  font-size: var(--homeos-text-body);
+  font-weight: var(--homeos-weight-semibold);
+  color: var(--homeos-ink-950);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }

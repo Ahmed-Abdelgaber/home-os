@@ -33,38 +33,40 @@ export function PendingTransactionsSection({ showHeader = true }: PendingTransac
           const txDate = formatTimestampDate(tx.transactionAt)
           const recvDate = formatTimestampDate(tx.receivedAt)
           const displayDate = txDate || recvDate || null
+          const cardHint = tx.cardLast4 ? `Card •••• ${tx.cardLast4}` : null
 
-          const cardHint = tx.cardLast4 ? `Card •••• ${tx.cardLast4}` : 'Card'
           const formattedAmount = `${tx.currency} ${tx.amount.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}`
           const merchant = tx.merchantRaw || 'Unknown Merchant'
-
           const isPartial = tx.status === 'partially_fulfilled'
-          const metaParts: string[] = [merchant]
-          if (isPartial) {
-            metaParts.push('Partially Fulfilled')
-          } else if (tx.cardLast4) {
-            metaParts.push(cardHint)
-          }
-          if (displayDate) {
-            metaParts.push(displayDate)
-          }
-          const meta = metaParts.join(' • ')
+          const meta = [cardHint, displayDate].filter(Boolean).join(' • ')
+
+          const accessoryNode = isPartial ? (
+            <div className="homeos-tx-row-aside">
+              <span className="homeos-tx-remaining-badge">
+                {tx.remainingAmount !== undefined
+                  ? `${tx.currency} ${tx.remainingAmount.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })} remaining`
+                  : 'Partially fulfilled'}
+              </span>
+              <span className="homeos-tx-row-amount-sub">of {formattedAmount}</span>
+            </div>
+          ) : (
+            <span className="homeos-tx-row-amount">{formattedAmount}</span>
+          )
 
           return (
             <Row
               key={tx.id}
               icon={cardOutline}
               tone="warning"
-              title={formattedAmount}
+              title={merchant}
               meta={meta}
-              accessory={
-                <span className="homeos-status-chip homeos-status-chip--warning">
-                  {isPartial ? 'Partially Fulfilled' : 'Pending'}
-                </span>
-              }
+              accessory={accessoryNode}
               onClick={() => navigate(`/app/pending-transactions/${tx.id}`)}
             />
           )

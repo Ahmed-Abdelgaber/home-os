@@ -19,6 +19,7 @@ export interface BankTransaction {
   receivedAt: string
   createdAt: string
   updatedAt: string
+  remainingAmount?: number
 }
 
 export interface BankTransactionAllocation {
@@ -119,6 +120,33 @@ export function usePendingBankTransactions() {
       }
 
       const items = (data ?? []).map(mapRowToTransaction)
+
+      // Fetch remaining amount for any partially fulfilled transactions
+      const partialItems = items.filter((it) => it.status === 'partially_fulfilled')
+      if (partialItems.length > 0) {
+        try {
+          const { data: allocRows } = await supabase
+            .from('bank_transaction_allocations')
+            .select('bank_transaction_id, allocated_amount')
+            .in('bank_transaction_id', partialItems.map((p) => p.id))
+
+          if (allocRows && allocRows.length > 0) {
+            const totalsByTx: Record<string, number> = {}
+            for (const row of allocRows as Array<{ bank_transaction_id: string; allocated_amount: number | string }>) {
+              const txId = row.bank_transaction_id
+              totalsByTx[txId] = (totalsByTx[txId] ?? 0) + Number(row.allocated_amount)
+            }
+            for (const item of items) {
+              if (item.status === 'partially_fulfilled') {
+                const totalAlloc = totalsByTx[item.id] ?? 0
+                item.remainingAmount = Math.max(0, item.amount - totalAlloc)
+              }
+            }
+          }
+        } catch {
+          // Gracefully fallback if allocations query fails
+        }
+      }
 
       // Priority ordering: partially_fulfilled first, then pending, then newest first
       return items.sort((a, b) => {

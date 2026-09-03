@@ -37,21 +37,23 @@
 }
 
 .homeos-shortcut-key-row:active {
-  background-color: rgba(var(--homeos-ink-rgb), 0.06);
+  background-color: rgba(var(--homeos-ink-950-rgb), 0.04);
 }
 
 .homeos-shortcut-key-row__content {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   flex: 1;
   min-width: 0;
 }
 
 .homeos-shortcut-key-row__label {
-  font-size: var(--homeos-text-footnote);
-  font-weight: var(--homeos-weight-medium);
+  font-size: var(--homeos-text-caption);
+  font-weight: var(--homeos-weight-semibold);
   color: var(--homeos-ink-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .homeos-shortcut-key-row__value {
@@ -74,7 +76,14 @@
   border-radius: var(--homeos-radius-control);
   background: var(--homeos-soft-surface);
   color: var(--homeos-ink-600);
-  transition: transform var(--homeos-motion-fast) var(--homeos-ease);
+  transition: transform var(--homeos-motion-fast) var(--homeos-ease),
+              background-color var(--homeos-motion-fast) var(--homeos-ease),
+              color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-shortcut-key-row:hover .homeos-shortcut-key-row__icon-wrap {
+  background: var(--homeos-border);
+  color: var(--homeos-ink-950);
 }
 
 .homeos-shortcut-key-row:active .homeos-shortcut-key-row__icon-wrap {
@@ -108,7 +117,7 @@
 }
 
 .homeos-regenerate-row:active {
-  background-color: rgba(var(--homeos-ink-rgb), 0.06);
+  background-color: rgba(var(--homeos-ink-950-rgb), 0.04);
 }
 
 .homeos-regenerate-row__left {
@@ -123,12 +132,13 @@
   font-size: 18px;
   color: var(--homeos-ink-500);
   flex-shrink: 0;
+  transition: color var(--homeos-motion-fast) var(--homeos-ease);
 }
 
 .homeos-regenerate-row__title {
   font-size: var(--homeos-text-body-sm);
   font-weight: var(--homeos-weight-medium);
-  color: var(--homeos-ink-700);
+  color: var(--homeos-ink-800);
   transition: color var(--homeos-motion-fast) var(--homeos-ease);
 }
 
@@ -137,12 +147,12 @@
 }
 
 .homeos-regenerate-row:hover .homeos-regenerate-row__icon {
-  color: var(--homeos-ink-700);
+  color: var(--homeos-ink-800);
 }
 
 .homeos-regenerate-row__chevron {
   font-size: 16px;
-  color: var(--homeos-ink-400);
+  color: var(--homeos-ink-500);
   flex-shrink: 0;
   transition: transform var(--homeos-motion-fast) var(--homeos-ease);
 }

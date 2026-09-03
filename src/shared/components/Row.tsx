@@ -24,10 +24,9 @@ interface RowProps {
  * The one list row. Object rows (items, expenses, products, trips) and event rows (activity)
  * differ only in media shape and tone.
  *
- * The tappable region is a real <button> rather than a div with role="button", so focus,
- * Enter and Space come from the platform. It deliberately wraps only the media and text:
- * that keeps `trailing` a sibling instead of a nested control, which is invalid inside a
- * button and previously needed a stopPropagation to work around.
+ * When `onClick` is provided, the entire row is interactive and tappable.
+ * If `trailing` is provided (e.g. a standalone button), clicks inside `trailing`
+ * will not trigger the row's `onClick`.
  */
 export function Row({ icon, tone = 'neutral', media = 'thumb', title, meta, accessory, trailing, onClick }: RowProps) {
   const body = (
@@ -42,17 +41,53 @@ export function Row({ icon, tone = 'neutral', media = 'thumb', title, meta, acce
     </>
   )
 
+  const handleRowClick = (e: React.MouseEvent) => {
+    if (!onClick) return
+    // If the click originated from inside a trailing control, don't trigger row onClick
+    if (trailing && (e.target as HTMLElement).closest('.homeos-row__trailing')) {
+      return
+    }
+    onClick()
+  }
+
   return (
-    <div className="homeos-row">
+    <div
+      className={`homeos-row ${onClick ? 'homeos-row--clickable' : ''}`}
+      onClick={onClick ? handleRowClick : undefined}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onClick()
+              }
+            }
+          : undefined
+      }
+    >
       {onClick ? (
-        <button type="button" className="homeos-row__action" onClick={onClick}>
+        <button
+          type="button"
+          className="homeos-row__action"
+          tabIndex={-1}
+          onClick={(e) => {
+            e.stopPropagation()
+            onClick()
+          }}
+        >
           {body}
         </button>
       ) : (
         <span className="homeos-row__action homeos-row__action--static">{body}</span>
       )}
       {accessory && <span className="homeos-row__accessory">{accessory}</span>}
-      {trailing ?? (onClick && <IonIcon icon={chevronForward} className="homeos-row__chevron" aria-hidden="true" />)}
+      {trailing ? (
+        <span className="homeos-row__trailing">{trailing}</span>
+      ) : (
+        onClick && <IonIcon icon={chevronForward} className="homeos-row__chevron" aria-hidden="true" />
+      )}
     </div>
   )
 }

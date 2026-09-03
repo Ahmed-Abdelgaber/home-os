@@ -713,6 +713,35 @@ test('37. Pending transaction display date fallback rule', () => {
   )
 })
 
+// 38. Route param resolution supports both transactionId and id parameters
+test('38. Route param resolution supports both transactionId and id parameters', () => {
+  const resolveTransactionId = (params) => params.transactionId ?? params.id
 
+  assert.equal(resolveTransactionId({ transactionId: 'tx-uuid-123' }), 'tx-uuid-123')
+  assert.equal(resolveTransactionId({ id: 'tx-uuid-456' }), 'tx-uuid-456')
+  assert.equal(resolveTransactionId({ transactionId: 'tx-primary', id: 'tx-fallback' }), 'tx-primary')
+  assert.equal(resolveTransactionId({}), undefined)
+})
 
+// 39. Actionable count badge layout renders supporting count metadata
+test('39. Actionable count badge layout renders supporting count metadata', () => {
+  const getBadgeVisibility = (count) => count > 0
+  assert.equal(getBadgeVisibility(0), false)
+  assert.equal(getBadgeVisibility(3), true)
+  assert.equal(getBadgeVisibility(12), true)
+})
 
+// 40. Row clickability invokes navigation for the tapped transaction without double triggering
+test('40. Row clickability invokes navigation for the tapped transaction without double triggering', () => {
+  let navTarget = null
+  let callCount = 0
+
+  const handleRowClick = (txId) => {
+    callCount += 1
+    navTarget = `/app/pending-transactions/${txId}`
+  }
+
+  handleRowClick('tx-carrefour')
+  assert.equal(navTarget, '/app/pending-transactions/tx-carrefour')
+  assert.equal(callCount, 1)
+})

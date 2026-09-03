@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { IonIcon, IonModal, IonRadio, IonRadioGroup } from '@ionic/react'
+import { IonIcon, IonModal } from '@ionic/react'
 import { cardOutline, close, cubeOutline } from 'ionicons/icons'
 import { useNavigate } from 'react-router-dom'
 import { cairoDateOnlyFromTimestamp } from '../../core/utils/cairoDate'
@@ -53,7 +53,7 @@ export function FulfillTransactionModal({
       setAmountError('Enter a valid amount greater than 0')
     } else if (num > remainingAmount) {
       setAmountError(
-        `Amount cannot exceed remaining unallocated ${transaction.currency} ${remainingAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+        `Amount cannot exceed remaining ${transaction.currency} ${remainingAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
       )
     } else {
       setAmountError(null)
@@ -98,15 +98,17 @@ export function FulfillTransactionModal({
     }
   }
 
+  const isPartiallyAllocated = totalAllocated > 0
+
   return (
     <IonModal
       isOpen={isOpen}
       onDidDismiss={onClose}
-      initialBreakpoint={0.85}
-      breakpoints={[0, 0.85, 1]}
+      initialBreakpoint={0.88}
+      breakpoints={[0, 0.88, 1]}
     >
       <div className="homeos-fulfill-modal">
-        <div className="homeos-fulfill-modal__header">
+        <header className="homeos-fulfill-modal__header">
           <h2 className="homeos-fulfill-modal__title">Where did this money go?</h2>
           <button
             type="button"
@@ -116,53 +118,68 @@ export function FulfillTransactionModal({
           >
             <IonIcon icon={close} />
           </button>
-        </div>
+        </header>
 
         <div className="homeos-fulfill-modal__body">
           {/* Summary Card */}
-          <div className="homeos-fulfill-modal__summary">
-            <div className="homeos-fulfill-modal__summary-row">
-              <span className="homeos-fulfill-modal__summary-label">Transaction Total</span>
-              <span className="homeos-fulfill-modal__summary-value">
-                {transaction.currency}{' '}
-                {transaction.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-            {totalAllocated > 0 && (
-              <div className="homeos-fulfill-modal__summary-row">
-                <span className="homeos-fulfill-modal__summary-label">Already Allocated</span>
-                <span className="homeos-fulfill-modal__summary-value">
-                  {transaction.currency}{' '}
-                  {totalAllocated.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          {!isPartiallyAllocated ? (
+            <div className="homeos-fulfill-summary">
+              <div className="homeos-fulfill-summary__meta">
+                <span className="homeos-fulfill-summary__caption">Transaction Amount</span>
+                {transaction.merchantRaw && (
+                  <span className="homeos-fulfill-summary__merchant">{transaction.merchantRaw}</span>
+                )}
+              </div>
+              <div className="homeos-fulfill-summary__amount-wrap">
+                <span className="homeos-fulfill-summary__currency">{transaction.currency}</span>
+                <span className="homeos-fulfill-summary__amount">
+                  {transaction.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
-            )}
-            <div className="homeos-fulfill-modal__summary-row homeos-fulfill-modal__summary-row--highlight">
-              <span className="homeos-fulfill-modal__summary-label">Remaining to Allocate</span>
-              <span className="homeos-fulfill-modal__summary-value">
-                {transaction.currency}{' '}
-                {remainingAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </span>
             </div>
-          </div>
+          ) : (
+            <div className="homeos-fulfill-summary homeos-fulfill-summary--partial">
+              <div className="homeos-fulfill-summary__meta">
+                <span className="homeos-fulfill-summary__caption">Remaining to Allocate</span>
+                {transaction.merchantRaw && (
+                  <span className="homeos-fulfill-summary__merchant">{transaction.merchantRaw}</span>
+                )}
+              </div>
+              <div className="homeos-fulfill-summary__amount-wrap">
+                <span className="homeos-fulfill-summary__currency">{transaction.currency}</span>
+                <span className="homeos-fulfill-summary__amount homeos-fulfill-summary__amount--highlight">
+                  {remainingAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div className="homeos-fulfill-summary__context">
+                <span>Total {transaction.currency} {transaction.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                <span className="homeos-fulfill-summary__dot">•</span>
+                <span>{transaction.currency} {totalAllocated.toLocaleString(undefined, { minimumFractionDigits: 2 })} allocated</span>
+              </div>
+            </div>
+          )}
 
           {/* Allocation Amount Mode */}
-          <div className="homeos-fulfill-modal__section">
-            <label className="homeos-fulfill-modal__section-title">Allocation Amount</label>
-            <div className="homeos-fulfill-modal__mode-toggle" role="tablist">
+          <div className="homeos-fulfill-section">
+            <span className="homeos-fulfill-section__title">Allocation Amount</span>
+            <div className="homeos-fulfill-seg" role="tablist">
               <button
                 type="button"
-                className={`homeos-fulfill-modal__mode-btn ${
-                  allocationMode === 'full' ? 'homeos-fulfill-modal__mode-btn--selected' : ''
+                role="tab"
+                aria-selected={allocationMode === 'full'}
+                className={`homeos-fulfill-seg__btn ${
+                  allocationMode === 'full' ? 'homeos-fulfill-seg__btn--active' : ''
                 }`}
                 onClick={() => handleModeChange('full')}
               >
-                Full ({transaction.currency} {remainingAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })})
+                Full ({transaction.currency} {remainingAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
               </button>
               <button
                 type="button"
-                className={`homeos-fulfill-modal__mode-btn ${
-                  allocationMode === 'split' ? 'homeos-fulfill-modal__mode-btn--selected' : ''
+                role="tab"
+                aria-selected={allocationMode === 'split'}
+                className={`homeos-fulfill-seg__btn ${
+                  allocationMode === 'split' ? 'homeos-fulfill-seg__btn--active' : ''
                 }`}
                 onClick={() => handleModeChange('split')}
               >
@@ -171,9 +188,9 @@ export function FulfillTransactionModal({
             </div>
 
             {allocationMode === 'split' && (
-              <div className="homeos-fulfill-modal__input-wrapper">
-                <div className="homeos-fulfill-modal__input-field">
-                  <span className="homeos-fulfill-modal__input-prefix">{transaction.currency}</span>
+              <div className="homeos-fulfill-split">
+                <div className={`homeos-fulfill-split__field ${amountError ? 'homeos-fulfill-split__field--error' : ''}`}>
+                  <span className="homeos-fulfill-split__prefix">{transaction.currency}</span>
                   <input
                     type="number"
                     step="0.01"
@@ -181,83 +198,92 @@ export function FulfillTransactionModal({
                     max={remainingAmount}
                     value={customAmount}
                     onChange={(e) => handleCustomAmountChange(e.target.value)}
-                    className="homeos-fulfill-modal__input"
+                    className="homeos-fulfill-split__input"
                     placeholder="0.00"
                     autoFocus
                   />
                 </div>
-                {amountError && (
-                  <p className="homeos-fulfill-modal__input-error">{amountError}</p>
+                {amountError ? (
+                  <p className="homeos-fulfill-split__error" role="alert">{amountError}</p>
+                ) : (
+                  <p className="homeos-fulfill-split__hint">
+                    Remaining {transaction.currency}{' '}
+                    {Math.max(0, remainingAmount - (Number(customAmount) || 0)).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}{' '}
+                    stays available to fulfill later.
+                  </p>
                 )}
-                <p className="homeos-fulfill-modal__hint">
-                  The remaining {transaction.currency}{' '}
-                  {Math.max(0, remainingAmount - (Number(customAmount) || 0)).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  })}{' '}
-                  will stay available to fulfill later.
-                </p>
               </div>
             )}
           </div>
 
           {/* Destination Type */}
-          <div className="homeos-fulfill-modal__section">
-            <label className="homeos-fulfill-modal__section-title">Interpretation</label>
-            <IonRadioGroup
-              value={destination}
-              onIonChange={(e) => setDestination(e.detail.value)}
-            >
-              <div
-                className={`homeos-fulfill-modal__choice ${
-                  destination === 'expense' ? 'homeos-fulfill-modal__choice--selected' : ''
+          <div className="homeos-fulfill-section">
+            <span className="homeos-fulfill-section__title">Interpretation</span>
+            <div className="homeos-fulfill-options" role="radiogroup" aria-label="Transaction Interpretation">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={destination === 'expense'}
+                className={`homeos-fulfill-option ${
+                  destination === 'expense' ? 'homeos-fulfill-option--selected' : ''
                 }`}
                 onClick={() => setDestination('expense')}
               >
-                <div className="homeos-fulfill-modal__choice-icon">
-                  <IonIcon icon={cardOutline} />
+                <div className="homeos-fulfill-option__icon-wrap">
+                  <IonIcon icon={cardOutline} className="homeos-fulfill-option__icon" aria-hidden="true" />
                 </div>
-                <div className="homeos-fulfill-modal__choice-info">
-                  <span className="homeos-fulfill-modal__choice-title">Regular Expense</span>
-                  <span className="homeos-fulfill-modal__choice-desc">
+                <div className="homeos-fulfill-option__text">
+                  <span className="homeos-fulfill-option__title">Regular Expense</span>
+                  <span className="homeos-fulfill-option__desc">
                     Record as a household or personal expense
                   </span>
                 </div>
-                <IonRadio value="expense" aria-label="Regular Expense" />
-              </div>
+                <div className="homeos-fulfill-option__indicator" aria-hidden="true">
+                  <span className="homeos-fulfill-option__dot" />
+                </div>
+              </button>
 
-              <div
-                className={`homeos-fulfill-modal__choice ${
-                  destination === 'purchase' ? 'homeos-fulfill-modal__choice--selected' : ''
+              <button
+                type="button"
+                role="radio"
+                aria-checked={destination === 'purchase'}
+                className={`homeos-fulfill-option ${
+                  destination === 'purchase' ? 'homeos-fulfill-option--selected' : ''
                 }`}
                 onClick={() => setDestination('purchase')}
               >
-                <div className="homeos-fulfill-modal__choice-icon homeos-fulfill-modal__choice-icon--product">
-                  <IonIcon icon={cubeOutline} />
+                <div className="homeos-fulfill-option__icon-wrap homeos-fulfill-option__icon-wrap--product">
+                  <IonIcon icon={cubeOutline} className="homeos-fulfill-option__icon" aria-hidden="true" />
                 </div>
-                <div className="homeos-fulfill-modal__choice-info">
-                  <span className="homeos-fulfill-modal__choice-title">Product Purchase</span>
-                  <span className="homeos-fulfill-modal__choice-desc">
-                    Purchase an inventory product and start or stock an item
+                <div className="homeos-fulfill-option__text">
+                  <span className="homeos-fulfill-option__title">Product Purchase</span>
+                  <span className="homeos-fulfill-option__desc">
+                    Purchase inventory and start or stock an item
                   </span>
                 </div>
-                <IonRadio value="purchase" aria-label="Product Purchase" />
-              </div>
-            </IonRadioGroup>
-          </div>
-
-          <div className="homeos-fulfill-modal__footer">
-            <p className="homeos-fulfill-modal__footer-note">
-              HomeOS will prefill the amount, date, and merchant. You will select the account, category, and person manually.
-            </p>
-            <PrimaryButton
-              disabled={Boolean(amountError) || effectiveAmount <= 0}
-              onClick={handleProceed}
-            >
-              Continue with {transaction.currency}{' '}
-              {effectiveAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </PrimaryButton>
+                <div className="homeos-fulfill-option__indicator" aria-hidden="true">
+                  <span className="homeos-fulfill-option__dot" />
+                </div>
+              </button>
+            </div>
           </div>
         </div>
+
+        <footer className="homeos-fulfill-modal__footer">
+          <p className="homeos-fulfill-modal__footer-note">
+            HomeOS prefills amount, merchant, and date. You will choose category, account, and person next.
+          </p>
+          <PrimaryButton
+            disabled={Boolean(amountError) || effectiveAmount <= 0}
+            onClick={handleProceed}
+          >
+            Continue with {transaction.currency}{' '}
+            {effectiveAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </PrimaryButton>
+        </footer>
       </div>
     </IonModal>
   )

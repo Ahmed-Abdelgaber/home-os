@@ -82,7 +82,7 @@ export function HomePage() {
             )}
           </QueryState>
 
-          <section>
+          <section className="homeos-home-section">
             {/* Home shows only the three oldest; the full list lives on the Items tab. */}
             <SectionHeader
               icon={hourglassOutline}
@@ -112,7 +112,7 @@ export function HomePage() {
             </QueryState>
           </section>
 
-          <section>
+          <section className="homeos-home-section">
             {/* Home lists only what has sat 30+ days; Items → Stocked shows everything stocked. */}
             <SectionHeader
               icon={archiveOutline}
@@ -148,7 +148,7 @@ export function HomePage() {
             </QueryState>
           </section>
 
-          <section>
+          <section className="homeos-home-section">
             {/* There is no activity screen to link to, so "View all" reveals the remainder in
                 place — and only appears once there is a remainder to reveal. The header stays
                 outside the query state so the section keeps its title while empty or failed. */}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useIonToast } from '@ionic/react'
+import { informationCircleOutline } from 'ionicons/icons'
 import { formatTimestampDate, formatTimestampDateTime } from '../../core/utils/cairoDate'
 import { BankTransactionAllocationsList } from '../../features/bank-transactions/BankTransactionAllocationsList'
 import { FulfillTransactionModal } from '../../features/bank-transactions/FulfillTransactionModal'
@@ -16,36 +17,38 @@ import { FactRow } from '../../shared/components/FactRow'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { SecondaryButton } from '../../shared/components/SecondaryButton'
+import { SectionHeader } from '../../shared/components/SectionHeader'
 import { QueryState } from '../../shared/components/QueryState'
 import { Skeleton } from '../../shared/components/Skeleton'
 import './PendingTransactionDetailsPage.css'
 
 export function PendingTransactionDetailsPage() {
-  const { transactionId } = useParams<{ transactionId: string }>()
+  const { id, transactionId } = useParams<{ id?: string; transactionId?: string }>()
+  const effectiveId = transactionId ?? id
   const navigate = useNavigate()
   const [presentToast] = useIonToast()
-  const transaction = useBankTransactionDetails(transactionId)
-  const allocations = useBankTransactionAllocations(transactionId)
-  const ignoreMutation = useIgnoreBankTransaction()
-
   const [showFulfillModal, setShowFulfillModal] = useState(false)
   const [showIgnoreConfirm, setShowIgnoreConfirm] = useState(false)
+
+  const transactionQuery = useBankTransactionDetails(effectiveId)
+  const allocationsQuery = useBankTransactionAllocations(effectiveId)
+  const ignoreMutation = useIgnoreBankTransaction()
 
   return (
     <AppPage title="Transaction" backHref="/app/pending-transactions">
       <QueryState
-        query={transaction}
+        query={transactionQuery}
         skeleton={
           <div className="homeos-tx-details-skeleton">
-            <Skeleton height={40} />
-            <Skeleton height={90} />
+            <Skeleton height={32} />
+            <Skeleton height={140} />
             <Skeleton height={200} />
           </div>
         }
-        error="Couldn't load bank transaction details."
+        error="Transaction not found or could not be loaded."
       >
         {(tx) => {
-          const allocList = allocations.data ?? []
+          const allocList = allocationsQuery.data ?? []
           const { totalAllocated, remaining, isFullyAllocated } = calculateAllocationSummary(
             tx.amount,
             allocList
@@ -66,14 +69,13 @@ export function PendingTransactionDetailsPage() {
             maximumFractionDigits: 2,
           })}`
 
-          const displayStatus =
-            tx.status === 'fulfilled' || isFullyAllocated
-              ? 'Fulfilled'
-              : tx.status === 'partially_fulfilled' || totalAllocated > 0
-              ? 'Partially Fulfilled'
-              : tx.status === 'ignored'
-              ? 'Ignored'
-              : 'Pending'
+          const displayStatus = isFullyAllocated
+            ? 'Fulfilled'
+            : totalAllocated > 0
+            ? 'Partially Fulfilled'
+            : tx.status === 'ignored'
+            ? 'Ignored'
+            : 'Pending'
 
           const statusTone =
             displayStatus === 'Fulfilled'
@@ -154,23 +156,22 @@ export function PendingTransactionDetailsPage() {
 
               <BankTransactionAllocationsList allocations={allocList} currency={tx.currency} />
 
-              <GroupedCard className="homeos-tx-details__facts">
-                <FactRow label="Bank" value={tx.bank} />
-                <FactRow label="Card" value={tx.cardLast4 ? `•••• ${tx.cardLast4}` : 'N/A'} />
-                {tx.transactionType && <FactRow label="Type" value={tx.transactionType.toUpperCase()} />}
-                {formatTimestampDate(tx.transactionAt) && (
-                  <FactRow label="Date" value={formatTimestampDate(tx.transactionAt)} />
-                )}
-                {formatTimestampDateTime(tx.receivedAt) ? (
-                  <FactRow label="Received" value={formatTimestampDateTime(tx.receivedAt)} />
-                ) : formatTimestampDate(tx.receivedAt) ? (
-                  <FactRow label="Received" value={formatTimestampDate(tx.receivedAt)} />
-                ) : null}
-                {tx.merchantRaw && <FactRow label="Raw merchant" value={tx.merchantRaw} />}
-                <FactRow label="Status" value={displayStatus} />
-                <FactRow label="Allocated" value={formattedAllocated} />
-                <FactRow label="Remaining" value={formattedRemaining} />
-              </GroupedCard>
+              <div className="homeos-tx-details__section">
+                <SectionHeader icon={informationCircleOutline} title="Transaction details" />
+                <GroupedCard className="homeos-tx-details__facts">
+                  {formatTimestampDate(tx.transactionAt) && (
+                    <FactRow label="Date" value={formatTimestampDate(tx.transactionAt)} />
+                  )}
+                  {formatTimestampDateTime(tx.receivedAt) ? (
+                    <FactRow label="Received" value={formatTimestampDateTime(tx.receivedAt)} />
+                  ) : formatTimestampDate(tx.receivedAt) ? (
+                    <FactRow label="Received" value={formatTimestampDate(tx.receivedAt)} />
+                  ) : null}
+                  <FactRow label="Bank" value={tx.bank} />
+                  <FactRow label="Card" value={tx.cardLast4 ? `•••• ${tx.cardLast4}` : 'N/A'} />
+                  {tx.transactionType && <FactRow label="Type" value={tx.transactionType.toUpperCase()} />}
+                </GroupedCard>
+              </div>
 
               {canIgnore && (
                 <div className="homeos-tx-details__secondary-actions">

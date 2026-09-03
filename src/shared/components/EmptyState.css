@@ -39,3 +39,8 @@
 .homeos-empty-state__action {
   margin-top: var(--homeos-space-12);
 }
+
+.homeos-grouped-card .homeos-empty-state {
+  padding: var(--homeos-space-24) var(--homeos-space-16);
+}
+

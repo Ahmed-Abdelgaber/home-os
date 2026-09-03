@@ -46,7 +46,7 @@ export function BankTransactionAllocationsList({ allocations, currency }: BankTr
               tone={isProductPurchase ? 'primary' : 'neutral'}
               title={title}
               meta={metaParts.join(' • ') || 'Linked Expense'}
-              accessory={formattedAmount}
+              accessory={<span className="homeos-alloc-amount">{formattedAmount}</span>}
               onClick={() => navigate(`/app/expenses/${alloc.expenseId}`)}
             />
           )
