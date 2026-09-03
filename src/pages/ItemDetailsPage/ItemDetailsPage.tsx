@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useIonToast } from '@ionic/react'
+import { cubeOutline, linkOutline, walletOutline } from 'ionicons/icons'
 import { formatShortDate } from '../../core/utils/cairoDate'
 import { useItem, useProductHistory } from '../../features/items/useItemDetails'
 import { useDeleteItem, useFinishItem, useStartItem, useUpdateItemFinishedDate } from '../../features/items/useItemMutations'
@@ -13,7 +14,9 @@ import { GroupedCard } from '../../shared/components/GroupedCard'
 import { HistorySection } from '../../shared/components/HistorySection'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { QueryState } from '../../shared/components/QueryState'
+import { Row } from '../../shared/components/Row'
 import { SecondaryButton } from '../../shared/components/SecondaryButton'
+import { SectionHeader } from '../../shared/components/SectionHeader'
 import { Skeleton } from '../../shared/components/Skeleton'
 import { StatusChip } from '../../shared/components/StatusChip'
 import { EditFinishDateSheet } from './EditFinishDateSheet'
@@ -211,6 +214,28 @@ function ItemDetailsBody({
           )
         )}
       </div>
+
+      <section className="homeos-item-details__related">
+        <SectionHeader icon={linkOutline} title="Related" />
+        <GroupedCard>
+          <Row
+            icon={cubeOutline}
+            tone="primary"
+            title={detail.productName}
+            meta="View product"
+            onClick={() => navigate(`/app/products/${detail.productId}`)}
+          />
+          {detail.expenseId && (
+            <Row
+              icon={walletOutline}
+              tone="info"
+              title={detail.expense ? `EGP ${detail.expense.amount.toLocaleString('en-US')}` : 'Linked expense'}
+              meta={detail.expense?.merchant ? `${detail.expense.merchant} • View expense` : 'View expense'}
+              onClick={() => navigate(`/app/expenses/${detail.expenseId}`)}
+            />
+          )}
+        </GroupedCard>
+      </section>
 
       <HistorySection title="Previous cycles" entries={historyEntries ?? []} onEntryClick={(id) => navigate(`/app/items/${id}`)} />
 

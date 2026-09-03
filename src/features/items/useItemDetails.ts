@@ -12,6 +12,7 @@ export interface ItemDetail {
   notes: string | null
   productId: string
   productName: string
+  expenseId: string | null
   expense: {
     amount: number
     merchant: string | null
@@ -30,7 +31,7 @@ export function useItem(itemId: string | undefined) {
       const { data: item, error } = await supabase
         .from('items')
         .select(
-          'id, status, started_date, finished_date, quantity, notes, product_id, product:products(name), expense:expenses(amount, merchant, expense_date, account_id, account:accounts(name))',
+          'id, status, started_date, finished_date, quantity, notes, product_id, expense_id, product:products(name), expense:expenses(amount, merchant, expense_date, account_id, account:accounts(name))',
         )
         .eq('id', itemId as string)
         .single()
@@ -62,6 +63,7 @@ export function useItem(itemId: string | undefined) {
         notes: item.notes,
         productId: item.product_id,
         productName: product?.name ?? 'Unknown product',
+        expenseId: item.expense_id ?? null,
         expense: expense
           ? {
               amount: Number(expense.amount),
