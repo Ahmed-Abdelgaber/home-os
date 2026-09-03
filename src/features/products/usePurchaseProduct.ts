@@ -41,6 +41,7 @@ export function usePurchaseProduct() {
         queryClient.invalidateQueries({ queryKey: ['expenses'] }),
         queryClient.invalidateQueries({ queryKey: ['home'] }),
         queryClient.invalidateQueries({ queryKey: ['products'] }),
+        queryClient.invalidateQueries({ queryKey: ['shopping-list'] }),
       ])
     },
   })

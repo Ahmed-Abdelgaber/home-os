@@ -11,6 +11,7 @@ function useItemLifecycleMutation(rpc: 'start_item' | 'finish_item') {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] })
       queryClient.invalidateQueries({ queryKey: ['home'] })
+      queryClient.invalidateQueries({ queryKey: ['shopping-list'] })
     },
   })
 }
@@ -35,11 +36,31 @@ export function useFinishItem() {
         p_finished_date: finishedDate || null,
       })
       if (error) throw error
+
+      // Client-side fallback for automatic shopping suggestion if no active/stocked item remains
+      try {
+        const { data: itemData } = await supabase.from('items').select('product_id').eq('id', itemId).single()
+        if (itemData?.product_id) {
+          const { count } = await supabase
+            .from('items')
+            .select('id', { count: 'exact', head: true })
+            .eq('product_id', itemData.product_id)
+            .in('status', ['active', 'stocked'])
+          if (!count || count === 0) {
+            await supabase
+              .from('shopping_list_items')
+              .upsert({ product_id: itemData.product_id, source: 'automatic' }, { onConflict: 'product_id', ignoreDuplicates: true })
+          }
+        }
+      } catch {
+        // Table may not exist yet if migration has not been applied
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] })
       queryClient.invalidateQueries({ queryKey: ['home'] })
       queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['shopping-list'] })
     },
   })
 }

@@ -17,6 +17,8 @@ import { CategoriesPage } from '../pages/CategoriesPage/CategoriesPage'
 import { PeriodsPage } from '../pages/PeriodsPage/PeriodsPage'
 import { PeoplePage } from '../pages/PeoplePage/PeoplePage'
 import { SettingsPage } from '../pages/SettingsPage/SettingsPage'
+import { ShoppingListPage } from '../pages/ShoppingListPage/ShoppingListPage'
+import { BuySelectedPage } from '../pages/BuySelectedPage/BuySelectedPage'
 import { AppShell } from '../shared/components/AppShell'
 
 /**
@@ -32,6 +34,8 @@ import { AppShell } from '../shared/components/AppShell'
 const protectedRoutes: { path: string; element: ReactElement }[] = [
   { path: '/app/items/:itemId', element: <ItemDetailsPage /> },
   { path: '/app/purchase', element: <PurchaseProductPage /> },
+  { path: '/app/shopping-list', element: <ShoppingListPage /> },
+  { path: '/app/shopping-list/buy', element: <BuySelectedPage /> },
   { path: '/app/expenses/add', element: <AddExpensePage /> },
   { path: '/app/expenses/:expenseId', element: <ExpenseDetailsPage /> },
   { path: '/app/products', element: <ProductCatalogPage /> },

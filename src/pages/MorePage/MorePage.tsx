@@ -1,5 +1,6 @@
 import {
   airplaneOutline,
+  cartOutline,
   cubeOutline,
   logOutOutline,
   pricetagOutline,
@@ -40,6 +41,13 @@ export function MorePage() {
   return (
     <AppPage title="More">
       <GroupedCard>
+        <Row
+          icon={cartOutline}
+          tone="primary"
+          title="Shopping List"
+          meta="Suggested and planned purchases"
+          onClick={() => navigate('/app/shopping-list')}
+        />
         <Row icon={airplaneOutline} tone="info" title="Trips" meta="Current, upcoming, and past" onClick={() => navigate('/app/trips')} />
         <Row
           icon={cubeOutline}

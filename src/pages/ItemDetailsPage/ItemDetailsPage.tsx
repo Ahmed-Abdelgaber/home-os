@@ -4,6 +4,8 @@ import { useIonToast } from '@ionic/react'
 import { formatShortDate } from '../../core/utils/cairoDate'
 import { useItem, useProductHistory } from '../../features/items/useItemDetails'
 import { useDeleteItem, useFinishItem, useStartItem, useUpdateItemFinishedDate } from '../../features/items/useItemMutations'
+import { useShoppingList } from '../../features/shopping-list/useShoppingList'
+import { useAddToShoppingList } from '../../features/shopping-list/useShoppingListMutations'
 import { AppPage } from '../../shared/components/AppPage'
 import { ConfirmationSheet } from '../../shared/components/ConfirmationSheet'
 import { FactRow } from '../../shared/components/FactRow'
@@ -23,6 +25,8 @@ export function ItemDetailsPage() {
   const navigate = useNavigate()
   const item = useItem(itemId)
   const history = useProductHistory(item.data?.productId, itemId)
+  const shoppingList = useShoppingList()
+  const addToShoppingList = useAddToShoppingList()
   const startItem = useStartItem()
   const finishItem = useFinishItem()
   const updateFinishedDate = useUpdateItemFinishedDate()
@@ -35,63 +39,69 @@ export function ItemDetailsPage() {
   return (
     <AppPage title="Item Details" backHref="/app/tabs/items">
       <QueryState query={item} skeleton={<Skeleton height={220} />} error="Couldn't load this item.">
-        {(detail) => (
-          <>
-            <ItemDetailsBody
-              detail={detail}
-              historyEntries={history.data ?? []}
-              onStart={() => startItem.mutate(detail.id)}
-              isStarting={startItem.isPending}
-              onRequestFinish={() => setFinishingItem(true)}
-              onRequestEditFinishDate={() => setEditingFinishDate(true)}
-              onBuyAgain={() => {
-                navigate('/app/purchase', {
-                  state: {
-                    productId: detail.productId,
-                    productName: detail.productName,
-                    quantity: detail.quantity,
-                    merchant: detail.expense?.merchant ?? null,
-                    accountId: detail.expense?.accountId ?? null,
-                    previousAmount: detail.expense?.amount ?? null,
-                  },
-                })
-              }}
-              confirmingDelete={confirmingDelete}
-              onRequestDelete={() => setConfirmingDelete(true)}
-              onCancelDelete={() => setConfirmingDelete(false)}
-              onConfirmDelete={() => {
-                setConfirmingDelete(false)
-                deleteItem.mutate(detail.id, { onSuccess: () => navigate('/app/tabs/items', { replace: true }) })
-              }}
-            />
+        {(detail) => {
+          const isOnShoppingList = (shoppingList.data ?? []).some((entry) => entry.productId === detail.productId)
+          return (
+            <>
+              <ItemDetailsBody
+                detail={detail}
+                historyEntries={history.data ?? []}
+                onStart={() => startItem.mutate(detail.id)}
+                isStarting={startItem.isPending}
+                onRequestFinish={() => setFinishingItem(true)}
+                onRequestEditFinishDate={() => setEditingFinishDate(true)}
+                isOnShoppingList={isOnShoppingList}
+                isAddingToShoppingList={addToShoppingList.isPending}
+                onAddToShoppingList={() => addToShoppingList.mutate({ productId: detail.productId, source: 'manual' })}
+                onBuyAgain={() => {
+                  navigate('/app/purchase', {
+                    state: {
+                      productId: detail.productId,
+                      productName: detail.productName,
+                      quantity: detail.quantity,
+                      merchant: detail.expense?.merchant ?? null,
+                      accountId: detail.expense?.accountId ?? null,
+                      previousAmount: detail.expense?.amount ?? null,
+                    },
+                  })
+                }}
+                confirmingDelete={confirmingDelete}
+                onRequestDelete={() => setConfirmingDelete(true)}
+                onCancelDelete={() => setConfirmingDelete(false)}
+                onConfirmDelete={() => {
+                  setConfirmingDelete(false)
+                  deleteItem.mutate(detail.id, { onSuccess: () => navigate('/app/tabs/items', { replace: true }) })
+                }}
+              />
 
-            <FinishItemSheet
-              isOpen={finishingItem}
-              startedDate={detail.startedDate}
-              isPending={finishItem.isPending}
-              onClose={() => setFinishingItem(false)}
-              onConfirmFinish={async (finishedDate) => {
-                await finishItem.mutateAsync({ itemId: detail.id, finishedDate })
-              }}
-            />
+              <FinishItemSheet
+                isOpen={finishingItem}
+                startedDate={detail.startedDate}
+                isPending={finishItem.isPending}
+                onClose={() => setFinishingItem(false)}
+                onConfirmFinish={async (finishedDate) => {
+                  await finishItem.mutateAsync({ itemId: detail.id, finishedDate })
+                }}
+              />
 
-            <EditFinishDateSheet
-              isOpen={editingFinishDate}
-              currentFinishedDate={detail.finishedDate}
-              startedDate={detail.startedDate}
-              isPending={updateFinishedDate.isPending}
-              onClose={() => setEditingFinishDate(false)}
-              onConfirmSave={async (finishedDate) => {
-                await updateFinishedDate.mutateAsync({ itemId: detail.id, finishedDate })
-                presentToast({
-                  message: 'Finish date updated',
-                  duration: 2000,
-                  position: 'bottom',
-                })
-              }}
-            />
-          </>
-        )}
+              <EditFinishDateSheet
+                isOpen={editingFinishDate}
+                currentFinishedDate={detail.finishedDate}
+                startedDate={detail.startedDate}
+                isPending={updateFinishedDate.isPending}
+                onClose={() => setEditingFinishDate(false)}
+                onConfirmSave={async (finishedDate) => {
+                  await updateFinishedDate.mutateAsync({ itemId: detail.id, finishedDate })
+                  presentToast({
+                    message: 'Finish date updated',
+                    duration: 2000,
+                    position: 'bottom',
+                  })
+                }}
+              />
+            </>
+          )
+        }}
       </QueryState>
     </AppPage>
   )
@@ -104,6 +114,9 @@ interface ItemDetailsBodyProps {
   isStarting: boolean
   onRequestFinish: () => void
   onRequestEditFinishDate: () => void
+  isOnShoppingList: boolean
+  isAddingToShoppingList: boolean
+  onAddToShoppingList: () => void
   onBuyAgain: () => void
   confirmingDelete: boolean
   onRequestDelete: () => void
@@ -118,6 +131,9 @@ function ItemDetailsBody({
   isStarting,
   onRequestFinish,
   onRequestEditFinishDate,
+  isOnShoppingList,
+  isAddingToShoppingList,
+  onAddToShoppingList,
   onBuyAgain,
   confirmingDelete,
   onRequestDelete,
@@ -183,6 +199,17 @@ function ItemDetailsBody({
           </SecondaryButton>
         )}
         <SecondaryButton onClick={onBuyAgain}>Buy again</SecondaryButton>
+        {(detail.status === 'active' || detail.status === 'finished') && (
+          isOnShoppingList ? (
+            <SecondaryButton onClick={() => navigate('/app/shopping-list')}>
+              On shopping list
+            </SecondaryButton>
+          ) : (
+            <SecondaryButton onClick={onAddToShoppingList} disabled={isAddingToShoppingList}>
+              {isAddingToShoppingList ? 'Adding…' : 'Add to shopping list'}
+            </SecondaryButton>
+          )
+        )}
       </div>
 
       <HistorySection title="Previous cycles" entries={historyEntries ?? []} onEntryClick={(id) => navigate(`/app/items/${id}`)} />
