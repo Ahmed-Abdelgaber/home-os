@@ -562,5 +562,157 @@ test('33. Successful fulfillment invalidates required query caches', () => {
   ])
 })
 
+// 34. formatShortDate safely handles null, undefined, invalid and full ISO timestamps without throwing
+test('34. formatShortDate safely handles null, undefined, invalid and full ISO timestamps without throwing', () => {
+  const CAIRO_TZ = 'Africa/Cairo'
+  function formatShortDate(dateStr) {
+    if (!dateStr) return ''
+    try {
+      const trimmed = typeof dateStr === 'string' ? dateStr.trim() : ''
+      if (!trimmed) return ''
+
+      let d
+      if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+        d = new Date(`${trimmed}T00:00:00Z`)
+      } else {
+        d = new Date(trimmed)
+      }
+
+      if (isNaN(d.getTime())) return ''
+
+      return new Intl.DateTimeFormat('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        timeZone: CAIRO_TZ,
+      }).format(d)
+    } catch {
+      return ''
+    }
+  }
+
+  // Falsy / invalid inputs return empty string (never throw)
+  assert.equal(formatShortDate(null), '')
+  assert.equal(formatShortDate(undefined), '')
+  assert.equal(formatShortDate(''), '')
+  assert.equal(formatShortDate('   '), '')
+  assert.equal(formatShortDate('invalid-date'), '')
+
+  // Date-only string preserves calendar day
+  assert.equal(formatShortDate('2026-08-25'), '25 Aug')
+  assert.equal(formatShortDate('2026-03-09'), '9 Mar')
+
+  // Full ISO timestamp (timestamptz from Supabase) does not throw RangeError
+  assert.equal(formatShortDate('2026-03-09T04:00:00+00:00'), '9 Mar')
+  assert.ok(formatShortDate('2026-09-02T14:10:00Z').startsWith('2 Sep'))
+})
+
+// 35. formatTimestampDate formats timestamptz in Cairo timezone
+test('35. formatTimestampDate formats timestamptz in Cairo timezone', () => {
+  const CAIRO_TZ = 'Africa/Cairo'
+  function formatTimestampDate(iso) {
+    if (!iso) return ''
+    try {
+      const d = new Date(iso)
+      if (isNaN(d.getTime())) return ''
+      return new Intl.DateTimeFormat('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        timeZone: CAIRO_TZ,
+      }).format(d)
+    } catch {
+      return ''
+    }
+  }
+
+  assert.equal(formatTimestampDate(null), '')
+  assert.equal(formatTimestampDate(undefined), '')
+  assert.equal(formatTimestampDate(''), '')
+  assert.equal(formatTimestampDate('not-a-date'), '')
+  assert.equal(formatTimestampDate('2026-03-09T04:00:00+00:00'), '9 Mar')
+  assert.ok(formatTimestampDate('2026-09-02T14:10:00Z').startsWith('2 Sep'))
+})
+
+// 36. formatTimestampDateTime formats date and time in Cairo timezone
+test('36. formatTimestampDateTime formats date and time in Cairo timezone', () => {
+  const CAIRO_TZ = 'Africa/Cairo'
+  function formatTimestampDateTime(iso) {
+    if (!iso) return ''
+    try {
+      const d = new Date(iso)
+      if (isNaN(d.getTime())) return ''
+      const datePart = new Intl.DateTimeFormat('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        timeZone: CAIRO_TZ,
+      }).format(d)
+      const timePart = new Intl.DateTimeFormat('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: CAIRO_TZ,
+      }).format(d)
+      return `${datePart}, ${timePart}`
+    } catch {
+      return ''
+    }
+  }
+
+  assert.equal(formatTimestampDateTime(null), '')
+  assert.equal(formatTimestampDateTime(undefined), '')
+  assert.equal(formatTimestampDateTime('not-a-date'), '')
+  // In UTC+2 (Cairo winter standard): 04:00 UTC = 6:00 AM Cairo
+  const formatted = formatTimestampDateTime('2026-03-09T04:00:00+00:00')
+  assert.ok(formatted.startsWith('9 Mar'))
+  assert.ok(formatted.includes('AM') || formatted.includes('PM'))
+})
+
+// 37. Pending transaction display date fallback rule
+test('37. Pending transaction display date fallback rule', () => {
+  const CAIRO_TZ = 'Africa/Cairo'
+  function formatTimestampDate(iso) {
+    if (!iso) return ''
+    try {
+      const d = new Date(iso)
+      if (isNaN(d.getTime())) return ''
+      return new Intl.DateTimeFormat('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        timeZone: CAIRO_TZ,
+      }).format(d)
+    } catch {
+      return ''
+    }
+  }
+
+  function getDisplayDate(tx) {
+    const txDate = formatTimestampDate(tx.transactionAt)
+    const recvDate = formatTimestampDate(tx.receivedAt)
+    return txDate || recvDate || null
+  }
+
+  // Both available -> prefers transactionAt
+  assert.equal(
+    getDisplayDate({ transactionAt: '2026-03-09T04:00:00+00:00', receivedAt: '2026-03-09T06:00:00+00:00' }),
+    '9 Mar'
+  )
+
+  // transactionAt is null -> falls back to receivedAt
+  assert.equal(
+    getDisplayDate({ transactionAt: null, receivedAt: '2026-03-09T06:00:00+00:00' }),
+    '9 Mar'
+  )
+
+  // Both null or invalid -> returns null without throwing or producing "Invalid Date"
+  assert.equal(
+    getDisplayDate({ transactionAt: null, receivedAt: null }),
+    null
+  )
+  assert.equal(
+    getDisplayDate({ transactionAt: 'invalid', receivedAt: 'invalid' }),
+    null
+  )
+})
+
+
 
 

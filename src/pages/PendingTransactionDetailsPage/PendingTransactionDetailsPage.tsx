@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useIonToast } from '@ionic/react'
-import { formatShortDate } from '../../core/utils/cairoDate'
+import { formatTimestampDate, formatTimestampDateTime } from '../../core/utils/cairoDate'
 import { BankTransactionAllocationsList } from '../../features/bank-transactions/BankTransactionAllocationsList'
 import { FulfillTransactionModal } from '../../features/bank-transactions/FulfillTransactionModal'
 import {
@@ -158,8 +158,14 @@ export function PendingTransactionDetailsPage() {
                 <FactRow label="Bank" value={tx.bank} />
                 <FactRow label="Card" value={tx.cardLast4 ? `•••• ${tx.cardLast4}` : 'N/A'} />
                 {tx.transactionType && <FactRow label="Type" value={tx.transactionType.toUpperCase()} />}
-                {tx.transactionAt && <FactRow label="Date" value={formatShortDate(tx.transactionAt)} />}
-                <FactRow label="Received" value={formatShortDate(tx.receivedAt)} />
+                {formatTimestampDate(tx.transactionAt) && (
+                  <FactRow label="Date" value={formatTimestampDate(tx.transactionAt)} />
+                )}
+                {formatTimestampDateTime(tx.receivedAt) ? (
+                  <FactRow label="Received" value={formatTimestampDateTime(tx.receivedAt)} />
+                ) : formatTimestampDate(tx.receivedAt) ? (
+                  <FactRow label="Received" value={formatTimestampDate(tx.receivedAt)} />
+                ) : null}
                 {tx.merchantRaw && <FactRow label="Raw merchant" value={tx.merchantRaw} />}
                 <FactRow label="Status" value={displayStatus} />
                 <FactRow label="Allocated" value={formattedAllocated} />

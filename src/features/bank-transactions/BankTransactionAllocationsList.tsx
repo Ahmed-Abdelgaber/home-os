@@ -31,8 +31,8 @@ export function BankTransactionAllocationsList({ allocations, currency }: BankTr
           const metaParts: string[] = []
           if (exp?.categoryName) metaParts.push(exp.categoryName)
           if (exp?.accountName) metaParts.push(exp.accountName)
-          if (exp?.personName) metaParts.push(exp.personName)
-          if (exp?.expenseDate) metaParts.push(formatShortDate(exp.expenseDate))
+          const expDate = formatShortDate(exp?.expenseDate)
+          if (expDate) metaParts.push(expDate)
 
           const formattedAmount = `${currency} ${alloc.allocatedAmount.toLocaleString(undefined, {
             minimumFractionDigits: 2,

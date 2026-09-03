@@ -20,24 +20,120 @@ export function cairoMonthRange(monthOffset: number): { start: string; end: stri
   return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) }
 }
 
-/** "25 Aug" style, for trip dates. */
-export function formatShortDate(dateStr: string): string {
-  return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: CAIRO_TZ }).format(
-    new Date(`${dateStr}T00:00:00Z`),
-  )
+/**
+ * Converts any timestamp or date string to YYYY-MM-DD in Africa/Cairo timezone.
+ * Returns empty string if invalid or falsy.
+ */
+export function cairoDateOnlyFromTimestamp(iso?: string | null): string {
+  if (!iso) return ''
+  try {
+    const trimmed = typeof iso === 'string' ? iso.trim() : ''
+    if (!trimmed) return ''
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed
+    const d = new Date(trimmed)
+    if (isNaN(d.getTime())) return ''
+    return new Intl.DateTimeFormat('en-CA', { timeZone: CAIRO_TZ }).format(d)
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * "25 Aug" style, for date-only (YYYY-MM-DD) strings.
+ * Safely handles null, undefined, empty, or full ISO timestamps as fallback without throwing.
+ */
+export function formatShortDate(dateStr?: string | null): string {
+  if (!dateStr) return ''
+  try {
+    const trimmed = typeof dateStr === 'string' ? dateStr.trim() : ''
+    if (!trimmed) return ''
+
+    let d: Date
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      d = new Date(`${trimmed}T00:00:00Z`)
+    } else {
+      d = new Date(trimmed)
+    }
+
+    if (isNaN(d.getTime())) return ''
+
+    return new Intl.DateTimeFormat('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      timeZone: CAIRO_TZ,
+    }).format(d)
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * "25 Aug" style, specifically for ISO timestamps (e.g. timestamptz like "2026-03-09T04:00:00+00:00").
+ * Formats the date part in Africa/Cairo timezone. Returns empty string if invalid or falsy.
+ */
+export function formatTimestampDate(iso?: string | null): string {
+  if (!iso) return ''
+  try {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return ''
+    return new Intl.DateTimeFormat('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      timeZone: CAIRO_TZ,
+    }).format(d)
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * "25 Aug, 6:00 AM" style, for full ISO timestamps (e.g. bank transaction received_at / created_at).
+ * Formats date and time in Africa/Cairo timezone. Returns empty string if invalid or falsy.
+ */
+export function formatTimestampDateTime(iso?: string | null): string {
+  if (!iso) return ''
+  try {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return ''
+    const datePart = new Intl.DateTimeFormat('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      timeZone: CAIRO_TZ,
+    }).format(d)
+    const timePart = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: CAIRO_TZ,
+    }).format(d)
+    return `${datePart}, ${timePart}`
+  } catch {
+    return ''
+  }
 }
 
 /** "Today • 7:45 PM" / "Yesterday • 9:30 PM" / "25 Aug • 9:30 PM", for activity timestamps. */
-export function formatActivityTimestamp(iso: string): string {
-  const date = new Date(iso)
-  const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: CAIRO_TZ }).format(date)
-  const time = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: CAIRO_TZ }).format(
-    date,
-  )
+export function formatActivityTimestamp(iso?: string | null): string {
+  if (!iso) return ''
+  try {
+    const date = new Date(iso)
+    if (isNaN(date.getTime())) return ''
 
-  if (dateStr === cairoToday()) return `Today • ${time}`
-  if (dateStr === cairoDateMinusDays(1)) return `Yesterday • ${time}`
-  return `${formatShortDate(dateStr)} • ${time}`
+    const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: CAIRO_TZ }).format(date)
+    const time = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: CAIRO_TZ,
+    }).format(date)
+
+    if (dateStr === cairoToday()) return `Today • ${time}`
+    if (dateStr === cairoDateMinusDays(1)) return `Yesterday • ${time}`
+    const shortDate = formatShortDate(dateStr)
+    return shortDate ? `${shortDate} • ${time}` : time
+  } catch {
+    return ''
+  }
 }
 
 /** Time-of-day greeting per docs/06 §1 — "Greeting varies by time later if desired." */

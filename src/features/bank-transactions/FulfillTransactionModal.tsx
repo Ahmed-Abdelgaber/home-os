@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { IonIcon, IonModal, IonRadio, IonRadioGroup } from '@ionic/react'
 import { cardOutline, close, cubeOutline } from 'ionicons/icons'
 import { useNavigate } from 'react-router-dom'
+import { cairoDateOnlyFromTimestamp } from '../../core/utils/cairoDate'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { type BankTransaction } from './useBankTransactions'
 import './FulfillTransactionModal.css'
@@ -71,9 +72,9 @@ export function FulfillTransactionModal({
 
     onClose()
 
-    // Format transaction date if available (YYYY-MM-DD)
+    // Format transaction date if available (YYYY-MM-DD in Cairo timezone)
     const txDate = transaction.transactionAt
-      ? transaction.transactionAt.split('T')[0]
+      ? cairoDateOnlyFromTimestamp(transaction.transactionAt) || undefined
       : undefined
 
     if (destination === 'expense') {

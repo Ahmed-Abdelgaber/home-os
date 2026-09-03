@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { cardOutline } from 'ionicons/icons'
 import { useQueryClient } from '@tanstack/react-query'
-import { formatShortDate } from '../../core/utils/cairoDate'
+import { formatTimestampDate } from '../../core/utils/cairoDate'
 import {
   useCompletedBankTransactions,
   usePendingBankTransactions,
@@ -81,9 +81,10 @@ export function PendingTransactionsPage() {
         {(items) => (
           <GroupedCard>
             {items.map((tx) => {
-              const dateStr = tx.transactionAt
-                ? formatShortDate(tx.transactionAt)
-                : formatShortDate(tx.receivedAt)
+              const txDate = formatTimestampDate(tx.transactionAt)
+              const recvDate = formatTimestampDate(tx.receivedAt)
+              const displayDate = txDate || recvDate || null
+
               const cardHint = tx.cardLast4 ? `Card •••• ${tx.cardLast4}` : 'Card'
               const formattedAmount = `${tx.currency} ${tx.amount.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
@@ -95,13 +96,22 @@ export function PendingTransactionsPage() {
               const isFulfilled = tx.status === 'fulfilled'
               const isIgnored = tx.status === 'ignored'
 
-              const meta = isPartiallyFulfilled
-                ? `${merchant} • Partially Fulfilled • ${dateStr}`
-                : isFulfilled
-                ? `${merchant} • Fulfilled • ${dateStr}`
-                : isIgnored
-                ? `${merchant} • Ignored • ${dateStr}`
-                : `${merchant} • ${cardHint} • ${dateStr}`
+              const metaParts: string[] = [merchant]
+              if (isPartiallyFulfilled) {
+                metaParts.push('Partially Fulfilled')
+              } else if (isFulfilled) {
+                metaParts.push('Fulfilled')
+              } else if (isIgnored) {
+                metaParts.push('Ignored')
+              } else if (tx.cardLast4) {
+                metaParts.push(cardHint)
+              }
+
+              if (displayDate) {
+                metaParts.push(displayDate)
+              }
+
+              const meta = metaParts.join(' • ')
 
               const chipClass = isFulfilled
                 ? 'homeos-status-chip--active'
