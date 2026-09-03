@@ -17,151 +17,93 @@
   text-align: center;
 }
 
-.homeos-bank-sms-settings__content {
-  padding: var(--homeos-space-16);
-  display: flex;
-  flex-direction: column;
-  gap: var(--homeos-space-16);
-}
-
-.homeos-bank-sms-settings__description {
-  margin: 0;
-  color: var(--homeos-ink-600);
-  font-size: var(--homeos-text-body-sm);
-  line-height: 1.45;
-}
-
-.homeos-bank-sms-settings__key-box {
-  display: flex;
-  flex-direction: column;
-  gap: var(--homeos-space-12);
-  padding: var(--homeos-space-14);
-  background: var(--homeos-soft-surface);
-  border: 1px solid var(--homeos-border);
-  border-radius: var(--homeos-radius-control);
-}
-
-.homeos-bank-sms-settings__key-header {
+.homeos-shortcut-key-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  padding: var(--homeos-space-14) var(--homeos-space-16);
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--homeos-border);
+  cursor: pointer;
+  text-align: left;
+  gap: var(--homeos-space-12);
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+  margin: 0;
 }
 
-.homeos-bank-sms-settings__key-label {
-  font-size: var(--homeos-text-footnote);
-  font-weight: var(--homeos-weight-semibold);
-  color: var(--homeos-ink-700);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.homeos-shortcut-key-row:hover {
+  background-color: var(--homeos-soft-surface);
 }
 
-.homeos-bank-sms-settings__key-display {
-  padding: var(--homeos-space-10) var(--homeos-space-12);
-  background: var(--homeos-surface);
-  border: 1px solid var(--homeos-border);
-  border-radius: var(--homeos-radius-control);
-  overflow-x: auto;
+.homeos-shortcut-key-row:active {
+  background-color: rgba(var(--homeos-ink-rgb), 0.08);
 }
 
-.homeos-bank-sms-settings__key-display code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: var(--homeos-text-caption);
-  color: var(--homeos-ink-950);
-  letter-spacing: 0.5px;
-  word-break: break-all;
-}
-
-.homeos-bank-sms-settings__key-actions {
+.homeos-shortcut-key-row__content {
   display: flex;
-  align-items: center;
-  gap: var(--homeos-space-8);
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
 }
 
-.homeos-bank-sms-settings__action-btn {
-  --border-radius: var(--homeos-radius-control);
+.homeos-shortcut-key-row__label {
   font-size: var(--homeos-text-footnote);
   font-weight: var(--homeos-weight-medium);
-  margin: 0;
+  color: var(--homeos-ink-600);
+}
+
+.homeos-shortcut-key-row__value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--homeos-text-caption);
+  font-weight: var(--homeos-weight-medium);
+  color: var(--homeos-ink-950);
+  word-break: break-all;
+  background: transparent;
+  padding: 0;
+  border: none;
+  line-height: 1.35;
+}
+
+.homeos-shortcut-key-row__icon {
+  font-size: 18px;
+  color: var(--homeos-ink-400);
+  flex-shrink: 0;
+}
+
+.homeos-bank-sms-settings__footer {
+  padding: var(--homeos-space-10) var(--homeos-space-16) var(--homeos-space-14);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.homeos-bank-sms-settings__regenerate-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--homeos-ink-500);
+  font-size: var(--homeos-text-caption);
+  font-weight: var(--homeos-weight-medium);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.homeos-bank-sms-settings__regenerate-link:hover {
+  color: var(--homeos-ink-800);
+  text-decoration: underline;
+}
+
+.homeos-bank-sms-settings__hint-box {
+  padding: var(--homeos-space-12) var(--homeos-space-16);
+  border-top: 1px solid var(--homeos-border);
 }
 
 .homeos-bank-sms-settings__hint {
   margin: 0;
+  font-size: var(--homeos-text-caption);
   color: var(--homeos-ink-500);
-  font-size: var(--homeos-text-caption);
   line-height: 1.4;
-}
-
-.homeos-bank-sms-settings__guide {
-  margin-top: var(--homeos-space-8);
-  padding-top: var(--homeos-space-14);
-  border-top: 1px dashed var(--homeos-border);
-  display: flex;
-  flex-direction: column;
-  gap: var(--homeos-space-12);
-}
-
-.homeos-bank-sms-settings__guide-title {
-  margin: 0;
-  font-size: var(--homeos-text-subhead);
-  font-weight: var(--homeos-weight-semibold);
-  color: var(--homeos-ink-950);
-}
-
-.homeos-bank-sms-settings__guide-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.homeos-bank-sms-settings__guide-label {
-  font-size: var(--homeos-text-caption);
-  font-weight: var(--homeos-weight-medium);
-  color: var(--homeos-ink-600);
-}
-
-.homeos-bank-sms-settings__guide-item code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12px;
-  color: var(--homeos-ink-800);
-  background: var(--homeos-surface);
-  padding: 4px 8px;
-  border-radius: var(--homeos-radius-control);
-  border: 1px solid var(--homeos-border);
-  align-self: flex-start;
-}
-
-.homeos-bank-sms-settings__guide-url-row {
-  display: flex;
-  align-items: center;
-  gap: var(--homeos-space-8);
-  background: var(--homeos-surface);
-  border: 1px solid var(--homeos-border);
-  border-radius: var(--homeos-radius-control);
-  padding-left: var(--homeos-space-10);
-  overflow: hidden;
-}
-
-.homeos-bank-sms-settings__guide-url {
-  flex: 1;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  color: var(--homeos-ink-800);
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.homeos-bank-sms-settings__guide-json {
-  margin: 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12px;
-  color: var(--homeos-ink-800);
-  background: var(--homeos-surface);
-  padding: 8px 12px;
-  border-radius: var(--homeos-radius-control);
-  border: 1px solid var(--homeos-border);
 }
