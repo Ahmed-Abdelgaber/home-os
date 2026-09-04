@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { cubeOutline } from 'ionicons/icons'
+import { cubeOutline, searchOutline } from 'ionicons/icons'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -15,6 +15,7 @@ import { EmptyState } from '../../shared/components/EmptyState'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { Row } from '../../shared/components/Row'
+import { SearchBar } from '../../shared/components/SearchBar'
 import { SecondaryButton } from '../../shared/components/SecondaryButton'
 import { Skeleton } from '../../shared/components/Skeleton'
 import './PurchaseProductPage.css'
@@ -144,6 +145,7 @@ export function PurchaseProductPage() {
 
 function ProductPicker({ onSelect }: { onSelect: (product: ActiveProduct) => void }) {
   const products = useActiveProducts()
+  const [search, setSearch] = useState('')
 
   if (products.isLoading) {
     return (
@@ -163,18 +165,42 @@ function ProductPicker({ onSelect }: { onSelect: (product: ActiveProduct) => voi
     return <EmptyState message="No products yet. Add one from More → Product Catalog." />
   }
 
+  const lowerSearch = search.toLowerCase().trim()
+  const filtered = lowerSearch
+    ? products.data.filter(
+        (product) =>
+          product.name.toLowerCase().includes(lowerSearch) ||
+          (product.categoryName && product.categoryName.toLowerCase().includes(lowerSearch)),
+      )
+    : products.data
+
   return (
-    <GroupedCard>
-      {products.data.map((product) => (
-        <Row
-          key={product.id}
-          icon={cubeOutline}
-          title={product.name}
-          meta={product.categoryName ?? ''}
-          onClick={() => onSelect(product)}
+    <>
+      <SearchBar
+        value={search}
+        onChange={setSearch}
+        placeholder="Search products…"
+      />
+      {filtered.length === 0 && lowerSearch ? (
+        <EmptyState
+          icon={searchOutline}
+          title="No matching products"
+          message={`No products match "${search}".`}
         />
-      ))}
-    </GroupedCard>
+      ) : (
+        <GroupedCard>
+          {filtered.map((product) => (
+            <Row
+              key={product.id}
+              icon={cubeOutline}
+              title={product.name}
+              meta={product.categoryName ?? ''}
+              onClick={() => onSelect(product)}
+            />
+          ))}
+        </GroupedCard>
+      )}
+    </>
   )
 }
 

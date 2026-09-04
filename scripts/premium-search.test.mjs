@@ -141,3 +141,43 @@ test('8. Keyboard/accessibility attributes are present where testable', () => {
   })
   assert.equal(explicitAriaProps.ariaLabel, 'Search household inventory items')
 })
+
+// 9. Buy Product picker filters products by name and category
+test('9. Buy Product picker filters products by name and category', () => {
+  const activeProducts = [
+    { id: 'p1', name: 'Whole Milk 1L', categoryName: 'Dairy' },
+    { id: 'p2', name: 'Greek Yogurt 200g', categoryName: 'Dairy' },
+    { id: 'p3', name: 'Espresso Beans 500g', categoryName: 'Pantry' },
+    { id: 'p4', name: 'Olive Oil 1L', categoryName: null },
+  ]
+
+  const filterProducts = (query) => {
+    const lower = query.toLowerCase().trim()
+    return lower
+      ? activeProducts.filter(
+          (product) =>
+            product.name.toLowerCase().includes(lower) ||
+            (product.categoryName && product.categoryName.toLowerCase().includes(lower)),
+        )
+      : activeProducts
+  }
+
+  // Exact name search
+  assert.equal(filterProducts('whole milk').length, 1)
+  assert.equal(filterProducts('whole milk')[0].id, 'p1')
+
+  // Category search
+  assert.equal(filterProducts('dairy').length, 2)
+
+  // Substring match
+  assert.equal(filterProducts('oil').length, 1)
+  assert.equal(filterProducts('oil')[0].id, 'p4')
+
+  // Non-matching search
+  assert.equal(filterProducts('nonexistent').length, 0)
+
+  // Empty or whitespace search returns all
+  assert.equal(filterProducts('').length, 4)
+  assert.equal(filterProducts('   ').length, 4)
+})
+
