@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { IonIcon, IonModal, IonToggle, useIonToast } from '@ionic/react'
-import { chevronForward, close, copyOutline, phonePortraitOutline, refreshOutline } from 'ionicons/icons'
+import { close, phonePortraitOutline } from 'ionicons/icons'
 import { ConfirmationSheet } from '../../shared/components/ConfirmationSheet'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
@@ -78,7 +78,7 @@ export function BankSmsSettingsCard() {
     }
   }
 
-  const handleCopyKey = async () => {
+  /* const handleCopyKey = async () => {
     if (!ingestionKey) return
     try {
       await navigator.clipboard.writeText(ingestionKey)
@@ -95,7 +95,7 @@ export function BankSmsSettingsCard() {
         color: 'warning',
       })
     }
-  }
+  } */
 
   const handleConnect = () => {
     if (!ingestionKey) return
