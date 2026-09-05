@@ -78,7 +78,7 @@ export function FulfillTransactionModal({
       : undefined
 
     if (destination === 'expense') {
-      navigate('/app/expenses/new', {
+      navigate('/app/expenses/add', {
         state: {
           amount: effectiveAmount,
           merchant: transaction.merchantRaw,
