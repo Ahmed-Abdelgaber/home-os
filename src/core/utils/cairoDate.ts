@@ -146,3 +146,50 @@ export function cairoGreeting(): string {
   if (hour < 17) return 'Good afternoon'
   return 'Good evening'
 }
+
+/**
+ * Natural relative timestamp for activity feed (e.g. "Just now", "2 min ago", "Yesterday", "2 days ago").
+ * Uses Africa/Cairo day boundaries for calendar comparison (Today, Yesterday, etc.).
+ */
+export function formatRelativeCairoTime(iso?: string | null, now: Date = new Date()): string {
+  if (!iso) return ''
+  try {
+    const target = new Date(iso)
+    if (isNaN(target.getTime())) return ''
+
+    const diffMs = now.getTime() - target.getTime()
+    // Handle future or near-instant timestamps gracefully
+    if (diffMs < 45 * 1000) return 'Just now'
+
+    const diffMin = Math.floor(diffMs / (60 * 1000))
+    if (diffMin < 60) {
+      return `${diffMin} min ago`
+    }
+
+    const cairoTargetDay = cairoDateOnlyFromTimestamp(iso)
+    const today = cairoToday()
+    const yesterday = cairoDateMinusDays(1)
+
+    if (cairoTargetDay === today) {
+      const diffHours = Math.floor(diffMs / (3600 * 1000))
+      return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`
+    }
+
+    if (cairoTargetDay === yesterday) {
+      return 'Yesterday'
+    }
+
+    // Days difference between today and target day
+    const targetDateObj = new Date(`${cairoTargetDay}T00:00:00Z`)
+    const todayDateObj = new Date(`${today}T00:00:00Z`)
+    const dayDiff = Math.round((todayDateObj.getTime() - targetDateObj.getTime()) / (86400 * 1000))
+
+    if (dayDiff >= 2 && dayDiff <= 6) {
+      return `${dayDiff} days ago`
+    }
+
+    return formatShortDate(cairoTargetDay)
+  } catch {
+    return ''
+  }
+}

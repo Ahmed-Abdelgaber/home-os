@@ -166,17 +166,20 @@ export function HomePage() {
             >
               {(entries) => (
                 <GroupedCard>
-                  {(showAllActivity ? entries : entries.slice(0, RECENT_ACTIVITY_PREVIEW_COUNT)).map((activity) => (
-                    <Row
-                      key={activity.id}
-                      icon={activity.icon}
-                      tone={activity.tone}
-                      media="badge"
-                      title={activity.label}
-                      meta={activity.timestamp}
-                      onClick={() => navigate(activity.href)}
-                    />
-                  ))}
+                  {(showAllActivity ? entries : entries.slice(0, RECENT_ACTIVITY_PREVIEW_COUNT)).map((activity) => {
+                    const targetHref = activity.href
+                    return (
+                      <Row
+                        key={activity.id}
+                        icon={activity.icon}
+                        tone={activity.tone}
+                        media="badge"
+                        title={activity.label}
+                        meta={activity.timestamp}
+                        onClick={targetHref ? () => navigate(targetHref) : undefined}
+                      />
+                    )
+                  })}
                 </GroupedCard>
               )}
             </QueryState>

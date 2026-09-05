@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { IonIcon, IonModal, IonToggle, useIonToast } from '@ionic/react'
-import { chevronForward, close, copyOutline, phonePortraitOutline, refreshOutline } from 'ionicons/icons'
+import { close, phonePortraitOutline } from 'ionicons/icons'
 import { ConfirmationSheet } from '../../shared/components/ConfirmationSheet'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
@@ -74,25 +74,6 @@ export function BankSmsSettingsCard() {
         duration: 3000,
         position: 'bottom',
         color: 'danger',
-      })
-    }
-  }
-
-  const handleCopyKey = async () => {
-    if (!ingestionKey) return
-    try {
-      await navigator.clipboard.writeText(ingestionKey)
-      presentToast({
-        message: 'Copied',
-        duration: 1500,
-        position: 'bottom',
-      })
-    } catch {
-      presentToast({
-        message: 'Could not copy to clipboard',
-        duration: 2000,
-        position: 'bottom',
-        color: 'warning',
       })
     }
   }
@@ -223,38 +204,6 @@ export function BankSmsSettingsCard() {
               </div>
             </>
           )}
-
-          {/* {isEnabled && ingestionKey && (
-            <button
-              type="button"
-              className="homeos-shortcut-key-row"
-              onClick={handleCopyKey}
-              aria-label={`Shortcut Key ${ingestionKey}. Tap to copy.`}
-            >
-              <div className="homeos-shortcut-key-row__content">
-                <span className="homeos-shortcut-key-row__label">Shortcut Key</span>
-                <span className="homeos-shortcut-key-row__value">{ingestionKey}</span>
-              </div>
-              <div className="homeos-shortcut-key-row__icon-wrap" aria-hidden="true">
-                <IonIcon icon={copyOutline} className="homeos-shortcut-key-row__icon" />
-              </div>
-            </button>
-          )} */}
-
-          {/* {isEnabled && ingestionKey && (
-            <button
-              type="button"
-              className="homeos-regenerate-row"
-              disabled={isPending}
-              onClick={() => setShowRegenerateConfirm(true)}
-            >
-              <div className="homeos-regenerate-row__left">
-                <IonIcon icon={refreshOutline} className="homeos-regenerate-row__icon" aria-hidden="true" />
-                <span className="homeos-regenerate-row__title">Regenerate Shortcut Key</span>
-              </div>
-              <IonIcon icon={chevronForward} className="homeos-regenerate-row__chevron" aria-hidden="true" />
-            </button>
-          )} */}
         </GroupedCard>
       )}
 
