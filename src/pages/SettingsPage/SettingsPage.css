@@ -1,0 +1,53 @@
+/* ── Settings Profile Card ────────────────────── */
+.homeos-profile-card {
+  display: flex;
+  align-items: center;
+  gap: var(--homeos-space-16);
+  padding: var(--homeos-space-20) var(--homeos-space-16);
+}
+
+.homeos-profile-card__avatar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--homeos-radius-circle);
+  background: linear-gradient(135deg, var(--homeos-primary-500), var(--homeos-primary-600));
+  color: #ffffff;
+  font-size: var(--homeos-text-title);
+  font-weight: var(--homeos-weight-bold);
+  letter-spacing: -0.3px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(var(--homeos-primary-500-rgb), 0.3);
+  user-select: none;
+}
+
+.homeos-profile-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.homeos-profile-card__name {
+  font-size: var(--homeos-text-body-lg);
+  font-weight: var(--homeos-weight-bold);
+  color: var(--homeos-ink-950);
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.homeos-profile-card__email {
+  font-size: var(--homeos-text-footnote);
+  font-weight: var(--homeos-weight-medium);
+  color: var(--homeos-ink-500);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

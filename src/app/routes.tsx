@@ -41,6 +41,7 @@ const protectedRoutes: { path: string; element: ReactElement }[] = [
   { path: '/app/pending-transactions', element: <PendingTransactionsPage /> },
   { path: '/app/pending-transactions/:transactionId', element: <PendingTransactionDetailsPage /> },
   { path: '/app/expenses/add', element: <AddExpensePage /> },
+  { path: '/app/expenses/new', element: <AddExpensePage /> },
   { path: '/app/expenses/:expenseId', element: <ExpenseDetailsPage /> },
   { path: '/app/products', element: <ProductCatalogPage /> },
   { path: '/app/products/new', element: <ProductFormPage /> },
