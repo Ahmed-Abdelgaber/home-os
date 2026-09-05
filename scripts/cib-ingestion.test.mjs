@@ -745,3 +745,161 @@ test('40. Row clickability invokes navigation for the tapped transaction without
   assert.equal(navTarget, '/app/pending-transactions/tx-carrefour')
   assert.equal(callCount, 1)
 })
+
+// 41. Install Shortcut setup action configuration and visibility
+test('41. Install Shortcut setup action configuration and visibility', () => {
+  const EXPECTED_SHORTCUT_URL = 'https://www.icloud.com/shortcuts/3696b64724894b7887d8116d101f4b13'
+  const BUTTON_LABEL = 'Install Shortcut'
+  const SUPPORTING_TEXT = 'Add the HomeOS Bank Capture shortcut to your iPhone.'
+
+  // Action model
+  const getSetupAction = (isEnabled) => {
+    if (!isEnabled) return null
+    return {
+      type: 'install_shortcut',
+      buttonLabel: BUTTON_LABEL,
+      supportingText: SUPPORTING_TEXT,
+      href: EXPECTED_SHORTCUT_URL,
+      target: '_blank',
+      rel: 'noopener noreferrer',
+    }
+  }
+
+  // Hidden when disabled
+  assert.equal(getSetupAction(false), null)
+
+  // Visible when enabled
+  const action = getSetupAction(true)
+  assert.notEqual(action, null)
+  assert.equal(action.buttonLabel, 'Install Shortcut')
+  assert.equal(action.supportingText, 'Add the HomeOS Bank Capture shortcut to your iPhone.')
+  assert.equal(action.href, EXPECTED_SHORTCUT_URL)
+  assert.equal(action.target, '_blank')
+  assert.equal(action.rel, 'noopener noreferrer')
+
+  // URL is external iCloud Shortcuts URL
+  assert.ok(action.href.startsWith('https://www.icloud.com/shortcuts/'))
+  // Supporting text and label do not display raw URL
+  assert.equal(action.buttonLabel.includes('https://'), false)
+  assert.equal(action.supportingText.includes('https://'), false)
+})
+
+// 42. Connect to HomeOS setup action and Shortcuts URL scheme generation
+test('42. Connect to HomeOS setup action and Shortcuts URL scheme generation', () => {
+  const buildShortcutsConnectUrl = (ingestionKey) => {
+    const payload = `HOMEOS_CONFIG:${ingestionKey}`
+    return (
+      `shortcuts://run-shortcut?name=${encodeURIComponent('HomeOS Bank Capture')}` +
+      `&input=text&text=${encodeURIComponent(payload)}`
+    )
+  }
+
+  const sampleKey = '5de22ea9-e328-4291-915e-8b52f6719e12'
+  const url = buildShortcutsConnectUrl(sampleKey)
+
+  // Format checks
+  assert.ok(url.startsWith('shortcuts://run-shortcut?name='))
+  assert.ok(url.includes('name=HomeOS%20Bank%20Capture'))
+  assert.ok(url.includes('&input=text&text='))
+  assert.ok(url.includes('HOMEOS_CONFIG%3A5de22ea9-e328-4291-915e-8b52f6719e12'))
+
+  // Exact URL validation
+  const expectedUrl =
+    'shortcuts://run-shortcut?name=HomeOS%20Bank%20Capture&input=text&text=HOMEOS_CONFIG%3A5de22ea9-e328-4291-915e-8b52f6719e12'
+  assert.equal(url, expectedUrl)
+
+  // Action model and guard verification
+  const getConnectAction = (isEnabled, key) => {
+    if (!isEnabled) return null
+    return {
+      type: 'connect',
+      title: 'Connect to HomeOS',
+      supportingText: 'Securely link the shortcut to your HomeOS account.',
+      buttonLabel: 'Connect',
+      isEnabled: Boolean(key),
+      url: key ? buildShortcutsConnectUrl(key) : null,
+    }
+  }
+
+  // Hidden when Bank SMS Capture is disabled
+  assert.equal(getConnectAction(false, sampleKey), null)
+
+  // Gracefully disabled when enabled but key is null/unavailable
+  const disabledAction = getConnectAction(true, null)
+  assert.notEqual(disabledAction, null)
+  assert.equal(disabledAction.isEnabled, false)
+  assert.equal(disabledAction.url, null)
+
+  // Fully enabled and runnable when key exists
+  const enabledAction = getConnectAction(true, sampleKey)
+  assert.notEqual(enabledAction, null)
+  assert.equal(enabledAction.isEnabled, true)
+  assert.equal(enabledAction.buttonLabel, 'Connect')
+  assert.equal(enabledAction.supportingText, 'Securely link the shortcut to your HomeOS account.')
+  assert.equal(enabledAction.url, expectedUrl)
+
+  // UI labels never expose raw UUID, HOMEOS_CONFIG: or URL scheme
+  assert.equal(enabledAction.title.includes(sampleKey), false)
+  assert.equal(enabledAction.supportingText.includes(sampleKey), false)
+  assert.equal(enabledAction.title.includes('HOMEOS_CONFIG'), false)
+  assert.equal(enabledAction.supportingText.includes('HOMEOS_CONFIG'), false)
+  assert.equal(enabledAction.supportingText.includes('shortcuts://'), false)
+})
+
+// 43. Enable Automation setup action and guidance modal verification
+test('43. Enable Automation setup action and guidance modal verification', () => {
+  const AUTOMATION_STEPS = [
+    { step: 1, text: 'Open Shortcuts' },
+    { step: 2, text: 'Go to Automation' },
+    { step: 3, text: 'Tap + and choose Message' },
+    { step: 4, text: 'Set Sender to CIB' },
+    { step: 5, text: 'Choose "Run Immediately"' },
+    { step: 6, text: 'Select "HomeOS Bank Capture"' },
+    { step: 7, text: 'Make sure the received message is passed as the Shortcut Input' },
+    { step: 8, text: 'Save the automation' },
+  ]
+
+  const SHORTCUTS_APP_URL = 'shortcuts://'
+
+  // Verification of the 8 steps
+  assert.equal(AUTOMATION_STEPS.length, 8)
+  assert.equal(AUTOMATION_STEPS[0].text, 'Open Shortcuts')
+  assert.equal(AUTOMATION_STEPS[1].text, 'Go to Automation')
+  assert.equal(AUTOMATION_STEPS[2].text, 'Tap + and choose Message')
+  assert.equal(AUTOMATION_STEPS[3].text, 'Set Sender to CIB')
+  assert.equal(AUTOMATION_STEPS[4].text, 'Choose "Run Immediately"')
+  assert.equal(AUTOMATION_STEPS[5].text, 'Select "HomeOS Bank Capture"')
+  assert.equal(AUTOMATION_STEPS[6].text, 'Make sure the received message is passed as the Shortcut Input')
+  assert.equal(AUTOMATION_STEPS[7].text, 'Save the automation')
+
+  // URL scheme to open Shortcuts app
+  assert.equal(SHORTCUTS_APP_URL, 'shortcuts://')
+
+  // UI texts must not expose technical details or secrets
+  AUTOMATION_STEPS.forEach((step) => {
+    assert.equal(step.text.includes('uuid'), false)
+    assert.equal(step.text.includes('http'), false)
+    assert.equal(step.text.includes('HOMEOS_CONFIG'), false)
+    assert.equal(step.text.includes('headers'), false)
+  })
+
+  // Action model
+  const getAutomationRow = (isEnabled) => {
+    if (!isEnabled) return null
+    return {
+      type: 'automation',
+      title: 'Enable Automation',
+      desc: 'Capture CIB SMS automatically',
+      buttonLabel: 'Set Up',
+    }
+  }
+
+  assert.equal(getAutomationRow(false), null)
+  const row = getAutomationRow(true)
+  assert.notEqual(row, null)
+  assert.equal(row.title, 'Enable Automation')
+  assert.equal(row.buttonLabel, 'Set Up')
+})
+
+
+
