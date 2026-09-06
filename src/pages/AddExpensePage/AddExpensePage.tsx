@@ -70,7 +70,12 @@ export function AddExpensePage() {
     : '/app/tabs/expenses'
 
   return (
-    <AppPage title={prefill?.bankTransactionId ? 'Fulfill Expense' : 'Add Expense'} backHref={backHref}>
+    <AppPage
+      title={prefill?.bankTransactionId ? 'Fulfill Expense' : 'Add Expense'}
+      backHref={backHref}
+      className="homeos-compact-ledger homeos-directory-page homeos-add-expense-page"
+      fullscreen={false}
+    >
       <ExpenseForm
         defaultValues={defaultValues}
         submitLabel={prefill?.bankTransactionId ? 'Fulfill expense' : 'Add expense'}

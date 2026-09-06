@@ -32,40 +32,67 @@ for (const rule of PRODUCT_VISUAL_CATALOG) {
 }
 
 const categoryVisuals: [RegExp, string, VisualTone][] = [
-  [/grocer|food|بقال|طعام/, '🛒', 'violet'],
-  [/dining|restaurant|outings|مطعم|خروج/, '🍽️', 'amber'],
-  [/transport|fuel|uber|مواصل/, '🚗', 'blue'],
-  [/cleaning|تنظيف/, '🧽', 'green'],
-  [/personal care|beauty|عنايه|تجميل/, '🧴', 'rose'],
-  [/personal shopping|clothing|ملابس/, '🛍️', 'violet'],
-  [/health|medical|صح|علاج/, '💊', 'rose'],
-  [/utilit|bill|فواتير/, '💡', 'amber'],
-  [/charity|donation|تبرع|صدقه/, '🤲', 'green'],
-  [/family|عيله|عائله|اسره/, '👨‍👩‍👧', 'green'],
-  [/subscription|اشتراك/, '🔄', 'blue'],
-  [/education|تعليم/, '🎓', 'blue'],
-  [/pet|حيوان/, '🐾', 'amber'],
-  [/baby|طفل|اطفال/, '👶', 'blue'],
-  [/electronic|الكترون/, '🔌', 'blue'],
-  [/travel|سفر/, '🧳', 'blue'],
-  [/entertainment|ترفيه/, '🎬', 'violet'],
-  [/home|house|منزل|بيت/, '🏠', 'amber'],
+  [/grocer|food|supermarket|بقالة|بقال|طعام|اغذية|اغذيه|سوبرماركت/, '🛒', 'violet'],
+  [/dairy|cheese|milk|butter|yogurt|البان|ألبان|جبن|جبنة|لبن|زبادي|زبادى|قشطة/, '🥛', 'blue'],
+  [/meat|poultry|chicken|beef|butcher|لحوم|لحم|فراخ|دواجن|جزارة/, '🥩', 'rose'],
+  [/bakery|bread|pastry|مخبوزات|مخبوز|عيش|خبز|فطائر/, '🍞', 'amber'],
+  [/fruit|vegetable|produce|خضار|فاكهة|خضروات|فواكه/, '🍎', 'green'],
+  [/beverage|drink|juice|water|soda|coffee|tea|مشروبات|عصائر|عصير|مياه|قهوة|شاي/, '🧃', 'blue'],
+  [/snack|candy|sweet|chocolate|chips|سناكس|حلويات|مسليات|شيبسي|شوكولاتة/, '🍫', 'amber'],
+  [/dining|restaurant|outings|cafe|كافيه|مطعم|خروج|اكل جاهز/, '🍽️', 'amber'],
+  [/transport|fuel|uber|car|gas|مواصلات|بنزين|سيارة|مواصل/, '🚗', 'blue'],
+  [/cleaning|detergent|laundry|dish|منظفات|تنظيف|غسيل|صابون/, '🧽', 'green'],
+  [/personal care|beauty|hygiene|hair|skin|عناية|تجميل|نظافة شخصية|شعر|بشرة/, '🧴', 'rose'],
+  [/personal shopping|clothing|fashion|clothes|ملابس|تسوق|ازياء/, '🛍️', 'violet'],
+  [/health|medical|pharmacy|medicine|صيدلية|صحة|علاج|دواء|ادوية/, '💊', 'rose'],
+  [/utilit|bill|electricity|water bill|gas bill|فواتير|كهرباء|مياه|غاز|نت/, '💡', 'amber'],
+  [/charity|donation|تبرع|صدقة|خيرية/, '🤲', 'green'],
+  [/family|kids|children|عيلة|عائلة|اسرة|اطفال/, '👨‍👩‍👧', 'green'],
+  [/subscription|اشتراك|خدمات/, '🔄', 'blue'],
+  [/education|school|college|books|تعليم|مدرسة|دراسة|كتب/, '🎓', 'blue'],
+  [/pet|vet|حيوان|بيطري/, '🐾', 'amber'],
+  [/baby|diaper|طفل|بامبرز/, '👶', 'blue'],
+  [/electronic|gadget|appliances|الكترونيات|اجهزة/, '🔌', 'blue'],
+  [/travel|flight|hotel|سفر|طيران|فندق/, '🧳', 'blue'],
+  [/entertainment|cinema|games|ترفيه|سينما|العاب/, '🎬', 'violet'],
+  [/home|house|household|decor|kitchen|منزل|بيت|مطبخ|ادوات منزلية/, '🏠', 'amber'],
 ]
 
 export function resolveProductVisual(title: string, category = ''): ProductVisual {
-  const words = normalizeProductName(title).split(' ')
-  let best: ProductVisualRule | undefined
-  let bestScore = -1
-  for (let position = 0; position < words.length; position++) {
-    for (const candidate of aliasIndex.get(words[position]) ?? []) {
-      if (!candidate.words.every((word, index) => word === words[position + index])) continue
-      // Whole-name matches win; otherwise a product form (shampoo) beats its scent (coconut).
-      const exact = position === 0 && candidate.words.length === words.length
-      const score = (exact ? 1_000_000 : 0) + candidate.rule.priority * 1000 + candidate.words.length * 100 + candidate.length
-      if (score > bestScore) { best = candidate.rule; bestScore = score }
+  const cleanTitle = (title || '').trim()
+  if (cleanTitle.length > 0) {
+    const words = normalizeProductName(cleanTitle).split(' ')
+    let best: ProductVisualRule | undefined
+    let bestScore = -1
+    for (let position = 0; position < words.length; position++) {
+      for (const candidate of aliasIndex.get(words[position]) ?? []) {
+        if (!candidate.words.every((word, index) => word === words[position + index])) continue
+        // Whole-name matches win; otherwise a product form (shampoo) beats its scent (coconut).
+        const exact = position === 0 && candidate.words.length === words.length
+        const score = (exact ? 1_000_000 : 0) + candidate.rule.priority * 1000 + candidate.words.length * 100 + candidate.length
+        if (score > bestScore) { best = candidate.rule; bestScore = score }
+      }
+    }
+    if (best) return { emoji: best.emoji, tone: best.tone, ruleId: best.id }
+  }
+
+  // Fallback to category visual if title didn't yield a specific match
+  const cleanCategory = (category || '').trim()
+  if (cleanCategory.length > 0) {
+    // Check if category itself matches any catalog rule directly
+    const catWords = normalizeProductName(cleanCategory).split(' ')
+    for (let position = 0; position < catWords.length; position++) {
+      for (const candidate of aliasIndex.get(catWords[position]) ?? []) {
+        if (!candidate.words.every((word, index) => word === catWords[position + index])) continue
+        return { emoji: candidate.rule.emoji, tone: candidate.rule.tone, ruleId: candidate.rule.id }
+      }
+    }
+
+    const fallback = categoryVisuals.find(([pattern]) => pattern.test(normalizeProductName(cleanCategory)))
+    if (fallback) {
+      return { emoji: fallback[1], tone: fallback[2], ruleId: `cat-${fallback[1]}` }
     }
   }
-  if (best) return { emoji: best.emoji, tone: best.tone, ruleId: best.id }
-  const fallback = categoryVisuals.find(([pattern]) => pattern.test(normalizeProductName(category)))
-  return { emoji: fallback?.[1] ?? '🧾', tone: fallback?.[2] ?? 'violet', ruleId: null }
+
+  return { emoji: '📦', tone: 'violet', ruleId: null }
 }

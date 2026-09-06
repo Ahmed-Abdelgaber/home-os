@@ -1,74 +1,177 @@
+/* ─── Item Details Page: Phone Ledger System ─── */
+
+.homeos-item-details-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 32px;
+}
+
+/* ─── Top Identity ─── */
 .homeos-item-details__identity {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: var(--homeos-space-12);
-  margin-bottom: var(--homeos-space-20);
+  gap: 12px;
+  padding: 16px;
+  background: var(--homeos-surface);
+  border-radius: 20px;
+}
+
+.homeos-item-details__identity-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.homeos-item-details__identity-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
 }
 
 .homeos-item-details__title {
   margin: 0;
-  color: var(--homeos-ink-950);
-  font-size: var(--homeos-text-heading);
-  font-weight: var(--homeos-weight-bold);
+  color: var(--ledger-ink);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
+.homeos-item-details__subtitle {
+  color: var(--ledger-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* ─── Usage Metrics ─── */
 .homeos-item-details__metrics {
   display: flex;
-  gap: var(--homeos-space-8);
-  margin-bottom: var(--homeos-space-20);
+  gap: 10px;
 }
 
 .homeos-item-details__metric {
   flex: 1;
-  padding: var(--homeos-space-16) var(--homeos-space-12);
+  padding: 16px 12px;
   background: var(--homeos-surface);
-  border: 1px solid var(--homeos-border);
-  border-radius: var(--homeos-radius-card);
-  box-shadow: var(--homeos-shadow-subtle);
+  border: 0;
+  border-radius: 18px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .homeos-item-details__metric--highlight {
-  background: var(--homeos-success-soft);
-  border-color: rgba(52, 182, 83, 0.25);
+  background: var(--ledger-green-soft);
+}
+
+.homeos-item-details__metric--highlight .homeos-item-details__metric-value {
+  color: #147a52;
+}
+
+.homeos-item-details__metric--highlight .homeos-item-details__metric-label {
+  color: #147a52;
 }
 
 .homeos-item-details__metric-value {
   margin: 0;
-  color: var(--homeos-ink-950);
-  font-size: var(--homeos-text-heading-lg);
-  font-weight: var(--homeos-weight-bold);
+  color: var(--ledger-ink);
+  font-size: 24px;
+  font-weight: 700;
   line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
 .homeos-item-details__metric-label {
-  margin: 6px 0 0;
-  color: var(--homeos-ink-600);
-  font-size: var(--homeos-text-caption);
-  font-weight: var(--homeos-weight-medium);
+  margin: 0;
+  color: var(--ledger-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
-.homeos-item-details__facts {
-  margin-bottom: var(--homeos-space-24);
-}
-
+/* ─── Actions ─── */
 .homeos-item-details__actions {
   display: flex;
   flex-direction: column;
-  gap: var(--homeos-space-12);
-  margin-bottom: var(--homeos-space-24);
+  gap: 10px;
 }
 
-.homeos-item-details__delete {
+.homeos-item-details-page .homeos-primary-button {
+  background: var(--ledger-violet);
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 48px;
+  height: auto;
+  padding: 12px;
   width: 100%;
-  margin-top: var(--homeos-space-24);
-  border-color: var(--homeos-danger-soft);
-  background: var(--homeos-danger-soft);
-  color: var(--homeos-danger);
 }
 
-.homeos-item-details__delete:active {
-  background: var(--homeos-danger);
-  color: #ffffff;
+.homeos-item-details__start {
+  background: var(--ledger-green-soft) !important;
+  color: #147a52 !important;
+  border: 1px solid rgba(20, 122, 82, 0.15) !important;
+}
+
+.homeos-item-details-page .homeos-secondary-button {
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 48px;
+  height: auto;
+  padding: 12px;
+  width: 100%;
+  border: 1px solid var(--ledger-line);
+  background: var(--homeos-surface);
+  color: var(--ledger-ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.homeos-item-details-page .homeos-secondary-button:active {
+  background: #f8f8fb;
+}
+
+.homeos-item-details-page .homeos-secondary-button.homeos-item-details__delete,
+.homeos-item-details-page .homeos-secondary-button--danger {
+  width: 100%;
+  margin-top: 8px;
+  border: 1px solid rgba(194, 53, 83, 0.15) !important;
+  border-radius: 14px;
+  background: var(--ledger-rose-soft) !important;
+  color: #c23553 !important;
+  min-height: 48px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: none !important;
+  transition: opacity var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-item-details-page .homeos-secondary-button.homeos-item-details__delete:active,
+.homeos-item-details-page .homeos-secondary-button--danger:active {
+  opacity: 0.7;
+}
+
+/* ─── Related Section ─── */
+.homeos-item-details__related {
+  margin-top: 4px;
+}
+
+/* ─── Mobile Viewport Refinements ─── */
+@media (max-width: 359px) {
+  .homeos-item-details__title {
+    font-size: 16px;
+  }
+  .homeos-item-details__metric-value {
+    font-size: 20px;
+  }
 }

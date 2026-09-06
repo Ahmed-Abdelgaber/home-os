@@ -6,29 +6,61 @@
 
 .homeos-purchase-form__product {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: flex-start;
-  padding: var(--homeos-space-16);
-  background: var(--homeos-primary-50);
-  border: 1px solid var(--homeos-primary-100);
-  border-radius: var(--homeos-radius-control);
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--homeos-surface);
+  border: 0;
+  border-radius: 18px;
   font-family: inherit;
   cursor: pointer;
-  min-height: 44px;
+  min-height: 56px;
+  text-align: left;
+  transition: opacity var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-purchase-form__product:active {
+  opacity: 0.7;
+}
+
+.homeos-purchase-form__product-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.homeos-purchase-form__product-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .homeos-purchase-form__product-label {
-  font-size: var(--homeos-text-caption);
-  font-weight: var(--homeos-weight-bold);
-  color: var(--homeos-primary-600);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ledger-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .homeos-purchase-form__product-value {
-  font-size: var(--homeos-text-body);
-  font-weight: var(--homeos-weight-semibold);
-  color: var(--homeos-ink-950);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ledger-ink);
+  overflow-wrap: anywhere;
 }
+
+.homeos-purchase-form__product-change {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ledger-violet);
+  flex-shrink: 0;
+}
+
 
 .homeos-purchase-form__toggle {
   display: flex;
@@ -95,4 +127,17 @@
   gap: var(--homeos-space-12);
   margin-top: var(--homeos-space-8);
 }
+
+.homeos-purchase-page .homeos-field__input {
+  border-radius: 14px;
+  background: var(--homeos-surface);
+  border: 1px solid var(--ledger-line);
+}
+
+.homeos-purchase-page .homeos-field__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ledger-muted);
+}
+
 

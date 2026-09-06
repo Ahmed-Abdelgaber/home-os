@@ -1,7 +1,18 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { IonIcon, useIonToast } from '@ionic/react'
-import { addOutline, checkmarkCircle, informationCircleOutline, receiptOutline } from 'ionicons/icons'
+import {
+  addOutline,
+  businessOutline,
+  calendarOutline,
+  cardOutline,
+  checkmarkCircle,
+  checkmarkCircleOutline,
+  informationCircleOutline,
+  pricetagOutline,
+  receiptOutline,
+  timeOutline,
+} from 'ionicons/icons'
 import { formatTimestampDate, formatTimestampDateTime } from '../../core/utils/cairoDate'
 import { BankTransactionAllocationsList } from '../../features/bank-transactions/BankTransactionAllocationsList'
 import { FulfillTransactionModal } from '../../features/bank-transactions/FulfillTransactionModal'
@@ -13,11 +24,8 @@ import {
 } from '../../features/bank-transactions/useBankTransactions'
 import { AppPage } from '../../shared/components/AppPage'
 import { ConfirmationSheet } from '../../shared/components/ConfirmationSheet'
-import { FactRow } from '../../shared/components/FactRow'
-import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { SecondaryButton } from '../../shared/components/SecondaryButton'
-import { SectionHeader } from '../../shared/components/SectionHeader'
 import { QueryState } from '../../shared/components/QueryState'
 import { Skeleton } from '../../shared/components/Skeleton'
 import '../../shared/components/CompactLedger.css'
@@ -30,6 +38,33 @@ function money(currency: string, value: number): string {
     maximumFractionDigits: 2,
   })}`
 }
+
+/**
+ * Calculates a progressive color from unallocated Red (#c23553)
+ * through Amber (#d8891d) to fully fulfilled Green (#147a52).
+ */
+function getFulfillProgressColor(percent: number, isIgnored: boolean): string {
+  if (isIgnored) return 'var(--ledger-muted)'
+  if (percent <= 0) return '#c23553'
+  if (percent >= 100) return '#147a52'
+
+  if (percent < 50) {
+    const t = percent / 50
+    // Red (194, 53, 83) to Amber (216, 137, 29)
+    const r = Math.round(194 + (216 - 194) * t)
+    const g = Math.round(53 + (137 - 53) * t)
+    const b = Math.round(83 + (29 - 83) * t)
+    return `rgb(${r}, ${g}, ${b})`
+  } else {
+    const t = (percent - 50) / 50
+    // Amber (216, 137, 29) to Green (20, 122, 82)
+    const r = Math.round(216 + (20 - 216) * t)
+    const g = Math.round(137 + (122 - 137) * t)
+    const b = Math.round(29 + (82 - 29) * t)
+    return `rgb(${r}, ${g}, ${b})`
+  }
+}
+
 
 /**
  * The receipt splitter. One bank transaction is reconciled against one or more HomeOS
@@ -71,7 +106,7 @@ export function PendingTransactionDetailsPage() {
       <div className="homeos-splitter__footer">
         <PrimaryButton className="homeos-splitter__add" onClick={() => setShowFulfillModal(true)}>
           <IonIcon icon={addOutline} aria-hidden="true" />
-          Allocate {money(tx.currency, summary.remaining)}
+          <span>Allocate {money(tx.currency, summary.remaining)}</span>
         </PrimaryButton>
       </div>
     ) : null
@@ -93,12 +128,18 @@ export function PendingTransactionDetailsPage() {
   }
 
   return (
-    <AppPage className="homeos-compact-ledger homeos-directory-page homeos-transaction-page" fullscreen={false} title="Transaction" backHref="/app/pending-transactions" footer={footer}>
+    <AppPage
+      className="homeos-compact-ledger homeos-directory-page homeos-transaction-page"
+      fullscreen={false}
+      title="Transaction"
+      backHref="/app/pending-transactions"
+      footer={footer}
+    >
       <QueryState
         query={transactionQuery}
         skeleton={
           <div className="homeos-splitter__skeleton">
-            <Skeleton height={18} width="55%" variant="text" />
+            <Skeleton height={24} width="55%" variant="text" />
             <Skeleton height={188} />
             <Skeleton height={140} />
           </div>
@@ -118,48 +159,95 @@ export function PendingTransactionDetailsPage() {
 
           const isIgnored = transaction.status === 'ignored'
           const settled = isFullyAllocated || transaction.status === 'fulfilled'
+          const isPartiallyFulfilled = !settled && !isIgnored && totalAllocated > 0
+
+          const statusModifier = settled
+            ? 'fulfilled'
+            : isPartiallyFulfilled
+            ? 'partial'
+            : isIgnored
+            ? 'ignored'
+            : 'pending'
 
           const statusLabel = settled
             ? 'Fulfilled'
             : isIgnored
             ? 'Ignored'
-            : totalAllocated > 0
-            ? 'Partially fulfilled'
+            : isPartiallyFulfilled
+            ? 'Partial'
             : 'Not allocated'
 
-          const statusTone = settled ? 'active' : isIgnored ? 'finished' : totalAllocated > 0 ? 'warning' : 'danger'
-
           const canIgnore = transaction.status === 'pending' && totalAllocated === 0
+
+          const progressColor = getFulfillProgressColor(allocatedPercent, isIgnored)
 
           return (
             <div className="homeos-splitter">
               <section
-                className={`homeos-splitter__ledger ${settled ? 'homeos-splitter__ledger--settled' : ''}`}
+                className={`homeos-splitter__ledger homeos-splitter__ledger--${statusModifier}`}
               >
                 <div className="homeos-splitter__identity">
-                  <h1 className="homeos-splitter__merchant">
-                    {transaction.merchantRaw || 'Unknown merchant'}
-                  </h1>
-                  <span className={`homeos-status-chip homeos-status-chip--${statusTone}`}>{statusLabel}</span>
+                  <div className="homeos-splitter__identity-main">
+                    <div
+                      className={`homeos-tx-card__icon homeos-tx-card__icon--${statusModifier}`}
+                      aria-hidden="true"
+                    >
+                      <IonIcon icon={settled ? checkmarkCircleOutline : cardOutline} />
+                    </div>
+                    <div className="homeos-splitter__identity-copy">
+                      <h1 className="homeos-splitter__merchant">
+                        {transaction.merchantRaw || 'Unknown Merchant'}
+                      </h1>
+                      <span className="homeos-splitter__meta-line">
+                        {formatTimestampDate(transaction.transactionAt) ||
+                          formatTimestampDate(transaction.receivedAt) ||
+                          'Bank Transaction'}
+                        {transaction.bank ? ` • ${transaction.bank}` : ''}
+                        {transaction.cardLast4 ? ` • •••• ${transaction.cardLast4}` : ''}
+                      </span>
+                    </div>
+                  </div>
+                  <span className={`homeos-tx-badge homeos-tx-badge--${statusModifier}`}>
+                    {statusLabel}
+                  </span>
                 </div>
 
-                <p className="homeos-splitter__headline-label">
-                  {settled ? 'Fully allocated' : totalAllocated > 0 ? 'Remaining' : 'To allocate'}
-                </p>
-                <p className="homeos-splitter__headline-amount">
-                  {money(transaction.currency, settled ? transaction.amount : remaining)}
-                </p>
-
-                <div
-                  className="homeos-splitter__track"
-                  role="progressbar"
-                  aria-label="Amount allocated"
-                  aria-valuenow={Math.round(allocatedPercent)}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                >
-                  <div className="homeos-splitter__fill" style={{ width: `${allocatedPercent}%` }} />
+                <div className="homeos-splitter__balance">
+                  <p className="homeos-splitter__headline-label">
+                    {settled
+                      ? 'Fully allocated'
+                      : isIgnored
+                      ? 'Transaction amount'
+                      : isPartiallyFulfilled
+                      ? 'Remaining to allocate'
+                      : 'To allocate'}
+                  </p>
+                  <p
+                    className={`homeos-splitter__headline-amount homeos-splitter__headline-amount--${statusModifier}`}
+                    style={{ color: progressColor }}
+                  >
+                    {money(
+                      transaction.currency,
+                      settled ? transaction.amount : isIgnored ? transaction.amount : remaining,
+                    )}
+                  </p>
                 </div>
+
+                {(isPartiallyFulfilled || settled) && (
+                  <div
+                    className="homeos-splitter__track"
+                    role="progressbar"
+                    aria-label="Amount allocated"
+                    aria-valuenow={Math.round(allocatedPercent)}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  >
+                    <div
+                      className={`homeos-splitter__fill homeos-splitter__fill--${statusModifier}`}
+                      style={{ width: `${allocatedPercent}%`, backgroundColor: progressColor }}
+                    />
+                  </div>
+                )}
 
                 <dl className="homeos-splitter__tally">
                   <div className="homeos-splitter__tally-cell">
@@ -170,13 +258,28 @@ export function PendingTransactionDetailsPage() {
                     <dt>Allocated</dt>
                     <dd>{money(transaction.currency, totalAllocated)}</dd>
                   </div>
+                  {isPartiallyFulfilled && (
+                    <div className="homeos-splitter__tally-cell">
+                      <dt>Remaining</dt>
+                      <dd className="homeos-splitter__tally-remaining">
+                        {money(transaction.currency, remaining)}
+                      </dd>
+                    </div>
+                  )}
                 </dl>
 
                 {settled && (
-                  <p className="homeos-splitter__settled-note">
+                  <div className="homeos-splitter__note homeos-splitter__note--settled">
                     <IonIcon icon={checkmarkCircle} aria-hidden="true" />
-                    Every pound on this transaction is accounted for in HomeOS.
-                  </p>
+                    <span>Every pound on this transaction is accounted for in HomeOS.</span>
+                  </div>
+                )}
+
+                {isIgnored && (
+                  <div className="homeos-splitter__note homeos-splitter__note--ignored">
+                    <IonIcon icon={informationCircleOutline} aria-hidden="true" />
+                    <span>This transaction is marked as ignored and will not create an expense in HomeOS.</span>
+                  </div>
                 )}
               </section>
 
@@ -197,29 +300,69 @@ export function PendingTransactionDetailsPage() {
                 )
               )}
 
-              <section className="homeos-splitter__section">
-                <SectionHeader icon={informationCircleOutline} title="Transaction details" />
-                <GroupedCard>
+              <section className="homeos-splitter__section" aria-label="Transaction details">
+                <div className="homeos-ledger-day__heading">
+                  <h2>Transaction details</h2>
+                </div>
+                <ul className="homeos-tx-details-list">
                   {formatTimestampDate(transaction.transactionAt) && (
-                    <FactRow label="Date" value={formatTimestampDate(transaction.transactionAt)} />
+                    <li className="homeos-tx-detail-row">
+                      <span className="homeos-tx-detail-row__label">
+                        <IonIcon icon={calendarOutline} aria-hidden="true" />
+                        <span>Date</span>
+                      </span>
+                      <span className="homeos-tx-detail-row__value">
+                        {formatTimestampDate(transaction.transactionAt)}
+                      </span>
+                    </li>
                   )}
-                  {formatTimestampDateTime(transaction.receivedAt) ? (
-                    <FactRow label="Received" value={formatTimestampDateTime(transaction.receivedAt)} />
-                  ) : formatTimestampDate(transaction.receivedAt) ? (
-                    <FactRow label="Received" value={formatTimestampDate(transaction.receivedAt)} />
-                  ) : null}
-                  <FactRow label="Bank" value={transaction.bank} />
-                  <FactRow label="Card" value={transaction.cardLast4 ? `•••• ${transaction.cardLast4}` : 'N/A'} />
+                  {(formatTimestampDateTime(transaction.receivedAt) || formatTimestampDate(transaction.receivedAt)) && (
+                    <li className="homeos-tx-detail-row">
+                      <span className="homeos-tx-detail-row__label">
+                        <IonIcon icon={timeOutline} aria-hidden="true" />
+                        <span>Received</span>
+                      </span>
+                      <span className="homeos-tx-detail-row__value">
+                        {formatTimestampDateTime(transaction.receivedAt) || formatTimestampDate(transaction.receivedAt)}
+                      </span>
+                    </li>
+                  )}
+                  <li className="homeos-tx-detail-row">
+                    <span className="homeos-tx-detail-row__label">
+                      <IonIcon icon={businessOutline} aria-hidden="true" />
+                      <span>Bank</span>
+                    </span>
+                    <span className="homeos-tx-detail-row__value">{transaction.bank}</span>
+                  </li>
+                  <li className="homeos-tx-detail-row">
+                    <span className="homeos-tx-detail-row__label">
+                      <IonIcon icon={cardOutline} aria-hidden="true" />
+                      <span>Card</span>
+                    </span>
+                    <span className="homeos-tx-detail-row__value">
+                      {transaction.cardLast4 ? `•••• ${transaction.cardLast4}` : 'N/A'}
+                    </span>
+                  </li>
                   {transaction.transactionType && (
-                    <FactRow label="Type" value={transaction.transactionType.toUpperCase()} />
+                    <li className="homeos-tx-detail-row">
+                      <span className="homeos-tx-detail-row__label">
+                        <IonIcon icon={pricetagOutline} aria-hidden="true" />
+                        <span>Type</span>
+                      </span>
+                      <span className="homeos-tx-detail-row__value">
+                        {transaction.transactionType.toUpperCase()}
+                      </span>
+                    </li>
                   )}
-                </GroupedCard>
+                </ul>
               </section>
 
-              <details className="homeos-splitter__source">
-                <summary className="homeos-splitter__source-summary">Original bank message</summary>
-                <div className="homeos-splitter__raw">{transaction.rawMessage}</div>
-              </details>
+              {transaction.rawMessage && (
+                <details className="homeos-splitter__source">
+                  <summary className="homeos-splitter__source-summary">Original bank message</summary>
+                  <div className="homeos-splitter__raw">{transaction.rawMessage}</div>
+                </details>
+              )}
 
               {canIgnore && (
                 <SecondaryButton
@@ -254,3 +397,4 @@ export function PendingTransactionDetailsPage() {
     </AppPage>
   )
 }
+

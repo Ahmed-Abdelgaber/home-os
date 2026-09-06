@@ -1,21 +1,186 @@
+/* ─── Expense Form: Phone Ledger System ─── */
+
 .homeos-expense-form {
   display: flex;
   flex-direction: column;
-  gap: var(--homeos-space-20);
+  gap: 20px;
+  padding-bottom: 32px;
+}
+
+/* ─── Live Preview Hero Card ─── */
+.homeos-expense-form__preview {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  background: var(--homeos-surface);
+  border-radius: 20px;
+  border: 1px solid var(--ledger-line);
+}
+
+.homeos-expense-form__preview-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.homeos-expense-form__preview-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.homeos-expense-form__preview-title {
+  color: var(--ledger-ink);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.homeos-expense-form__preview-subtitle {
+  color: var(--ledger-muted);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.homeos-expense-form__preview-amount {
+  color: var(--ledger-ink);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  letter-spacing: -0.4px;
+}
+
+/* ─── Fields Container ─── */
+.homeos-expense-form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── Form Fields ─── */
+.homeos-expense-form .homeos-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.homeos-expense-form .homeos-field__label {
+  color: var(--ledger-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding-left: 2px;
+}
+
+.homeos-expense-form .homeos-field__input {
+  min-height: 50px;
+  padding: 12px 16px;
+  border: 1px solid var(--ledger-line);
+  border-radius: 14px;
+  background: var(--homeos-surface);
+  color: var(--ledger-ink);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  transition: border-color var(--homeos-motion-fast) var(--homeos-ease),
+              box-shadow var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-expense-form .homeos-field__input:focus {
+  outline: none;
+  border-color: var(--ledger-violet);
+  box-shadow: 0 0 0 3px var(--ledger-violet-soft);
+}
+
+.homeos-expense-form .homeos-field__input::placeholder {
+  color: #a8a9b8;
+}
+
+.homeos-expense-form .homeos-field__select-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.homeos-expense-form .homeos-field__select-wrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 16px;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--ledger-muted);
+  pointer-events: none;
+}
+
+.homeos-expense-form .homeos-field__select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding-inline-end: 36px;
+}
+
+.homeos-expense-form .homeos-field__input--textarea {
+  min-height: 84px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.homeos-expense-form .homeos-field__error {
+  color: #c23553;
+  font-size: 12px;
+  font-weight: 500;
+  padding-left: 2px;
+}
+
+/* ─── Error Alert ─── */
+.homeos-expense-form__error {
+  margin: 0;
+  padding: 14px 16px;
+  background: var(--ledger-rose-soft);
+  color: #c23553;
+  border: 1px solid rgba(194, 53, 83, 0.15);
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ─── Actions ─── */
+.homeos-expense-form__actions {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.homeos-expense-form .homeos-primary-button {
+  background: var(--ledger-violet);
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 48px;
+  height: auto;
+  padding: 12px;
+  width: 100%;
 }
 
 .homeos-expense-form-skeleton-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--homeos-space-16);
-}
-
-.homeos-expense-form__error {
-  margin: 0;
-  padding: var(--homeos-space-12);
-  background: var(--homeos-danger-soft);
-  color: var(--homeos-danger);
-  border-radius: var(--homeos-radius-control);
-  font-size: var(--homeos-text-footnote);
-  font-weight: var(--homeos-weight-medium);
+  gap: 16px;
+  padding: 16px 0;
 }

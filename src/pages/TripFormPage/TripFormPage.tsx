@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
+import { formatShortDate } from '../../core/utils/cairoDate'
 import { useActivePeople } from '../../features/master-data/usePeople'
 import { useTrip } from '../../features/trips/useTripDetail'
 import { useCreateTrip, useUpdateTrip } from '../../features/trips/useTripMutations'
@@ -11,6 +12,8 @@ import { AppPage } from '../../shared/components/AppPage'
 import { EmptyState } from '../../shared/components/EmptyState'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { Skeleton } from '../../shared/components/Skeleton'
+import '../../shared/components/CompactLedger.css'
+import '../../shared/components/CompactList.css'
 import './TripFormPage.css'
 
 const tripSchema = z
@@ -80,12 +83,18 @@ export function TripFormPage() {
   }
 
   return (
-    <AppPage title={isEdit ? 'Edit Trip' : 'Add Trip'} backHref="/app/trips">
+    <AppPage
+      title={isEdit ? 'Edit Trip' : 'Add Trip'}
+      backHref="/app/trips"
+      className="homeos-compact-ledger homeos-directory-page homeos-trip-form-page"
+      fullscreen={false}
+    >
       {stillLoading ? (
         <div className="homeos-trip-form-skeleton-stack">
-          <Skeleton height={48} />
-          <Skeleton height={48} />
-          <Skeleton height={48} />
+          <Skeleton height={64} />
+          <Skeleton height={50} />
+          <Skeleton height={50} />
+          <Skeleton height={50} />
         </div>
       ) : loadFailed ? (
         <EmptyState message="Couldn't load this trip or the people list." />
@@ -134,51 +143,97 @@ function TripForm({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<TripFormValues>({
     resolver: zodResolver(tripSchema),
     defaultValues,
   })
 
+  const watchedName = watch('name')
+  const watchedPersonId = watch('personId')
+  const watchedDeparture = watch('departureDate')
+  const watchedReturn = watch('returnDate')
+  const selectedPerson = people.find((p) => p.id === watchedPersonId)?.name
+
   return (
     <form className="homeos-trip-form" onSubmit={handleSubmit(onSubmit)} noValidate>
-      <label className="homeos-field">
-        <span className="homeos-field__label">Destination</span>
-        <input type="text" className="homeos-field__input" {...register('name')} />
-        {errors.name && <span className="homeos-field__error">{errors.name.message}</span>}
-      </label>
+      {/* Live Preview Hero Card */}
+      <div className="homeos-trip-form__preview">
+        <span className="homeos-list-glyph homeos-list-glyph--blue" aria-hidden="true">
+          ✈️
+        </span>
+        <div className="homeos-trip-form__preview-copy">
+          <strong className="homeos-trip-form__preview-title">
+            {watchedName?.trim() || defaultValues?.name || 'New Trip'}
+          </strong>
+          <span className="homeos-trip-form__preview-subtitle">
+            {selectedPerson ? `${selectedPerson} • ` : ''}
+            {watchedDeparture && watchedReturn
+              ? `${formatShortDate(watchedDeparture)} → ${formatShortDate(watchedReturn)}`
+              : watchedDeparture
+                ? `Departs ${formatShortDate(watchedDeparture)}`
+                : 'Select trip dates'}
+          </span>
+        </div>
+      </div>
 
-      <label className="homeos-field">
-        <span className="homeos-field__label">Departure date</span>
-        <input type="date" className="homeos-field__input" {...register('departureDate')} />
-        {errors.departureDate && <span className="homeos-field__error">{errors.departureDate.message}</span>}
-      </label>
+      <div className="homeos-trip-form__fields">
+        <label className="homeos-field">
+          <span className="homeos-field__label">Destination</span>
+          <input
+            type="text"
+            className="homeos-field__input"
+            placeholder="e.g. Paris, Dahab, Alexandria…"
+            autoComplete="off"
+            {...register('name')}
+          />
+          {errors.name && <span className="homeos-field__error">{errors.name.message}</span>}
+        </label>
 
-      <label className="homeos-field">
-        <span className="homeos-field__label">Return date</span>
-        <input type="date" className="homeos-field__input" {...register('returnDate')} />
-        {errors.returnDate && <span className="homeos-field__error">{errors.returnDate.message}</span>}
-      </label>
+        <label className="homeos-field">
+          <span className="homeos-field__label">Departure Date</span>
+          <input type="date" className="homeos-field__input" {...register('departureDate')} />
+          {errors.departureDate && <span className="homeos-field__error">{errors.departureDate.message}</span>}
+        </label>
 
-      <label className="homeos-field">
-        <span className="homeos-field__label">Person</span>
-        <select className="homeos-field__input" defaultValue={defaultValues?.personId ?? ''} {...register('personId')}>
-          <option value="" disabled>
-            Select who is traveling
-          </option>
-          {people.map((person) => (
-            <option key={person.id} value={person.id}>
-              {person.name}
-            </option>
-          ))}
-        </select>
-        {errors.personId && <span className="homeos-field__error">{errors.personId.message}</span>}
-      </label>
+        <label className="homeos-field">
+          <span className="homeos-field__label">Return Date</span>
+          <input type="date" className="homeos-field__input" {...register('returnDate')} />
+          {errors.returnDate && <span className="homeos-field__error">{errors.returnDate.message}</span>}
+        </label>
 
-      <label className="homeos-field">
-        <span className="homeos-field__label">Notes</span>
-        <textarea className="homeos-field__input homeos-field__input--textarea" rows={3} {...register('notes')} />
-      </label>
+        <label className="homeos-field">
+          <span className="homeos-field__label">Person</span>
+          <div className="homeos-field__select-wrap">
+            <select
+              className="homeos-field__input homeos-field__select"
+              defaultValue={defaultValues?.personId ?? ''}
+              {...register('personId')}
+            >
+              <option value="" disabled>
+                Select who is traveling
+              </option>
+              {people.map((person) => (
+                <option key={person.id} value={person.id}>
+                  {person.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {errors.personId && <span className="homeos-field__error">{errors.personId.message}</span>}
+        </label>
+
+        <label className="homeos-field">
+          <span className="homeos-field__label">Notes (Optional)</span>
+          <textarea
+            className="homeos-field__input homeos-field__input--textarea"
+            rows={3}
+            placeholder="Flight info, hotel, purpose…"
+            {...register('notes')}
+          />
+        </label>
+      </div>
 
       {submitError && (
         <p className="homeos-trip-form__error" role="alert">
@@ -186,9 +241,11 @@ function TripForm({
         </p>
       )}
 
-      <PrimaryButton type="submit" disabled={isPending}>
-        {isPending ? pendingLabel : submitLabel}
-      </PrimaryButton>
+      <div className="homeos-trip-form__actions">
+        <PrimaryButton type="submit" disabled={isPending}>
+          {isPending ? pendingLabel : submitLabel}
+        </PrimaryButton>
+      </div>
     </form>
   )
 }

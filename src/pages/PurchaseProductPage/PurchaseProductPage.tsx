@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { cubeOutline, searchOutline } from 'ionicons/icons'
+import { searchOutline } from 'ionicons/icons'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { cairoToday } from '../../core/utils/cairoDate'
+import { resolveProductVisual } from '../../core/presentation/productVisuals'
 import { useActiveAccounts } from '../../features/master-data/useAccounts'
 import { useProduct } from '../../features/products/useProductDetail'
 import { type ActiveProduct, useActiveProducts } from '../../features/products/useProducts'
@@ -12,13 +13,15 @@ import { usePurchaseProduct } from '../../features/products/usePurchaseProduct'
 import { useFulfillBankTransactionPurchase } from '../../features/bank-transactions/useBankTransactions'
 import { AppPage } from '../../shared/components/AppPage'
 import { EmptyState } from '../../shared/components/EmptyState'
-import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
-import { Row } from '../../shared/components/Row'
 import { SearchBar } from '../../shared/components/SearchBar'
 import { SecondaryButton } from '../../shared/components/SecondaryButton'
 import { RowSkeleton } from '../../shared/components/RowSkeleton'
+import { CompactRow } from '../../shared/components/CompactList'
+import '../../shared/components/CompactLedger.css'
+import '../../shared/components/CompactList.css'
 import './PurchaseProductPage.css'
+
 
 export interface PurchasePrefillState {
   productId?: string
@@ -73,11 +76,18 @@ export function PurchaseProductPage() {
     setPickedProduct(null)
   }
 
+  const pageTitle = effectivePrefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'
+
   // If prefilled with a productId, validate against product status
   if (prefillProductId && !clearedPrefillProduct) {
     if (productQuery.isLoading) {
       return (
-        <AppPage title={effectivePrefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
+        <AppPage
+          title={pageTitle}
+          backHref={backHref}
+          className="homeos-compact-ledger homeos-directory-page homeos-purchase-page"
+          fullscreen={false}
+        >
           <RowSkeleton />
         </AppPage>
       )
@@ -85,7 +95,12 @@ export function PurchaseProductPage() {
 
     if (productQuery.isError || !productQuery.data) {
       return (
-        <AppPage title={effectivePrefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
+        <AppPage
+          title={pageTitle}
+          backHref={backHref}
+          className="homeos-compact-ledger homeos-directory-page homeos-purchase-page"
+          fullscreen={false}
+        >
           <EmptyState message="Couldn't load product for purchase." />
         </AppPage>
       )
@@ -93,7 +108,12 @@ export function PurchaseProductPage() {
 
     if (!productQuery.data.isActive) {
       return (
-        <AppPage title={effectivePrefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
+        <AppPage
+          title={pageTitle}
+          backHref={backHref}
+          className="homeos-compact-ledger homeos-directory-page homeos-purchase-page"
+          fullscreen={false}
+        >
           <div className="homeos-purchase-inactive-card">
             <h2 className="homeos-purchase-inactive-title">{productQuery.data.name} is archived</h2>
             <p className="homeos-purchase-inactive-desc">
@@ -119,7 +139,12 @@ export function PurchaseProductPage() {
     }
 
     return (
-      <AppPage title={effectivePrefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
+      <AppPage
+        title={pageTitle}
+        backHref={backHref}
+        className="homeos-compact-ledger homeos-directory-page homeos-purchase-page"
+        fullscreen={false}
+      >
         <PurchaseForm
           product={prefilledActiveProduct}
           prefill={effectivePrefill}
@@ -131,7 +156,12 @@ export function PurchaseProductPage() {
   }
 
   return (
-    <AppPage title={effectivePrefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
+    <AppPage
+      title={pageTitle}
+      backHref={backHref}
+      className="homeos-compact-ledger homeos-directory-page homeos-purchase-page"
+      fullscreen={false}
+    >
       {pickedProduct ? (
         <PurchaseForm
           product={pickedProduct}
@@ -187,21 +217,27 @@ function ProductPicker({ onSelect }: { onSelect: (product: ActiveProduct) => voi
           message={`No products match "${search}".`}
         />
       ) : (
-        <GroupedCard>
-          {filtered.map((product) => (
-            <Row
-              key={product.id}
-              icon={cubeOutline}
-              title={product.name}
-              meta={product.categoryName ?? ''}
-              onClick={() => onSelect(product)}
-            />
-          ))}
-        </GroupedCard>
+        <ul className="homeos-ledger-rows">
+          {filtered.map((product) => {
+            const visual = resolveProductVisual(product.name, product.categoryName ?? '')
+            return (
+              <li key={product.id}>
+                <CompactRow
+                  title={product.name}
+                  meta={product.categoryName || 'Uncategorized'}
+                  glyph={visual.ruleId ? visual.emoji : '📦'}
+                  tone={visual.tone}
+                  onClick={() => onSelect(product)}
+                />
+              </li>
+            )
+          })}
+        </ul>
       )}
     </>
   )
 }
+
 
 function PurchaseForm({
   product,
@@ -287,11 +323,21 @@ function PurchaseForm({
     }
   }
 
+  const productVisual = resolveProductVisual(product.name, product.categoryName ?? '')
+
   return (
     <form className="homeos-purchase-form" onSubmit={handleSubmit(onSubmit)} noValidate>
       <button type="button" className="homeos-purchase-form__product" onClick={onChangeProduct}>
-        <span className="homeos-purchase-form__product-label">Product</span>
-        <span className="homeos-purchase-form__product-value">{product.name} · Change</span>
+        <div className="homeos-purchase-form__product-info">
+          <span className={`homeos-list-glyph homeos-list-glyph--${productVisual.tone}`} aria-hidden="true">
+            {productVisual.ruleId ? productVisual.emoji : '📦'}
+          </span>
+          <div className="homeos-purchase-form__product-text">
+            <span className="homeos-purchase-form__product-label">{product.categoryName || 'Product'}</span>
+            <span className="homeos-purchase-form__product-value">{product.name}</span>
+          </div>
+        </div>
+        <span className="homeos-purchase-form__product-change">Change</span>
       </button>
 
       <label className="homeos-field">
