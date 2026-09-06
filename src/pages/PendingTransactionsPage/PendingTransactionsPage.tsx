@@ -13,6 +13,8 @@ import { EmptyState } from '../../shared/components/EmptyState'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { QueryState } from '../../shared/components/QueryState'
 import { Skeleton } from '../../shared/components/Skeleton'
+import '../../shared/components/CompactLedger.css'
+import '../../shared/components/CompactList.css'
 import './PendingTransactionsPage.css'
 
 type TabFilter = 'actionable' | 'completed'
@@ -31,6 +33,8 @@ export function PendingTransactionsPage() {
   return (
     <AppPage
       title="Pending Transactions"
+      className="homeos-compact-ledger homeos-directory-page homeos-pending-page"
+      fullscreen={false}
       backHref="/app/tabs/more"
       onRefresh={async () => {
         await Promise.all([

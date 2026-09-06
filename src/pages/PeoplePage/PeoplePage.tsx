@@ -1,18 +1,13 @@
+import { ManagementList } from '../../shared/components/ManagementList'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useIonAlert } from '@ionic/react'
-import { personOutline } from 'ionicons/icons'
+import { IonIcon, useIonAlert } from '@ionic/react'
+import { homeOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { type PersonDetail, useAllPeople, useCreatePerson, useUpdatePerson } from '../../features/master-data/usePeople'
-import { AppPage } from '../../shared/components/AppPage'
-import { EmptyState } from '../../shared/components/EmptyState'
-import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
-import { QueryState } from '../../shared/components/QueryState'
 import { QuickAddSheet } from '../../shared/components/QuickAddSheet'
-import { Row } from '../../shared/components/Row'
-import { RowSkeleton } from '../../shared/components/RowSkeleton'
 
 type SheetState = { mode: 'add' } | { mode: 'edit'; person: PersonDetail } | null
 
@@ -29,46 +24,11 @@ export function PeoplePage() {
   const [sheet, setSheet] = useState<SheetState>(null)
 
   return (
-    <AppPage title="People" backHref="/app/tabs/more" onRefresh={async () => { await people.refetch() }}>
-      {/* Hidden while the list is empty — the empty state carries the add action there instead. */}
-      {(people.data?.length ?? 0) > 0 && (
-        <PrimaryButton className="homeos-page-cta" onClick={() => setSheet({ mode: 'add' })}>
-          Add person
-        </PrimaryButton>
-      )}
-
-      <QueryState
-        query={people}
-        skeleton={<RowSkeleton />}
-        error="Couldn't load people."
-        empty={
-          <EmptyState
-            icon={personOutline}
-            title="No people yet"
-            message="People are who an expense or a trip belongs to. Add everyone in the household."
-            action={
-              <PrimaryButton onClick={() => setSheet({ mode: 'add' })}>Add person</PrimaryButton>
-            }
-          />
-        }
-      >
-        {(items) => (
-          <GroupedCard>
-            {items.map((person) => (
-              <Row
-                key={person.id}
-                icon={personOutline}
-                title={person.name}
-                meta={[person.kind === 'household' ? 'Household' : 'Person', person.isActive ? null : 'Inactive']
-                  .filter(Boolean)
-                  .join(' • ')}
-                onClick={() => setSheet({ mode: 'edit', person })}
-              />
-            ))}
-          </GroupedCard>
-        )}
-      </QueryState>
-
+    <ManagementList title="People" singular="person" query={people}
+      onAdd={() => setSheet({ mode: 'add' })}
+      onEdit={(person) => setSheet({ mode: 'edit', person })}
+      describe={(person) => person.kind === 'household' ? 'Household' : 'Household member'}
+      visual={(person) => ({ glyph: person.kind === 'household' ? <IonIcon icon={homeOutline} /> : <span className="homeos-list-glyph--initial">{person.name.trim().slice(0, 1).toLocaleUpperCase()}</span>, tone: person.kind === 'household' ? 'violet' : 'green' })}>
       <QuickAddSheet
         isOpen={sheet !== null}
         title={sheet?.mode === 'edit' ? 'Edit person' : 'Add person'}
@@ -82,7 +42,7 @@ export function PeoplePage() {
           />
         )}
       </QuickAddSheet>
-    </AppPage>
+    </ManagementList>
   )
 }
 

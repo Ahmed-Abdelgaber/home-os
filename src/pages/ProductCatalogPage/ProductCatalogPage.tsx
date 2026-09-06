@@ -1,119 +1,54 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { cubeOutline, searchOutline } from 'ionicons/icons'
-import { useState } from 'react'
+import { cubeOutline } from 'ionicons/icons'
+import { useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { resolveProductVisual } from '../../core/presentation/productVisuals'
 import { useProductCatalog } from '../../features/products/useProductCatalog'
 import { useInactiveProducts } from '../../features/products/useInactiveProducts'
 import { AppPage } from '../../shared/components/AppPage'
 import { EmptyState } from '../../shared/components/EmptyState'
-import { GroupedCard } from '../../shared/components/GroupedCard'
 import { QueryState } from '../../shared/components/QueryState'
-import { PrimaryButton } from '../../shared/components/PrimaryButton'
-import { Row } from '../../shared/components/Row'
 import { RowSkeleton } from '../../shared/components/RowSkeleton'
 import { SearchBar } from '../../shared/components/SearchBar'
+import { CompactRow, ListGroup, ListHeaderActions } from '../../shared/components/CompactList'
 import './ProductCatalogPage.css'
-
-type ProductsView = 'active' | 'inactive'
 
 export function ProductCatalogPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const searchContainer = useRef<HTMLDivElement>(null)
   const [searchParams, setSearchParams] = useSearchParams()
-  const rawView = searchParams.get('view')
-  const view: ProductsView = rawView === 'inactive' ? 'inactive' : 'active'
-  const selectView = (next: ProductsView) => {
-    setSearchParams(next === 'active' ? {} : { view: next }, { replace: true })
-    setSearch('')
-  }
-
+  const view = searchParams.get('view') === 'inactive' ? 'inactive' : 'active'
   const activeProducts = useProductCatalog(false)
   const inactiveProducts = useInactiveProducts()
   const query = view === 'active' ? activeProducts : inactiveProducts
-  const lowerSearch = search.toLowerCase()
-
-  return (
-    <AppPage title="Product Catalog" backHref="/app/tabs/more" onRefresh={() => queryClient.invalidateQueries({ queryKey: ['products'] })}>
-      <div className="homeos-catalog-view-toggle" role="tablist">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={view === 'active'}
-          className={`homeos-catalog-view-toggle__option ${view === 'active' ? 'homeos-catalog-view-toggle__option--selected' : ''}`}
-          onClick={() => selectView('active')}
-        >
-          Active
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={view === 'inactive'}
-          className={`homeos-catalog-view-toggle__option ${view === 'inactive' ? 'homeos-catalog-view-toggle__option--selected' : ''}`}
-          onClick={() => selectView('inactive')}
-        >
-          Inactive
-        </button>
-      </div>
-
-      {(query.data?.length ?? 0) > 0 && (
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          placeholder={view === 'active' ? 'Search products…' : 'Search inactive products…'}
-        />
-      )}
-
-      <QueryState
-        query={query}
-        skeleton={<RowSkeleton />}
-        error={`Couldn't load ${view} products.`}
-        empty={
-          view === 'active' ? (
-            <EmptyState
-              icon={cubeOutline}
-              title="No products yet"
-              message="A product is the thing you buy — a brand of coffee, a filter, a bag of rice. Add one and it becomes available everywhere you record a purchase."
-              action={<PrimaryButton onClick={() => navigate('/app/products/new')}>Add product</PrimaryButton>}
-            />
-          ) : (
-            <EmptyState
-              icon={cubeOutline}
-              title="Nothing retired"
-              message="Products you stop buying end up here. None have been retired yet."
-            />
-          )
-        }
-      >
-        {(items) => {
-          const filtered = lowerSearch
-            ? items.filter((p) => p.title.toLowerCase().includes(lowerSearch) || p.meta.toLowerCase().includes(lowerSearch))
-            : items
-          if (filtered.length === 0 && lowerSearch) {
-            return (
-              <EmptyState
-                icon={searchOutline}
-                title="No matching products"
-                message={`No ${view} products match "${search}".`}
-              />
-            )
-          }
-          return (
-            <GroupedCard>
-              {filtered.map((product) => (
-                <Row
-                  key={product.id}
-                  icon={cubeOutline}
-                  title={product.title}
-                  meta={view === 'inactive' ? [product.meta, 'Inactive'].filter(Boolean).join(' • ') : product.meta}
-                  onClick={() => navigate(`/app/products/${product.id}`)}
-                />
-              ))}
-            </GroupedCard>
-          )
-        }}
-      </QueryState>
-    </AppPage>
-  )
+  const addProduct = () => navigate('/app/products/new')
+  return <AppPage title="Product catalog" className="homeos-compact-ledger homeos-directory-page homeos-catalog-page" fullscreen={false} backHref="/app/tabs/more" onRefresh={() => queryClient.invalidateQueries({ queryKey: ['products'] })}
+    headerActions={<ListHeaderActions searchOpen={searchOpen} onAdd={addProduct} addLabel="Add product" onSearch={() => {
+      setSearchOpen(!searchOpen); if (searchOpen) setSearch(''); else requestAnimationFrame(() => searchContainer.current?.querySelector('input')?.focus())
+    }} />}>
+    <div hidden={!searchOpen} ref={searchContainer}><SearchBar value={search} onChange={value => { setSearch(value); if (!value) searchContainer.current?.querySelector('input')?.focus() }} placeholder="Search products…" /></div>
+    <div className="homeos-ledger-categories homeos-catalog-filters" role="group" aria-label="Product status">
+      {(['active','inactive'] as const).map(status => <button type="button" key={status} aria-pressed={view === status} className={`homeos-catalog-filter--${status}`} onClick={() => {
+        const params = new URLSearchParams(searchParams); if(status === 'active') params.delete('view'); else params.set('view',status); setSearchParams(params,{replace:true}); setSearch('')
+      }}>{status === 'active' ? 'Active' : 'Inactive'}</button>)}
+    </div>
+    <QueryState query={query} skeleton={<RowSkeleton />} error={`Couldn't load ${view} products.`} empty={<EmptyState icon={cubeOutline} title={view === 'active' ? 'No products yet' : 'Nothing retired'} message={view === 'active' ? 'Add a product to use it in purchases and your shopping list.' : 'Products you stop buying will appear here.'} action={view === 'active' && <button className="homeos-list-submit" type="button" onClick={addProduct}>Add product</button>} />}>
+      {items => {
+        const term = search.trim().toLocaleLowerCase()
+        const filtered = items.filter(product => `${product.title} ${product.meta}`.toLocaleLowerCase().includes(term))
+        if (!filtered.length) return <EmptyState title="No matching products" message="Try another product name or category." action={<button className="homeos-ledger-reset" type="button" onClick={() => setSearch('')}>Clear search</button>} />
+        const categories = [...new Set(filtered.map(product => product.meta || 'Uncategorized'))].sort((a,b) => a.localeCompare(b))
+        return categories.map(category => {
+          const group = filtered.filter(product => (product.meta || 'Uncategorized') === category)
+          return <ListGroup key={category} title={category} count={group.length}>
+            {group.map(product => { const visual = resolveProductVisual(product.title, product.meta); return <li key={product.id}><CompactRow title={product.title} meta={product.meta || 'Uncategorized'} glyph={visual.ruleId ? visual.emoji : '📦'} tone={view === 'inactive' ? 'neutral' : visual.tone} accessory={view === 'inactive' && <span className="homeos-list-badge">Inactive</span>} to={`/app/products/${product.id}`} /></li> })}
+          </ListGroup>
+        })
+      }}
+    </QueryState>
+    {query.isError && <button className="homeos-ledger-reset" type="button" onClick={() => void query.refetch()}>Try again</button>}
+  </AppPage>
 }
-

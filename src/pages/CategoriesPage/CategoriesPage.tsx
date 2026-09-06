@@ -1,6 +1,7 @@
+import { ManagementList } from '../../shared/components/ManagementList'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useIonAlert } from '@ionic/react'
-import { pricetagOutline } from 'ionicons/icons'
+import { resolveProductVisual } from '../../core/presentation/productVisuals'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -10,14 +11,8 @@ import {
   useCreateCategory,
   useUpdateCategory,
 } from '../../features/master-data/useCategories'
-import { AppPage } from '../../shared/components/AppPage'
-import { EmptyState } from '../../shared/components/EmptyState'
-import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
-import { QueryState } from '../../shared/components/QueryState'
 import { QuickAddSheet } from '../../shared/components/QuickAddSheet'
-import { Row } from '../../shared/components/Row'
-import { RowSkeleton } from '../../shared/components/RowSkeleton'
 
 type SheetState = { mode: 'add' } | { mode: 'edit'; category: CategoryDetail } | null
 
@@ -33,44 +28,11 @@ export function CategoriesPage() {
   const [sheet, setSheet] = useState<SheetState>(null)
 
   return (
-    <AppPage title="Categories" backHref="/app/tabs/more" onRefresh={async () => { await categories.refetch() }}>
-      {/* Hidden while the list is empty — the empty state carries the add action there instead. */}
-      {(categories.data?.length ?? 0) > 0 && (
-        <PrimaryButton className="homeos-page-cta" onClick={() => setSheet({ mode: 'add' })}>
-          Add category
-        </PrimaryButton>
-      )}
-
-      <QueryState
-        query={categories}
-        skeleton={<RowSkeleton />}
-        error="Couldn't load categories."
-        empty={
-          <EmptyState
-            icon={pricetagOutline}
-            title="No categories yet"
-            message="Categories group products so spending can be read by kind rather than by line item."
-            action={
-              <PrimaryButton onClick={() => setSheet({ mode: 'add' })}>Add category</PrimaryButton>
-            }
-          />
-        }
-      >
-        {(items) => (
-          <GroupedCard>
-            {items.map((category) => (
-              <Row
-                key={category.id}
-                icon={pricetagOutline}
-                title={category.name}
-                meta={category.isActive ? 'Active' : 'Inactive'}
-                onClick={() => setSheet({ mode: 'edit', category })}
-              />
-            ))}
-          </GroupedCard>
-        )}
-      </QueryState>
-
+    <ManagementList title="Categories" singular="category" query={categories}
+      onAdd={() => setSheet({ mode: 'add' })}
+      onEdit={(category) => setSheet({ mode: 'edit', category })}
+      describe={() => 'Products & expenses'}
+      visual={(category) => { const visual = resolveProductVisual('', category.name); return { glyph: visual.emoji, tone: visual.tone } }}>
       <QuickAddSheet
         isOpen={sheet !== null}
         title={sheet?.mode === 'edit' ? 'Edit category' : 'Add category'}
@@ -84,7 +46,7 @@ export function CategoriesPage() {
           />
         )}
       </QuickAddSheet>
-    </AppPage>
+    </ManagementList>
   )
 }
 

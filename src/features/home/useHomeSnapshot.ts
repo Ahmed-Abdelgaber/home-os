@@ -9,6 +9,7 @@ interface HomeSnapshot {
   percentVsLastMonth: number | null
   travel: TravelStatus
   activePeriodId: string | null
+  periodStartDate: string | null
 }
 
 async function fetchPeriodSpend(start: string, end: string | null): Promise<number> {
@@ -104,6 +105,7 @@ export function useHomeSnapshot() {
         percentVsLastMonth: previousSpend === 0 ? null : Math.round(((currentSpend - previousSpend) / previousSpend) * 100),
         travel,
         activePeriodId: active?.id ?? null,
+        periodStartDate: active?.start_date ?? null,
       }
     },
   })

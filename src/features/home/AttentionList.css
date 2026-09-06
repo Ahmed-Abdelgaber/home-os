@@ -1,12 +1,12 @@
-/*
-  Deliberately card-less. Home already stacks three grouped cards below this; giving the
-  attention list its own card would make it read as one more panel to scan rather than the
-  short answer to "anything for me?".
-*/
+/* Contextual actions share a compact panel, with color on the action itself. */
 .homeos-attention {
   display: flex;
   flex-direction: column;
   gap: var(--homeos-space-8);
+  padding: var(--homeos-space-16);
+  background: var(--homeos-surface);
+  border: 1px solid var(--homeos-border);
+  border-radius: var(--homeos-radius-card);
 }
 
 .homeos-attention__eyebrow {
@@ -34,7 +34,7 @@
   display: flex;
   align-items: center;
   gap: var(--homeos-space-12);
-  padding: var(--homeos-space-8) 0;
+  padding: var(--homeos-space-12) 0;
   background: none;
   border: none;
   font-family: inherit;
@@ -119,3 +119,12 @@
   gap: var(--homeos-space-12);
   padding: var(--homeos-space-12) 0;
 }
+
+.homeos-attention__row { text-decoration: none; min-height: 64px; border-radius: var(--homeos-radius-control); background: var(--homeos-surface); }
+.homeos-attention__detail { display: block; margin-top: 3px; color: var(--homeos-ink-600); font-size: var(--homeos-text-footnote); font-weight: 400; }
+.homeos-attention__row--warning .homeos-attention__label { font-weight: var(--homeos-weight-semibold); }
+.homeos-attention__row--warning .homeos-attention__dot {
+  background: var(--homeos-warning);
+  color: var(--homeos-ink-950);
+}
+.homeos-attention__dot { width: 36px; height: 36px; border-radius: var(--homeos-radius-control); font-size: var(--homeos-text-title-sm); }

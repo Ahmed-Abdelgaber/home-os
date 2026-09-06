@@ -1,9 +1,8 @@
-import { IonToggle, IonInput, IonButton } from '@ionic/react'
+import { IonToggle, IonInput } from '@ionic/react'
 import { notificationsOutline, walletOutline, airplaneOutline, homeOutline, cubeOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { Row } from '../../shared/components/Row'
-import { SectionHeader } from '../../shared/components/SectionHeader'
 import { useNotificationSettings, useUpdateNotificationSettings } from './useNotificationSettings'
 import { usePushSubscription } from './usePushSubscription'
 
@@ -11,7 +10,7 @@ export function NotificationSettingsCard() {
   const { data: settings } = useNotificationSettings()
   const { mutateAsync: updateSettings } = useUpdateNotificationSettings()
   const { subscribe, unsubscribe } = usePushSubscription()
-  
+
   const [permission, setPermission] = useState<NotificationPermission>(
     'Notification' in window ? Notification.permission : 'default'
   )
@@ -40,36 +39,38 @@ export function NotificationSettingsCard() {
   const isEnabled = permission === 'granted'
 
   return (
-    <section style={{ marginTop: 'var(--homeos-space-32)', paddingBottom: 'var(--homeos-space-32)' }}>
-      <SectionHeader icon={notificationsOutline} title="Notifications" />
-      
+    <section className="homeos-settings-section" aria-label="Notifications">
+      <h2 className="homeos-settings-heading">Notifications</h2>
+
       {!isEnabled && (
         <GroupedCard>
-          <div style={{ padding: 'var(--homeos-space-16)', textAlign: 'center' }}>
-            <p style={{ margin: '0 0 var(--homeos-space-12)', color: 'var(--homeos-ink-600)' }}>
-              Get pushed alerts for spend limits and trips.
-            </p>
-            <IonButton expand="block" onClick={handleEnable}>Enable Notifications</IonButton>
-          </div>
+          <Row
+            icon={notificationsOutline}
+            tone="success"
+            title="Push notifications"
+            meta="Alerts for spend limits and trips"
+            trailing={<button type="button" className="homeos-settings-enable" aria-label="Enable notifications" onClick={handleEnable}>Enable</button>}
+          />
         </GroupedCard>
       )}
 
       {isEnabled && (
         <GroupedCard>
-          <Row 
+          <Row
             icon={walletOutline}
+            tone="warning"
             title="Period spending limit"
             meta="Warn me when spending in the current period passes"
             trailing={
-              <IonToggle 
-                checked={settings?.spend_warning_enabled ?? false} 
+              <IonToggle aria-label="Period spending limit"
+                checked={settings?.spend_warning_enabled ?? false}
                 onIonChange={(e) => updateSettings({ spend_warning_enabled: e.detail.checked })}
               />
             }
           />
           {settings?.spend_warning_enabled && (
-            <div style={{ padding: '0 var(--homeos-space-16) var(--homeos-space-16)' }}>
-              <IonInput 
+            <div className="homeos-settings-field">
+              <IonInput
                 type="number"
                 label="Threshold (EGP)"
                 labelPlacement="stacked"
@@ -79,44 +80,47 @@ export function NotificationSettingsCard() {
             </div>
           )}
 
-          <Row 
+          <Row
             icon={airplaneOutline}
+            tone="info"
             title="Trip Starting"
             meta="Remind the day before a trip"
             trailing={
-              <IonToggle 
-                checked={settings?.trip_start_enabled ?? false} 
+              <IonToggle aria-label="Trip starting"
+                checked={settings?.trip_start_enabled ?? false}
                 onIonChange={(e) => updateSettings({ trip_start_enabled: e.detail.checked })}
               />
             }
           />
 
-          <Row 
+          <Row
             icon={homeOutline}
+            tone="success"
             title="Trip Ending"
             meta="Remind the day before returning"
             trailing={
-              <IonToggle 
-                checked={settings?.trip_end_enabled ?? false} 
+              <IonToggle aria-label="Trip ending"
+                checked={settings?.trip_end_enabled ?? false}
                 onIonChange={(e) => updateSettings({ trip_end_enabled: e.detail.checked })}
               />
             }
           />
 
-          <Row 
+          <Row
             icon={cubeOutline}
+            tone="warning"
             title="Long-Stocked Items"
             meta="Alert if item sits in stock too long"
             trailing={
-              <IonToggle 
-                checked={settings?.long_stocked_enabled ?? false} 
+              <IonToggle aria-label="Long-stocked items"
+                checked={settings?.long_stocked_enabled ?? false}
                 onIonChange={(e) => updateSettings({ long_stocked_enabled: e.detail.checked })}
               />
             }
           />
           {settings?.long_stocked_enabled && (
-            <div style={{ padding: '0 var(--homeos-space-16) var(--homeos-space-16)' }}>
-              <IonInput 
+            <div className="homeos-settings-field">
+              <IonInput
                 type="number"
                 label="Days in stock"
                 labelPlacement="stacked"
@@ -125,9 +129,9 @@ export function NotificationSettingsCard() {
               />
             </div>
           )}
-          
-          <div style={{ padding: 'var(--homeos-space-16)', textAlign: 'center', borderTop: '1px solid var(--homeos-border)' }}>
-            <IonButton fill="clear" color="danger" onClick={handleDisable}>Disable Push Delivery</IonButton>
+
+          <div className="homeos-settings-disable-wrap">
+            <button type="button" className="homeos-settings-disable" onClick={handleDisable}>Disable Push Delivery</button>
           </div>
         </GroupedCard>
       )}

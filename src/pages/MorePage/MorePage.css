@@ -1,54 +1,18 @@
-.homeos-more__section {
-  margin-top: var(--homeos-space-32);
-  margin-bottom: var(--homeos-space-32);
-}
-
-.homeos-more-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: var(--homeos-radius-circle);
-  background: var(--homeos-danger);
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: var(--homeos-weight-bold);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-
-.homeos-more-badge--warning {
-  background: var(--homeos-warning);
-  color: #ffffff;
-}
-
-.homeos-logout-button {
-  width: 100%;
-  margin-top: var(--homeos-space-32);
-  margin-bottom: var(--homeos-space-32);
-  padding: var(--homeos-space-16);
-  background: var(--homeos-danger-soft);
-  border: 1px solid transparent;
-  border-radius: var(--homeos-radius-control);
-  color: var(--homeos-danger);
-  font-size: var(--homeos-text-body-lg);
-  font-weight: var(--homeos-weight-bold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--homeos-space-12);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.homeos-logout-button:hover,
-.homeos-logout-button:active {
-  background: var(--homeos-danger);
-  color: #ffffff;
-}
-
-.homeos-logout-button ion-icon {
-  font-size: 1.5rem;
+.homeos-more-group { margin-bottom: 22px; }
+.homeos-more-group__title { margin: 0; padding: 0 8px 10px; color: var(--ledger-muted); font-size: 12px; line-height: 1.5; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+.homeos-more-row { min-height: 70px; }
+.homeos-more-icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 13px; font-size: 21px; }
+.homeos-more-icon--green { color: #147a52; background: var(--ledger-green-soft); }
+.homeos-more-icon--blue { color: #2864bd; background: var(--ledger-blue-soft); }
+.homeos-more-icon--violet { color: var(--ledger-violet); background: var(--ledger-violet-soft); }
+.homeos-more-icon--amber { color: var(--ledger-amber); background: var(--ledger-amber-soft); }
+.homeos-more-icon--rose { color: #c23553; background: var(--ledger-rose-soft); }
+.homeos-more-icon--neutral { color: var(--ledger-muted); background: #eeeff5; }
+.homeos-more-detail { display: block; margin-top: 2px; color: var(--ledger-muted); font-size: 12px; line-height: 1.45; }
+.homeos-more-count { display: inline-grid; place-items: center; flex-shrink: 0; min-width: 26px; min-height: 26px; padding: 3px 7px; border-radius: 9px; background: var(--ledger-amber-soft); color: var(--ledger-amber); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.homeos-more-feedback { margin: 8px 4px 0; color: #c23553; font-size: 12px; line-height: 1.5; }
+.homeos-logout-button { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 48px; padding: 12px; border: 0; border-radius: 16px; background: var(--ledger-rose-soft); color: #c23553; font: inherit; font-size: 14px; font-weight: 600; }
+.homeos-logout-button ion-icon { font-size: 20px; }
+@media (max-width: 359px) {
+  .homeos-more-icon { width: 32px; height: 36px; font-size: 19px; border-radius: 12px; }
 }

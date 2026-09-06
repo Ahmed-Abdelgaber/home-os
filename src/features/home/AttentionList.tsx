@@ -1,6 +1,6 @@
 import { IonIcon } from '@ionic/react'
 import { airplaneOutline, cardOutline, cartOutline, checkmarkOutline, chevronForward } from 'ionicons/icons'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { cairoToday } from '../../core/utils/cairoDate'
 import { Skeleton } from '../../shared/components/Skeleton'
 import type { TravelStatus } from '../../shared/components/HeroSnapshotCard'
@@ -13,6 +13,7 @@ interface AttentionItem {
   icon: string
   tone: 'warning' | 'primary' | 'info'
   label: string
+  detail?: string
   href: string
 }
 
@@ -41,8 +42,7 @@ function tripLabel(travel: TravelStatus): string | null {
  * data the app already holds — nothing here is a new domain concept, a score, or a metric.
  * A line only appears when it has something to say, so an empty list means nothing is due.
  */
-export function AttentionList({ travel }: { travel: TravelStatus | undefined }) {
-  const navigate = useNavigate()
+export function AttentionList({ travel, travelUnavailable = false, includeTravel = true }: { travel: TravelStatus | undefined; travelUnavailable?: boolean; includeTravel?: boolean }) {
   const transactions = usePendingBankTransactions()
   const shoppingList = useShoppingList()
 
@@ -56,7 +56,8 @@ export function AttentionList({ travel }: { travel: TravelStatus | undefined }) 
       id: 'transactions',
       icon: cardOutline,
       tone: 'warning',
-      label: `${txCount} bank ${txCount === 1 ? 'transaction' : 'transactions'} waiting`,
+      label: `${txCount} bank ${txCount === 1 ? 'transaction' : 'transactions'}`,
+      detail: 'Waiting to be reviewed',
       href: '/app/pending-transactions',
     })
   }
@@ -67,12 +68,13 @@ export function AttentionList({ travel }: { travel: TravelStatus | undefined }) 
       id: 'shopping-list',
       icon: cartOutline,
       tone: 'primary',
-      label: `${listCount} ${listCount === 1 ? 'item' : 'items'} on the shopping list`,
+      label: `${listCount} ${listCount === 1 ? 'thing' : 'things'} to buy`,
+      detail: 'On your shopping list',
       href: '/app/shopping-list',
     })
   }
 
-  const trip = travel ? tripLabel(travel) : null
+  const trip = includeTravel && travel ? tripLabel(travel) : null
   if (trip) {
     items.push({ id: 'trip', icon: airplaneOutline, tone: 'info', label: trip, href: '/app/trips' })
   }
@@ -90,9 +92,9 @@ export function AttentionList({ travel }: { travel: TravelStatus | undefined }) 
   }
 
   return (
-    <section className="homeos-attention">
-      <p className="homeos-attention__eyebrow">Needs attention</p>
-      {items.length === 0 ? (
+    <section className="homeos-attention" aria-labelledby="home-attention-title">
+      <h2 id="home-attention-title" className="homeos-attention__eyebrow">Needs attention</h2>
+      {items.length === 0 && !transactions.isError && !shoppingList.isError && !travelUnavailable ? (
         <p className="homeos-attention__clear">
           <IonIcon icon={checkmarkOutline} aria-hidden="true" />
           Nothing is waiting on you.
@@ -101,17 +103,19 @@ export function AttentionList({ travel }: { travel: TravelStatus | undefined }) 
         <ul className="homeos-attention__list">
           {items.map((item) => (
             <li key={item.id}>
-              <button type="button" className="homeos-attention__row" onClick={() => navigate(item.href)}>
+              <Link className={`homeos-attention__row homeos-attention__row--${item.tone}`} to={item.href}>
                 <span className={`homeos-attention__dot homeos-attention__dot--${item.tone}`} aria-hidden="true">
                   <IonIcon icon={item.icon} />
                 </span>
-                <span className="homeos-attention__label">{item.label}</span>
+                <span className="homeos-attention__label">{item.label}{item.detail && <span className="homeos-attention__detail">{item.detail}</span>}</span>
                 <IonIcon icon={chevronForward} className="homeos-attention__chevron" aria-hidden="true" />
-              </button>
+              </Link>
             </li>
           ))}
         </ul>
       )}
+      {transactions.isError && <p className="homeos-home-feedback" role="alert">Couldn't check bank transactions. <button className="homeos-home-link" type="button" onClick={() => void transactions.refetch()}>Retry</button></p>}
+      {shoppingList.isError && <p className="homeos-home-feedback" role="alert">Couldn't check the shopping list. <button className="homeos-home-link" type="button" onClick={() => void shoppingList.refetch()}>Retry</button></p>}
     </section>
   )
 }

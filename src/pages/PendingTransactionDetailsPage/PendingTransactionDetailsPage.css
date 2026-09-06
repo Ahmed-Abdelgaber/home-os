@@ -16,14 +16,14 @@
 .homeos-splitter__ledger {
   padding: var(--homeos-space-20);
   background: var(--homeos-surface);
-  border: 1px solid var(--homeos-border);
-  border-radius: var(--homeos-radius-hero);
-  box-shadow: var(--homeos-shadow-card);
+  border: 0;
+  border-radius: 20px;
+  box-shadow: none;
 }
 
 .homeos-splitter__ledger--settled {
-  background: linear-gradient(160deg, var(--homeos-success-soft) 0%, var(--homeos-surface) 60%);
-  border-color: rgba(52, 182, 83, 0.24);
+  background: var(--homeos-surface);
+
 }
 
 .homeos-splitter__identity {
@@ -37,35 +37,37 @@
 .homeos-splitter__merchant {
   margin: 0;
   min-width: 0;
-  color: var(--homeos-ink-950);
+  color: var(--ledger-ink);
   font-size: var(--homeos-text-title-sm);
-  font-weight: var(--homeos-weight-bold);
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .homeos-splitter__headline-label {
   margin: 0;
-  color: var(--homeos-ink-500);
+  color: var(--ledger-muted);
   font-size: var(--homeos-text-caption);
-  font-weight: var(--homeos-weight-bold);
+  font-weight: 600;
   letter-spacing: 0.8px;
   text-transform: uppercase;
 }
 
 .homeos-splitter__headline-amount {
   margin: var(--homeos-space-4) 0 var(--homeos-space-16);
-  color: var(--homeos-ink-950);
-  font-size: var(--homeos-text-display-lg);
-  font-weight: var(--homeos-weight-bold);
+  color: var(--ledger-ink);
+  font-size: 32px;
+  overflow-wrap: anywhere;
+  font-weight: 600;
   line-height: 1.05;
   letter-spacing: -0.6px;
   font-variant-numeric: tabular-nums;
 }
 
 .homeos-splitter__ledger--settled .homeos-splitter__headline-amount {
-  color: var(--homeos-success);
+  color: #147a52;
 }
 
 .homeos-splitter__track {
@@ -78,17 +80,18 @@
 .homeos-splitter__fill {
   height: 100%;
   border-radius: var(--homeos-radius-circle);
-  background: var(--homeos-primary-500);
+  background: var(--ledger-violet);
   transition: width var(--homeos-motion-normal) var(--homeos-ease);
 }
 
 .homeos-splitter__ledger--settled .homeos-splitter__fill {
-  background: var(--homeos-success);
+  background: #147a52;
 }
 
 .homeos-splitter__tally {
   display: flex;
   gap: var(--homeos-space-24);
+  flex-wrap: wrap;
   margin: var(--homeos-space-16) 0 0;
 }
 
@@ -99,14 +102,14 @@
 }
 
 .homeos-splitter__tally-cell dt {
-  color: var(--homeos-ink-500);
+  color: var(--ledger-muted);
   font-size: var(--homeos-text-caption);
   font-weight: var(--homeos-weight-medium);
 }
 
 .homeos-splitter__tally-cell dd {
   margin: 0;
-  color: var(--homeos-ink-800);
+  color: var(--ledger-ink);
   font-size: var(--homeos-text-body-sm);
   font-weight: var(--homeos-weight-semibold);
   font-variant-numeric: tabular-nums;
@@ -117,7 +120,7 @@
   align-items: center;
   gap: var(--homeos-space-8);
   margin: var(--homeos-space-16) 0 0;
-  color: var(--homeos-success);
+  color: #147a52;
   font-size: var(--homeos-text-footnote);
   font-weight: var(--homeos-weight-medium);
   line-height: 1.4;
@@ -136,8 +139,9 @@
   text-align: center;
   gap: var(--homeos-space-8);
   padding: var(--homeos-space-24) var(--homeos-space-20);
-  border: 1px dashed var(--homeos-border);
-  border-radius: var(--homeos-radius-card);
+  border: 0;
+  background: var(--homeos-surface);
+  border-radius: 20px;
 }
 
 .homeos-splitter__start-icon {
@@ -147,14 +151,14 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--homeos-radius-circle);
-  background: var(--homeos-primary-50);
-  color: var(--homeos-primary-600);
+  background: var(--ledger-violet-soft);
+  color: var(--ledger-violet);
   font-size: var(--homeos-text-title);
 }
 
 .homeos-splitter__start-title {
   margin: var(--homeos-space-4) 0 0;
-  color: var(--homeos-ink-950);
+  color: var(--ledger-ink);
   font-size: var(--homeos-text-body-lg);
   font-weight: var(--homeos-weight-semibold);
 }
@@ -162,7 +166,7 @@
 .homeos-splitter__start-copy {
   margin: 0;
   max-width: 320px;
-  color: var(--homeos-ink-500);
+  color: var(--ledger-muted);
   font-size: var(--homeos-text-body-sm);
   line-height: 1.45;
 }
@@ -181,7 +185,7 @@
   padding: var(--homeos-space-12) var(--homeos-page-padding-x);
   padding-bottom: calc(env(safe-area-inset-bottom) + var(--homeos-space-12));
   background: var(--homeos-surface);
-  border-top: 1px solid var(--homeos-border);
+  border-top: 1px solid var(--ledger-line);
 }
 
 .homeos-splitter__add {
@@ -198,8 +202,8 @@
 /* ─── Original bank message disclosure ─── */
 .homeos-splitter__source {
   background: var(--homeos-surface);
-  border: 1px solid var(--homeos-border);
-  border-radius: var(--homeos-radius-card);
+  border: 0;
+  border-radius: 20px;
   overflow: hidden;
 }
 
@@ -209,7 +213,7 @@
   justify-content: space-between;
   min-height: 48px;
   padding: var(--homeos-space-12) var(--homeos-space-16);
-  color: var(--homeos-ink-600);
+  color: var(--ledger-muted);
   font-size: var(--homeos-text-body-sm);
   font-weight: var(--homeos-weight-medium);
   cursor: pointer;
@@ -225,7 +229,7 @@
 .homeos-splitter__source-summary::after {
   content: '▾';
   font-size: var(--homeos-text-caption);
-  color: var(--homeos-ink-500);
+  color: var(--ledger-muted);
   transition: transform var(--homeos-motion-fast) var(--homeos-ease);
 }
 
@@ -239,9 +243,9 @@
 
 .homeos-splitter__raw {
   padding: var(--homeos-space-12) var(--homeos-space-16) var(--homeos-space-16);
-  border-top: 1px solid var(--homeos-border);
+  border-top: 1px solid var(--ledger-line);
   background: var(--homeos-soft-surface);
-  color: var(--homeos-ink-600);
+  color: var(--ledger-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: var(--homeos-text-caption);
   line-height: 1.6;
@@ -254,3 +258,28 @@
   margin-top: 0;
   margin-bottom: 0;
 }
+
+.homeos-splitter__identity { flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.homeos-splitter__merchant { font-size: 16px; line-height: 1.5; flex: 1 1 140px; }
+.homeos-splitter__headline-amount { color: var(--ledger-violet); line-height: 1.2; }
+.homeos-transaction-page .homeos-status-chip { border: 0; border-radius: 8px; padding: 5px 8px; font-size: 11px; font-weight: 600; box-shadow: none; }
+.homeos-transaction-page .homeos-status-chip--active { color: #147a52; background: var(--ledger-green-soft); }
+.homeos-transaction-page .homeos-status-chip--warning { color: var(--ledger-amber); background: var(--ledger-amber-soft); }
+.homeos-transaction-page .homeos-status-chip--danger { color: #c23553; background: var(--ledger-rose-soft); }
+.homeos-transaction-page .homeos-status-chip--finished { color: var(--ledger-muted); background: #eeeff5; }
+.homeos-transaction-page .homeos-grouped-card { border: 0; border-radius: 20px; box-shadow: none; }
+.homeos-transaction-page .homeos-section-header { padding: 0 8px 10px; margin: 0; }
+.homeos-transaction-page .homeos-section-header__title ion-icon { display: none; }
+.homeos-transaction-page .homeos-section-header h2 { color: var(--ledger-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+.homeos-transaction-page .homeos-row { min-height: 72px; padding: 12px; gap: 10px; }
+.homeos-transaction-page .homeos-row__title { white-space: normal; overflow-wrap: anywhere; font-size: 14px; line-height: 1.4; }
+.homeos-transaction-page .homeos-row__meta { color: var(--ledger-muted); font-size: 11px; line-height: 1.5; }
+.homeos-transaction-page .homeos-row__media { border-radius: 14px; background: var(--ledger-blue-soft); color: #2864bd; }
+.homeos-transaction-page .homeos-row__media--primary { background: var(--ledger-violet-soft); color: var(--ledger-violet); }
+.homeos-transaction-page .homeos-alloc-amount { font-size: 13px; white-space: normal; overflow-wrap: anywhere; }
+.homeos-transaction-page .homeos-row__accessory { max-width: 38%; text-align: end; }
+.homeos-transaction-page .homeos-row--clickable { background: transparent; }
+.homeos-transaction-page .homeos-row--clickable:active { opacity: .65; }
+.homeos-transaction-page .homeos-primary-button { background: var(--ledger-violet); border-radius: 14px; font-size: 14px; font-weight: 600; min-height: 48px; height: auto; padding: 12px; }
+.homeos-transaction-page .homeos-splitter__ignore { width: 100%; border: 0; border-radius: 14px; background: var(--ledger-rose-soft); color: #c23553; box-shadow: none; }
+.homeos-splitter__source-summary:focus-visible { outline: 2px solid var(--ledger-violet); outline-offset: -3px; }

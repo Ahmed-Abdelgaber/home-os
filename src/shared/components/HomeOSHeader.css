@@ -1,99 +1,205 @@
 .homeos-masthead {
   position: relative;
   isolation: isolate;
-  height: calc(env(safe-area-inset-top) + 268px);
-  border-bottom-left-radius: var(--homeos-radius-sheet);
-  border-bottom-right-radius: var(--homeos-radius-sheet);
   overflow: hidden;
-  background: var(--homeos-header);
-  display: flex;
-  flex-direction: column;
-}
-
-.homeos-masthead__photo {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Both faces sit in the upper third of the source frame. */
-  object-position: center 12%;
-  z-index: -2;
-}
-
-/*
-  Two scrims in one layer: a short one at the top so the brand and settings control stay
-  legible, and a deep one at the bottom carrying the greeting. The middle stays clear.
-*/
-.homeos-masthead__scrim {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    linear-gradient(to bottom, rgba(var(--homeos-ink-950-rgb), 0.45) 0%, rgba(var(--homeos-ink-950-rgb), 0) 22%),
-    linear-gradient(to top, rgba(var(--homeos-ink-950-rgb), 0.88) 0%, rgba(var(--homeos-ink-950-rgb), 0.55) 22%, rgba(var(--homeos-ink-950-rgb), 0) 48%);
+  padding: calc(env(safe-area-inset-top) + var(--homeos-space-8)) var(--homeos-page-padding-x) var(--homeos-space-16);
+  color: var(--homeos-surface);
+  background: var(--homeos-home-masthead);
+  border-radius: 0 0 var(--homeos-radius-sheet) var(--homeos-radius-sheet);
 }
 
 .homeos-masthead__bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: calc(env(safe-area-inset-top) + var(--homeos-space-12)) var(--homeos-page-padding-x) 0;
+  min-height: 44px;
 }
 
 .homeos-masthead__brand {
-  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: var(--homeos-space-8);
   font-size: var(--homeos-text-body-lg);
   font-weight: var(--homeos-weight-bold);
-  letter-spacing: 0.2px;
-  text-shadow: 0 1px 8px rgba(var(--homeos-ink-950-rgb), 0.5);
+  letter-spacing: -0.4px;
+}
+
+.homeos-masthead__brand ion-icon {
+  color: var(--homeos-surface);
+  font-size: var(--homeos-text-title-sm);
 }
 
 .homeos-masthead__settings {
   width: 44px;
   height: 44px;
-  margin-right: calc(var(--homeos-space-8) * -1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: var(--homeos-radius-circle);
-  background: rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(8px);
-  color: #ffffff;
-  font-size: var(--homeos-text-title-sm);
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--homeos-radius-control);
+  color: var(--homeos-surface);
+  font-size: var(--homeos-text-title);
   cursor: pointer;
-  transition: background-color var(--homeos-motion-fast) var(--homeos-ease), transform var(--homeos-motion-fast) var(--homeos-ease);
 }
 
 .homeos-masthead__settings:active {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(0.92);
+  transform: scale(0.94);
 }
 
 .homeos-masthead__settings:focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid var(--homeos-surface);
   outline-offset: 2px;
 }
 
-.homeos-masthead__caption {
-  margin-top: auto;
-  padding: 0 var(--homeos-page-padding-x) var(--homeos-space-24);
+.homeos-masthead__scene {
+  display: flex;
+  align-items: flex-end;
+  min-height: 196px;
+  padding-top: var(--homeos-space-24);
+}
+
+.homeos-masthead__date {
+  margin: 0 0 var(--homeos-space-16);
+  font-size: var(--homeos-text-caption);
+  line-height: 1.5;
+  color: var(--homeos-surface);
 }
 
 .homeos-masthead__greeting {
   margin: 0;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: var(--homeos-text-body-sm);
-  font-weight: var(--homeos-weight-semibold);
-  letter-spacing: 0.2px;
+  font-size: var(--homeos-text-heading);
+  font-weight: 400;
+  letter-spacing: -0.7px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
-.homeos-masthead__name {
-  margin: 2px 0 0;
-  color: #ffffff;
-  font-size: var(--homeos-text-heading);
-  font-weight: var(--homeos-weight-bold);
-  line-height: 1.15;
-  text-shadow: 0 1px 12px rgba(var(--homeos-ink-950-rgb), 0.4);
+.homeos-masthead__greeting span {
+  display: block;
+  margin-top: var(--homeos-space-4);
+  font-size: var(--homeos-text-display-lg);
+  font-weight: var(--homeos-weight-semibold);
+  letter-spacing: -1px;
+}
+
+.homeos-masthead__cover {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  opacity: 0.72;
+}
+
+.homeos-masthead__shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(18, 19, 26, 0.62), rgba(18, 19, 26, 0.12)),
+    linear-gradient(0deg, rgba(18, 19, 26, 0.58), transparent 75%);
+}
+
+.homeos-masthead__status {
+  display: flex;
+  align-items: center;
+  gap: var(--homeos-space-8);
+  margin: var(--homeos-space-20) 0 0;
+  color: var(--homeos-surface);
+  font-size: var(--homeos-text-caption);
+  line-height: 1.5;
+}
+
+.homeos-masthead__status > span {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@media (max-width: 359px) {
+  .homeos-masthead__greeting {
+    font-size: var(--homeos-text-title-lg);
+  }
+}
+
+/* A taller cover at wider sizes keeps both people within the landscape crop. */
+@media (min-width: 480px) {
+  .homeos-masthead__scene {
+    min-height: 280px;
+  }
+}
+
+.homeos-masthead__trip {
+  display: flex;
+  align-items: center;
+  gap: var(--homeos-space-12);
+  min-height: 72px;
+  margin-top: var(--homeos-space-16);
+  padding: var(--homeos-space-12);
+  border-radius: var(--homeos-radius-hero);
+  background: var(--homeos-info-soft);
+  color: var(--homeos-ink-800);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-masthead__trip:active {
+  background: var(--homeos-surface);
+  transform: scale(0.99);
+}
+
+.homeos-masthead__trip:focus-visible {
+  outline: 2px solid var(--homeos-surface);
+  outline-offset: 3px;
+}
+
+.homeos-masthead__trip-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--homeos-radius-circle);
+  background: var(--homeos-home-info-ink);
+  color: var(--homeos-surface);
+  font-size: var(--homeos-text-title);
+}
+
+.homeos-masthead__trip-copy {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--homeos-space-4);
+}
+
+.homeos-masthead__trip-label {
+  color: var(--homeos-home-info-ink);
+  font-size: var(--homeos-text-body-sm);
+  font-weight: var(--homeos-weight-semibold);
+}
+
+.homeos-masthead__trip-detail {
+  font-size: var(--homeos-text-footnote);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.homeos-masthead__trip-chevron {
+  flex-shrink: 0;
+  color: var(--homeos-ink-600);
+  font-size: var(--homeos-text-body-lg);
+}
+
+.homeos-masthead__status--home > span {
+  background: var(--homeos-success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--homeos-success) 18%, transparent);
+}
+
+.homeos-masthead__status--away > span {
+  background: var(--homeos-info);
 }

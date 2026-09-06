@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { cairoDateOnlyFromTimestamp } from '../../core/utils/cairoDate'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { type BankTransaction } from './useBankTransactions'
+import '../../shared/components/CompactLedger.css'
 import './FulfillTransactionModal.css'
 
 interface FulfillTransactionModalProps {
@@ -113,6 +114,11 @@ export function FulfillTransactionModal({
 
   return (
     <IonModal
+      className="homeos-compact-ledger homeos-fulfill-overlay"
+      onIonBreakpointDidChange={(event) => {
+        // Keep the footer inside the visible part of the draggable sheet.
+        (event.target as HTMLIonModalElement).style.setProperty('--sheet-visible-ratio', String(event.detail.breakpoint))
+      }}
       isOpen={isOpen}
       onDidDismiss={onClose}
       initialBreakpoint={0.88}

@@ -20,6 +20,8 @@ import { SecondaryButton } from '../../shared/components/SecondaryButton'
 import { SectionHeader } from '../../shared/components/SectionHeader'
 import { QueryState } from '../../shared/components/QueryState'
 import { Skeleton } from '../../shared/components/Skeleton'
+import '../../shared/components/CompactLedger.css'
+import '../../shared/components/CompactList.css'
 import './PendingTransactionDetailsPage.css'
 
 function money(currency: string, value: number): string {
@@ -91,7 +93,7 @@ export function PendingTransactionDetailsPage() {
   }
 
   return (
-    <AppPage title="Transaction" backHref="/app/pending-transactions" footer={footer}>
+    <AppPage className="homeos-compact-ledger homeos-directory-page homeos-transaction-page" fullscreen={false} title="Transaction" backHref="/app/pending-transactions" footer={footer}>
       <QueryState
         query={transactionQuery}
         skeleton={

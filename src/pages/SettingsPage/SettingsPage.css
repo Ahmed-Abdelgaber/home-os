@@ -1,53 +1,31 @@
-/* ── Settings Profile Card ────────────────────── */
-.homeos-profile-card {
-  display: flex;
-  align-items: center;
-  gap: var(--homeos-space-16);
-  padding: var(--homeos-space-20) var(--homeos-space-16);
+.homeos-settings-section { margin-bottom: 24px; }
+.homeos-settings-heading { margin: 0; padding: 0 8px 10px; color: var(--ledger-muted); font-size: 12px; font-weight: 600; line-height: 1.5; letter-spacing: .5px; text-transform: uppercase; }
+.homeos-settings-page .homeos-grouped-card { margin: 0; border: 0; border-radius: 20px; box-shadow: none; background: var(--homeos-surface); }
+.homeos-profile-card { display: flex; align-items: center; gap: 14px; padding: 20px 16px; }
+.homeos-profile-card__avatar { display: grid; place-items: center; flex-shrink: 0; width: 48px; height: 52px; border-radius: 16px; background: var(--ledger-green-soft); color: #147a52; font-size: 22px; font-weight: 600; }
+.homeos-profile-card__info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.homeos-profile-card__name { font-size: 17px; font-weight: 600; color: var(--ledger-ink); overflow-wrap: anywhere; }
+.homeos-profile-card__email { font-size: 12px; color: var(--ledger-muted); line-height: 1.5; overflow-wrap: anywhere; }
+.homeos-settings-page .homeos-row { min-height: 82px; padding: 14px 12px; gap: 10px; }
+.homeos-settings-page .homeos-row__action { gap: 10px; }
+.homeos-settings-page .homeos-row__title { font-size: 14px; line-height: 1.45; white-space: normal; overflow: visible; }
+.homeos-settings-page .homeos-row__meta { font-size: 12px; line-height: 1.5; color: var(--ledger-muted); }
+.homeos-settings-page .homeos-row__media { width: 40px; height: 44px; border-radius: 14px; font-size: 22px; }
+.homeos-settings-page .homeos-row__media--info { background: var(--ledger-blue-soft); color: #2864bd; }
+.homeos-settings-page .homeos-row__media--success { background: var(--ledger-green-soft); color: #147a52; }
+.homeos-settings-page .homeos-row__media--warning { background: var(--ledger-amber-soft); color: var(--ledger-amber); }
+.homeos-settings-page .homeos-row__media--primary { background: var(--ledger-violet-soft); color: var(--ledger-violet); }
+.homeos-settings-page ion-toggle { min-height: 44px; min-width: 44px; --track-background: #dcdde7; --track-background-checked: #147a52; --handle-background-checked: white; }
+.homeos-settings-page ion-toggle::part(track) { height: 28px; width: 46px; }
+.homeos-settings-page .homeos-grouped-card > .homeos-row + .homeos-row { border-top-color: var(--ledger-line); }
+.homeos-settings-field { margin: 0 12px 14px 62px; padding: 10px 12px; border-radius: 12px; background: var(--ledger-paper); }
+.homeos-settings-field ion-input { font-size: 14px; --highlight-color-focused: var(--ledger-violet); }
+.homeos-settings-disable { min-height: 48px; width: calc(100% - 24px); margin: 0 12px; padding: 12px 0; border: 0; border-top: 1px solid var(--ledger-line); background: transparent; color: #c23553; font: inherit; font-size: 13px; font-weight: 600; }
+.homeos-settings-page button:disabled { opacity: .45; cursor: default; }
+@media (max-width: 359px) {
+  .homeos-settings-page .homeos-row__media { width: 32px; height: 38px; font-size: 20px; }
+  .homeos-settings-page .homeos-row, .homeos-settings-page .homeos-row__action { gap: 8px; }
+  .homeos-settings-field { margin-inline-start: 52px; }
 }
 
-.homeos-profile-card__avatar {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: var(--homeos-radius-circle);
-  background: linear-gradient(135deg, var(--homeos-primary-500), var(--homeos-primary-600));
-  color: #ffffff;
-  font-size: var(--homeos-text-title);
-  font-weight: var(--homeos-weight-bold);
-  letter-spacing: -0.3px;
-  text-transform: uppercase;
-  box-shadow: 0 4px 12px rgba(var(--homeos-primary-500-rgb), 0.3);
-  user-select: none;
-}
-
-.homeos-profile-card__info {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  flex: 1;
-  min-width: 0;
-}
-
-.homeos-profile-card__name {
-  font-size: var(--homeos-text-body-lg);
-  font-weight: var(--homeos-weight-bold);
-  color: var(--homeos-ink-950);
-  line-height: 1.25;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.homeos-profile-card__email {
-  font-size: var(--homeos-text-footnote);
-  font-weight: var(--homeos-weight-medium);
-  color: var(--homeos-ink-500);
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.homeos-settings-enable { display: grid; place-items: center; min-width: 70px; min-height: 44px; padding: 8px 10px; border: 0; border-radius: 12px; background: var(--ledger-green-soft); color: #147a52; font: inherit; font-size: 12px; font-weight: 600; }
