@@ -4,6 +4,8 @@ import { AppPage } from '../../shared/components/AppPage'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { NotificationSettingsCard } from '../../features/notifications/NotificationSettingsCard'
 import { BankSmsSettingsCard } from '../../features/bank-sms/BankSmsSettingsCard'
+import '../../shared/components/CompactLedger.css'
+import '../../shared/components/CompactList.css'
 import './SettingsPage.css'
 
 /** Extract up to two initials from a display name. */
@@ -25,7 +27,9 @@ export function SettingsPage() {
   const email = session?.user.email ?? '—'
 
   return (
-    <AppPage title="Settings" backHref="/app/tabs/more">
+    <AppPage title="Settings" backHref="/app/tabs/more" className="homeos-compact-ledger homeos-directory-page homeos-settings-page" fullscreen={false}>
+      <section className="homeos-settings-section" aria-label="Your account">
+      <h2 className="homeos-settings-heading">Your account</h2>
       <GroupedCard>
         <div className="homeos-profile-card">
           <span className="homeos-profile-card__avatar" aria-hidden="true">
@@ -37,6 +41,7 @@ export function SettingsPage() {
           </div>
         </div>
       </GroupedCard>
+      </section>
 
       <BankSmsSettingsCard />
 

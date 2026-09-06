@@ -1,6 +1,7 @@
+import { ManagementList } from '../../shared/components/ManagementList'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useIonAlert } from '@ionic/react'
-import { pricetagOutline } from 'ionicons/icons'
+import { resolveProductVisual } from '../../core/presentation/productVisuals'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -10,14 +11,8 @@ import {
   useCreateCategory,
   useUpdateCategory,
 } from '../../features/master-data/useCategories'
-import { AppPage } from '../../shared/components/AppPage'
-import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
-import { QueryState } from '../../shared/components/QueryState'
 import { QuickAddSheet } from '../../shared/components/QuickAddSheet'
-import { Row } from '../../shared/components/Row'
-import { Skeleton } from '../../shared/components/Skeleton'
-import './CategoriesPage.css'
 
 type SheetState = { mode: 'add' } | { mode: 'edit'; category: CategoryDetail } | null
 
@@ -33,32 +28,11 @@ export function CategoriesPage() {
   const [sheet, setSheet] = useState<SheetState>(null)
 
   return (
-    <AppPage title="Categories" backHref="/app/tabs/more" onRefresh={async () => { await categories.refetch() }}>
-      <PrimaryButton className="homeos-categories__add" onClick={() => setSheet({ mode: 'add' })}>
-        Add category
-      </PrimaryButton>
-
-      <QueryState
-        query={categories}
-        skeleton={<Skeleton height={64} />}
-        error="Couldn't load categories."
-        empty="No categories yet."
-      >
-        {(items) => (
-          <GroupedCard>
-            {items.map((category) => (
-              <Row
-                key={category.id}
-                icon={pricetagOutline}
-                title={category.name}
-                meta={category.isActive ? 'Active' : 'Inactive'}
-                onClick={() => setSheet({ mode: 'edit', category })}
-              />
-            ))}
-          </GroupedCard>
-        )}
-      </QueryState>
-
+    <ManagementList title="Categories" singular="category" query={categories}
+      onAdd={() => setSheet({ mode: 'add' })}
+      onEdit={(category) => setSheet({ mode: 'edit', category })}
+      describe={() => 'Products & expenses'}
+      visual={(category) => { const visual = resolveProductVisual('', category.name); return { glyph: visual.emoji, tone: visual.tone } }}>
       <QuickAddSheet
         isOpen={sheet !== null}
         title={sheet?.mode === 'edit' ? 'Edit category' : 'Add category'}
@@ -72,7 +46,7 @@ export function CategoriesPage() {
           />
         )}
       </QuickAddSheet>
-    </AppPage>
+    </ManagementList>
   )
 }
 
@@ -96,8 +70,8 @@ function CategoryForm({ initial, onSaved }: { initial?: CategoryDetail; onSaved:
   const onSubmit = async (values: CategoryFormValues) => {
     if (initial) {
       presentAlert({
-        header: 'Save Changes?',
-        message: 'Are you sure you want to save these changes?',
+        header: 'Save changes?',
+        message: 'The new details replace the current ones everywhere this appears.',
         buttons: [
           { text: 'Cancel', role: 'cancel' },
           { text: 'Save', handler: () => executeSubmit(values) }

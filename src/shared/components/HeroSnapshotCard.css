@@ -34,15 +34,6 @@
   cursor: not-allowed;
 }
 
-.homeos-hero-card__glow {
-  position: absolute;
-  inset: 0;
-  background-image: url('/images/IMG_5718.JPG');
-  background-size: cover;
-  background-position: center 20%;
-  opacity: 0.2;
-}
-
 .homeos-hero-card__spend {
   position: relative;
 }

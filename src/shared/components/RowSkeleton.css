@@ -1,0 +1,12 @@
+/* Mirrors GroupedCard: one outline, hairline gaps between rows, square inner corners. */
+.homeos-row-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: var(--homeos-radius-card);
+  overflow: hidden;
+}
+
+.homeos-row-skeleton .homeos-skeleton {
+  border-radius: 0;
+}

@@ -1,22 +1,46 @@
+/*
+  Low-contrast shimmer: a single highlight band sweeps across a flat surface. The band is
+  only ~5% lighter than the surface, so it reads as "loading" in peripheral vision without
+  pulling the eye off whatever already painted.
+*/
 .homeos-skeleton {
+  position: relative;
+  overflow: hidden;
   border-radius: var(--homeos-radius-control);
   background: var(--homeos-soft-surface);
-  animation: homeos-skeleton-pulse 1.2s ease-in-out infinite;
 }
 
+.homeos-skeleton--text {
+  border-radius: var(--homeos-radius-circle);
+}
+
+.homeos-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: homeos-skeleton-sweep 1.6s var(--homeos-ease) infinite;
+}
+
+@keyframes homeos-skeleton-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Static, slightly recessed surface — no sweep, no pulse. */
 @media (prefers-reduced-motion: reduce) {
-  .homeos-skeleton {
-    animation: none;
-    opacity: 0.6;
+  .homeos-skeleton::after {
+    display: none;
   }
-}
 
-@keyframes homeos-skeleton-pulse {
-  0%,
-  100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
+  .homeos-skeleton {
+    opacity: 0.7;
   }
 }

@@ -9,6 +9,7 @@ interface HomeSnapshot {
   percentVsLastMonth: number | null
   travel: TravelStatus
   activePeriodId: string | null
+  periodStartDate: string | null
 }
 
 async function fetchPeriodSpend(start: string, end: string | null): Promise<number> {
@@ -44,6 +45,7 @@ async function fetchTravel(): Promise<TravelStatus> {
       who: personLabel(person),
       destination: currentTrip.name,
       returnLabel: formatShortDate(currentTrip.return_date),
+      returnDate: currentTrip.return_date,
     }
   }
 
@@ -65,6 +67,7 @@ async function fetchTravel(): Promise<TravelStatus> {
       person: personLabel(person),
       destination: upcomingTrip.name,
       rangeLabel: `${formatShortDate(upcomingTrip.departure_date)} – ${formatShortDate(upcomingTrip.return_date)}`,
+      departureDate: upcomingTrip.departure_date,
     },
   }
 }
@@ -102,6 +105,7 @@ export function useHomeSnapshot() {
         percentVsLastMonth: previousSpend === 0 ? null : Math.round(((currentSpend - previousSpend) / previousSpend) * 100),
         travel,
         activePeriodId: active?.id ?? null,
+        periodStartDate: active?.start_date ?? null,
       }
     },
   })

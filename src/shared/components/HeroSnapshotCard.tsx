@@ -4,8 +4,11 @@ import { briefcaseOutline, checkmarkCircle, chevronForward, trendingUpOutline } 
 import './HeroSnapshotCard.css'
 
 export type TravelStatus =
-  | { kind: 'away'; who: string; destination: string; returnLabel: string }
-  | { kind: 'home'; upcoming?: { person: string; destination: string; rangeLabel: string } }
+  | { kind: 'away'; who: string; destination: string; returnLabel: string; returnDate?: string }
+  | {
+      kind: 'home'
+      upcoming?: { person: string; destination: string; rangeLabel: string; departureDate?: string }
+    }
 
 interface HeroSnapshotCardProps {
   currency: string
@@ -47,8 +50,6 @@ export function HeroSnapshotCard({ currency, amount, percentVsLastMonth, travel,
 
   return (
     <div className="homeos-hero-card">
-      <div className="homeos-hero-card__glow" aria-hidden="true" />
-      
       {onCyclePeriod && (
         <button 
           type="button" 

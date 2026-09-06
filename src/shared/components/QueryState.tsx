@@ -15,8 +15,12 @@ interface QueryStateProps<T> {
   skeleton: ReactNode
   /** What to say when the fetch failed. Name the thing that didn't load. */
   error: string
-  /** What to say when the fetch succeeded with nothing in it. Omit for data that is never empty. */
-  empty?: string
+  /**
+   * What to show when the fetch succeeded with nothing in it. Omit for data that is never
+   * empty. A string gets the compact in-card treatment; pass an `EmptyState` of your own
+   * when the screen deserves an icon and a way to act on it.
+   */
+  empty?: ReactNode
   children: (data: T) => ReactNode
 }
 
@@ -30,10 +34,12 @@ export function QueryState<T>({ query, skeleton, error, empty, children }: Query
   if (query.isError || query.data === undefined) return <EmptyState message={error} />
 
   if (empty !== undefined && Array.isArray(query.data) && query.data.length === 0) {
-    return (
+    return typeof empty === 'string' ? (
       <GroupedCard>
         <EmptyState message={empty} />
       </GroupedCard>
+    ) : (
+      <>{empty}</>
     )
   }
 

@@ -3,6 +3,9 @@ import type { ReactNode } from 'react'
 
 interface AppPageProps {
   title: string
+  className?: string
+  headerActions?: ReactNode
+  fullscreen?: boolean
   /**
    * Where back goes when this page was opened directly (deep link, refresh). Ionic prefers the
    * real navigation history when there is one and only falls back to this. Omit on tab roots,
@@ -21,9 +24,9 @@ interface AppPageProps {
  * Every screen except Home and Login is this shape, and each was spelling out the same
  * six Ionic elements.
  */
-export function AppPage({ title, backHref, onRefresh, footer, children }: AppPageProps) {
+export function AppPage({ title, className, headerActions, fullscreen = true, backHref, onRefresh, footer, children }: AppPageProps) {
   return (
-    <IonPage>
+    <IonPage className={className}>
       <IonHeader>
         <IonToolbar>
           {backHref && (
@@ -32,9 +35,10 @@ export function AppPage({ title, backHref, onRefresh, footer, children }: AppPag
             </IonButtons>
           )}
           <IonTitle>{title}</IonTitle>
+          {headerActions && <IonButtons slot="end">{headerActions}</IonButtons>}
         </IonToolbar>
       </IonHeader>
-      <IonContent className="homeos-page-content" fullscreen>
+      <IonContent className="homeos-page-content" fullscreen={fullscreen}>
         {onRefresh && (
           <IonRefresher
             slot="fixed"
@@ -58,4 +62,3 @@ export function AppPage({ title, backHref, onRefresh, footer, children }: AppPag
     </IonPage>
   )
 }
-

@@ -1,18 +1,27 @@
 import { useNavigate, useParams } from 'react-router-dom'
+import { IonIcon } from '@ionic/react'
+import {
+  documentTextOutline,
+  personOutline,
+  pricetagOutline,
+  repeatOutline,
+  timerOutline,
+} from 'ionicons/icons'
 import { formatShortDate } from '../../core/utils/cairoDate'
+import { resolveProductVisual } from '../../core/presentation/productVisuals'
 import { calculateTypicalUsage, useProductHistory } from '../../features/items/useItemDetails'
 import { CONSUMPTION_MODE_LABELS } from '../../features/products/consumptionMode'
 import { useLatestProductPurchase } from '../../features/products/useLatestProductPurchase'
 import { type ProductDetail, useProduct } from '../../features/products/useProductDetail'
 import { useSetProductActive } from '../../features/products/useProductMutations'
 import { AppPage } from '../../shared/components/AppPage'
-import { FactRow } from '../../shared/components/FactRow'
-import { GroupedCard } from '../../shared/components/GroupedCard'
 import { HistorySection, type HistoryEntry } from '../../shared/components/HistorySection'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { QueryState } from '../../shared/components/QueryState'
 import { SecondaryButton } from '../../shared/components/SecondaryButton'
 import { Skeleton } from '../../shared/components/Skeleton'
+import '../../shared/components/CompactLedger.css'
+import '../../shared/components/CompactList.css'
 import './ProductDetailsPage.css'
 
 export function ProductDetailsPage() {
@@ -38,7 +47,12 @@ export function ProductDetailsPage() {
   }
 
   return (
-    <AppPage title="Product Details" backHref="/app/products">
+    <AppPage
+      title="Product Details"
+      backHref="/app/products"
+      className="homeos-compact-ledger homeos-directory-page homeos-product-details-page"
+      fullscreen={false}
+    >
       <QueryState query={product} skeleton={<Skeleton height={220} />} error="Couldn't load this product.">
         {(detail) => {
           const items = history.data ?? []
@@ -49,6 +63,7 @@ export function ProductDetailsPage() {
             (item) => item.status === 'finished',
           )
           const typicalUsage = calculateTypicalUsage(items)
+          const visual = resolveProductVisual(detail.name, detail.categoryName)
 
           const currentEntries: HistoryEntry[] = currentCoverageItems.map((h) => {
             const title = h.expense?.date
@@ -117,25 +132,87 @@ export function ProductDetailsPage() {
           })
 
           return (
-            <>
+            <div className="homeos-product-details-body">
               <div className="homeos-product-details__identity">
-                <h1 className="homeos-product-details__title">{detail.name}</h1>
+                <div className="homeos-product-details__identity-main">
+                  <span className={`homeos-list-glyph homeos-list-glyph--${visual.tone}`} aria-hidden="true">
+                    {visual.ruleId ? visual.emoji : '📦'}
+                  </span>
+                  <div className="homeos-product-details__identity-copy">
+                    <h1 className="homeos-product-details__title">{detail.name}</h1>
+                    <span className="homeos-product-details__subtitle">
+                      {detail.categoryName} • {detail.consumerName}
+                    </span>
+                  </div>
+                </div>
                 <span
                   className={`homeos-product-details__badge ${
                     detail.isActive ? 'homeos-product-details__badge--active' : 'homeos-product-details__badge--inactive'
                   }`}
                 >
-                  {detail.isActive ? 'Active' : 'Inactive'}
+                  {detail.isActive ? 'Active' : 'Archived'}
                 </span>
               </div>
 
-              <GroupedCard className="homeos-product-details__facts">
-                <FactRow label="Category" value={detail.categoryName} />
-                <FactRow label="Consumer" value={detail.consumerName} />
-                <FactRow label="Consumption" value={CONSUMPTION_MODE_LABELS[detail.consumptionMode]} />
-                {typicalUsage != null && <FactRow label="Typical usage" value={`${typicalUsage} days`} />}
-                {detail.notes && <FactRow label="Notes" value={detail.notes} />}
-              </GroupedCard>
+              <div className="homeos-product-details__metrics">
+                <div className={`homeos-product-details__metric ${typicalUsage != null ? 'homeos-product-details__metric--highlight' : ''}`}>
+                  <p className="homeos-product-details__metric-value">{typicalUsage != null ? typicalUsage : '—'}</p>
+                  <p className="homeos-product-details__metric-label">Typical Days</p>
+                </div>
+                <div className="homeos-product-details__metric">
+                  <p className="homeos-product-details__metric-value">{currentCoverageItems.length}</p>
+                  <p className="homeos-product-details__metric-label">In Stock / Active</p>
+                </div>
+                <div className="homeos-product-details__metric">
+                  <p className="homeos-product-details__metric-value">{finishedHistoryItems.length}</p>
+                  <p className="homeos-product-details__metric-label">Finished</p>
+                </div>
+              </div>
+
+              <section className="homeos-product-details__section" aria-label="Product details">
+                <div className="homeos-ledger-day__heading"><h2>Product details</h2></div>
+                <ul className="homeos-tx-details-list">
+                  <li className="homeos-tx-detail-row">
+                    <span className="homeos-tx-detail-row__label">
+                      <IonIcon icon={pricetagOutline} aria-hidden="true" />
+                      <span>Category</span>
+                    </span>
+                    <span className="homeos-tx-detail-row__value">{detail.categoryName}</span>
+                  </li>
+                  <li className="homeos-tx-detail-row">
+                    <span className="homeos-tx-detail-row__label">
+                      <IonIcon icon={personOutline} aria-hidden="true" />
+                      <span>Consumer</span>
+                    </span>
+                    <span className="homeos-tx-detail-row__value">{detail.consumerName}</span>
+                  </li>
+                  <li className="homeos-tx-detail-row">
+                    <span className="homeos-tx-detail-row__label">
+                      <IonIcon icon={repeatOutline} aria-hidden="true" />
+                      <span>Consumption</span>
+                    </span>
+                    <span className="homeos-tx-detail-row__value">{CONSUMPTION_MODE_LABELS[detail.consumptionMode]}</span>
+                  </li>
+                  {typicalUsage != null && (
+                    <li className="homeos-tx-detail-row">
+                      <span className="homeos-tx-detail-row__label">
+                        <IonIcon icon={timerOutline} aria-hidden="true" />
+                        <span>Typical usage</span>
+                      </span>
+                      <span className="homeos-tx-detail-row__value">{typicalUsage} days</span>
+                    </li>
+                  )}
+                  {detail.notes && (
+                    <li className="homeos-tx-detail-row">
+                      <span className="homeos-tx-detail-row__label">
+                        <IonIcon icon={documentTextOutline} aria-hidden="true" />
+                        <span>Notes</span>
+                      </span>
+                      <span className="homeos-tx-detail-row__value">{detail.notes}</span>
+                    </li>
+                  )}
+                </ul>
+              </section>
 
               <div className="homeos-product-details__actions">
                 <PrimaryButton disabled={!detail.isActive} onClick={() => handleBuyAgain(detail)}>
@@ -147,7 +224,7 @@ export function ProductDetailsPage() {
                 </SecondaryButton>
 
                 <SecondaryButton
-                  className="homeos-product-details__toggle"
+                  className={`homeos-product-details__toggle ${detail.isActive ? 'homeos-product-details__toggle--archive' : ''}`}
                   tone={detail.isActive ? 'danger' : 'brand'}
                   disabled={setActive.isPending}
                   onClick={() => setActive.mutate({ id: detail.id, isActive: !detail.isActive })}
@@ -170,7 +247,7 @@ export function ProductDetailsPage() {
                 entries={finishedEntries}
                 onEntryClick={(id) => navigate(`/app/items/${id}`)}
               />
-            </>
+            </div>
           )
         }}
       </QueryState>

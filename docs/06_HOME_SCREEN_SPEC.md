@@ -1,5 +1,48 @@
 # Home Screen Specification — V1
 
+> **Home palette approved — 6 September 2026.**
+> Home uses a single household cover photograph, a compact contextual trip strip,
+> sentence-case headings, compact item/activity rows, and the approved Deep violet period
+> treatment. Other screens retain their existing visual system pending separate review.
+>
+> Runtime palette ownership: `src/pages/HomePage/HomePage.css`, scoped to Home.
+> Brand violet `#6c5ce7`; ink `#232238`; paper `#f8f9fc`; surface `#ffffff`;
+> muted text `#66677a`; dividers `#e4e3ed`; deep period surface `#332857` with white
+> primary text, secondary text `#e0daf6`, and a translucent white End period control.
+> Success `#147a52` / soft `#e9f6ef`; warning `#edb23b` / soft `#fff3d8`
+> with readable warning text `#7e550c`; information `#3476df` / soft `#ebf2fe`;
+> danger `#c23553` / soft `#fcecf0`. The period's error text uses `#ffb8c6` for
+> contrast on its dark background. Shared type, spacing, and controls remain in
+> `src/theme/tokens.css`; Home adapts the existing semantic aliases to this palette.
+>
+> Amber marks pending review; green marks active items/success; blue marks stock/trips;
+> red marks errors/deletion. Activity tones come from the existing event formatter.
+> The normal End period control follows the approved translucent white treatment;
+> its confirmation retains the existing destructive intent. Amounts/comparisons stay
+> neutral, without treating higher spending as a failure. Scrollbars remain hidden
+> while scrolling stays enabled.
+> The cover uses object-fit: cover and a single responsive focal position; no duplicated
+> portraits or face-specific crops. Wider covers have more height to retain the subjects.
+>
+> The existing snapshot query calculates tracking-period spending. Home now labels it
+> “This period” and shows its existing start date; this supersedes the monthly display copy
+> below without changing calculation/query semantics. The existing previous-period comparison
+> is visible again, with a neutral unavailable state when prior spending is zero or absent.
+> Trips appear as a compact, pale strip within the photo header: current trip first, then
+> next upcoming trip, with person, destination, dates and a link to Trips. The strip is hidden
+> when neither exists; there is no standalone Trips section on Home. End period uses the existing
+> mutation and shared ConfirmationSheet. Never execute it on live data for UI verification.
+>
+> Item eligibility remains unchanged (oldest three active, stocked for at least 30 days).
+> Home previews two eligible stocked items and three activities, with existing destinations
+> and activity expansion retained. QueryState/Skeleton own load/error presentation,
+> React Router links own navigation, and Ionic owns confirmation and scroll behavior.
+>
+> **Known actor-name limitation:** read-only inspection confirmed that recent events map to
+> Esraa, while the `app_users` SELECT policy exposes only the current user's own mapping.
+> The existing frontend join/fallback cannot resolve the other household member under that
+> policy. No names were hardcoded and no database permissions were changed in this UI task.
+
 The Home screen is the highest-level operational summary of the household.
 
 It is **not**:

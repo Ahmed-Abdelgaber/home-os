@@ -1,36 +1,161 @@
+/* ─── Expense Details Page: Phone Ledger System ─── */
+
+.homeos-expense-details-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 32px;
+}
+
+/* ─── Linked Item Note ─── */
 .homeos-expense-details__linked-note {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
-  margin-bottom: var(--homeos-space-20);
-  padding: var(--homeos-space-12);
-  background: var(--homeos-info-soft);
-  color: var(--homeos-info);
-  border: none;
-  border-radius: var(--homeos-radius-control);
+  padding: 12px 16px;
+  background: var(--ledger-blue-soft);
+  color: #2864bd;
+  border: 0;
+  border-radius: 16px;
   font-family: inherit;
-  font-size: var(--homeos-text-footnote);
-  font-weight: var(--homeos-weight-medium);
+  font-size: 13px;
+  font-weight: 600;
   text-align: left;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity var(--homeos-motion-fast) var(--homeos-ease);
 }
 
-.homeos-expense-details__facts {
-  margin-bottom: var(--homeos-space-20);
+.homeos-expense-details__linked-note:active {
+  opacity: 0.7;
 }
 
-.homeos-expense-details__edit,
-.homeos-expense-details__delete {
+/* ─── Top Identity ─── */
+.homeos-expense-details__identity {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 16px;
+  background: var(--homeos-surface);
+  border-radius: 20px;
+}
+
+.homeos-expense-details__identity-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.homeos-expense-details__identity-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.homeos-expense-details__title {
+  margin: 0;
+  color: var(--ledger-ink);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.homeos-expense-details__subtitle {
+  color: var(--ledger-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.homeos-expense-details__amount {
+  color: var(--ledger-ink);
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  letter-spacing: -0.4px;
+}
+
+/* ─── Actions ─── */
+.homeos-expense-details__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.homeos-expense-details-page .homeos-primary-button {
+  background: var(--ledger-violet);
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 48px;
+  height: auto;
+  padding: 12px;
   width: 100%;
-  margin-top: var(--homeos-space-12);
+}
+
+.homeos-expense-details-page .homeos-secondary-button {
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 48px;
+  height: auto;
+  padding: 12px;
+  width: 100%;
+  border: 1px solid var(--ledger-line);
+  background: var(--homeos-surface);
+  color: var(--ledger-ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.homeos-expense-details-page .homeos-secondary-button:active {
+  background: #f8f8fb;
 }
 
 .homeos-expense-details__cancel {
   width: 100%;
-  margin-top: var(--homeos-space-16);
+  margin-top: 12px;
 }
 
-.homeos-expense-details__delete {
-  border-color: var(--homeos-danger);
-  color: var(--homeos-danger);
+.homeos-expense-details-page .homeos-secondary-button.homeos-expense-details__delete,
+.homeos-expense-details-page .homeos-secondary-button--danger {
+  width: 100%;
+  border: 1px solid rgba(194, 53, 83, 0.15) !important;
+  border-radius: 14px;
+  background: var(--ledger-rose-soft) !important;
+  color: #c23553 !important;
+  min-height: 48px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: none !important;
+  transition: opacity var(--homeos-motion-fast) var(--homeos-ease);
 }
 
+.homeos-expense-details-page .homeos-secondary-button.homeos-expense-details__delete:active,
+.homeos-expense-details-page .homeos-secondary-button--danger:active {
+  opacity: 0.7;
+}
+
+/* ─── Related Section ─── */
+.homeos-expense-details__related {
+  margin-top: 4px;
+}
+
+/* ─── Mobile Viewport Refinements ─── */
+@media (max-width: 359px) {
+  .homeos-expense-details__title {
+    font-size: 16px;
+  }
+  .homeos-expense-details__amount {
+    font-size: 18px;
+  }
+}

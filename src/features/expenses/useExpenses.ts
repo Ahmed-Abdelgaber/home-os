@@ -7,6 +7,9 @@ export interface ExpenseSummary {
   title: string
   meta: string
   amount: string
+  amountValue: number
+  date: string
+  category: string
 }
 
 // ponytail: flat cap instead of real pagination — revisit if a household's expense history outgrows this.
@@ -15,7 +18,7 @@ const LIST_LIMIT = 100
 /** All Expenses (Direct and Item-linked), most recent first. */
 export function useExpenses() {
   return useQuery({
-    queryKey: ['expenses', 'list'],
+    queryKey: ['expenses', 'list', 'ledger'],
     queryFn: async (): Promise<ExpenseSummary[]> => {
       const { data, error } = await supabase
         .from('expenses')
@@ -32,6 +35,9 @@ export function useExpenses() {
           title: row.description,
           meta: `${category?.name ?? 'Uncategorized'} • ${formatShortDate(row.expense_date)}`,
           amount: `EGP ${Number(row.amount).toLocaleString('en-US')}`,
+          amountValue: Number(row.amount),
+          date: row.expense_date,
+          category: category?.name ?? 'Uncategorized',
         }
       })
     },

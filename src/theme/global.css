@@ -81,6 +81,15 @@ ion-content::part(scroll)::-webkit-scrollbar {
   --padding-bottom: var(--homeos-space-24);
 }
 
+/*
+  The one add-action that sits above a list (Accounts, Categories, People, Trips). Four
+  screens each carried their own single-rule stylesheet for this, and they had drifted
+  apart by 4px.
+*/
+.homeos-page-cta {
+  margin-bottom: var(--homeos-space-20);
+}
+
 /* Shared form field styling per docs/05_UI_UX_DESIGN_SYSTEM.md §12 — used by any HomeOS form. */
 .homeos-field {
   display: flex;

@@ -1,178 +1,448 @@
-.homeos-tx-details {
+/* ─── Transaction Splitter Page: Phone Ledger System ─── */
+
+.homeos-splitter {
   display: flex;
   flex-direction: column;
-  gap: var(--homeos-space-20);
+  gap: 20px;
+  padding-bottom: 32px;
 }
 
-.homeos-tx-details-skeleton {
+.homeos-splitter__skeleton {
   display: flex;
   flex-direction: column;
-  gap: var(--homeos-space-16);
+  gap: 16px;
 }
 
-.homeos-tx-details__identity {
+/* ─── Ledger Card: Top Hero Running Balance ─── */
+.homeos-splitter__ledger {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--homeos-space-12);
-}
-
-.homeos-tx-details__title {
-  margin: 0;
-  color: var(--homeos-ink-950);
-  font-size: var(--homeos-text-heading);
-  font-weight: var(--homeos-weight-bold);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.homeos-tx-details__amount-card {
-  padding: var(--homeos-space-20);
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 16px;
   background: var(--homeos-surface);
-  border: 1px solid var(--homeos-border);
-  border-radius: var(--homeos-radius-card);
-  box-shadow: var(--homeos-shadow-card);
-  text-align: center;
+  border: 0;
+  border-radius: 20px;
+  box-shadow: none;
 }
 
-.homeos-tx-details__amount-label {
-  margin: 0;
-  color: var(--homeos-ink-500);
-  font-size: var(--homeos-text-caption);
-  font-weight: var(--homeos-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-}
-
-.homeos-tx-details__amount-value {
-  margin: var(--homeos-space-8) 0 0;
-  color: var(--homeos-ink-950);
-  font-size: var(--homeos-text-display);
-  font-weight: var(--homeos-weight-bold);
-  line-height: 1.1;
-  letter-spacing: -0.5px;
-}
-
-.homeos-tx-details__amount-breakdown {
+.homeos-splitter__identity {
   display: flex;
-  align-items: center;
-  justify-content: space-around;
-  margin-top: var(--homeos-space-16);
-  padding-top: var(--homeos-space-12);
-  border-top: 1px solid var(--homeos-border);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.homeos-tx-details__amount-sub {
+.homeos-splitter__identity-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.homeos-splitter__identity-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.homeos-splitter__merchant {
+  margin: 0;
+  color: var(--ledger-ink);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.homeos-splitter__meta-line {
+  color: var(--ledger-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* Icon glyphs matching PendingTransactionsPage */
+.homeos-tx-card__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 44px;
+  border-radius: 14px;
+  font-size: 22px;
+}
+
+.homeos-tx-card__icon--pending,
+.homeos-tx-badge--pending {
+  background: var(--ledger-rose-soft);
+  color: #c23553;
+}
+
+.homeos-tx-card__icon--partial,
+.homeos-tx-badge--partial {
+  background: var(--ledger-amber-soft);
+  color: var(--ledger-amber);
+}
+
+.homeos-tx-card__icon--fulfilled,
+.homeos-tx-badge--fulfilled {
+  background: var(--ledger-green-soft);
+  color: #147a52;
+}
+
+.homeos-tx-card__icon--ignored,
+.homeos-tx-badge--ignored {
+  background: #eeeff5;
+  color: var(--ledger-muted);
+}
+
+/* Status badge */
+.homeos-tx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ─── Headline Amount ─── */
+.homeos-splitter__balance {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.homeos-splitter__headline-label {
+  margin: 0;
+  color: var(--ledger-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.homeos-splitter__headline-amount {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  transition: color var(--homeos-motion-normal) var(--homeos-ease);
+}
+
+.homeos-splitter__headline-amount--pending {
+  color: var(--ledger-rose-soft);
+}
+
+.homeos-splitter__headline-amount--partial {
+  color: var(--ledger-amber);
+}
+
+.homeos-splitter__headline-amount--fulfilled {
+  color: #147a52;
+}
+
+.homeos-splitter__headline-amount--ignored {
+  color: var(--ledger-muted) !important;
+  text-decoration: line-through;
+}
+
+/* ─── Progress Bar ─── */
+.homeos-splitter__track {
+  height: 6px;
+  border-radius: 999px;
+  background: #eeeff5;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.homeos-splitter__fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width var(--homeos-motion-normal) var(--homeos-ease), background-color var(--homeos-motion-normal) var(--homeos-ease);
+}
+
+/* ─── Tally Details ─── */
+.homeos-splitter__tally {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin: 4px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--ledger-line);
+}
+
+.homeos-splitter__tally-cell {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.homeos-tx-details__sub-label {
-  font-size: var(--homeos-text-caption);
-  color: var(--homeos-ink-500);
+.homeos-splitter__tally-cell dt {
+  color: var(--ledger-muted);
+  font-size: 11px;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
-.homeos-tx-details__sub-value {
-  font-size: var(--homeos-text-body);
-  font-weight: var(--homeos-weight-semibold);
-  color: var(--homeos-ink-800);
+.homeos-splitter__tally-cell dd {
+  margin: 0;
+  color: var(--ledger-ink);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
-.homeos-tx-details__amount-sub--remaining .homeos-tx-details__sub-value {
-  color: var(--homeos-primary-600);
-  font-weight: var(--homeos-weight-bold);
+.homeos-splitter__tally-remaining {
+  color: var(--ledger-amber) !important;
+  font-weight: 700 !important;
 }
 
-.homeos-tx-details__action-bar {
-  margin-top: calc(var(--homeos-space-4) * -1);
-}
-
-.homeos-tx-details__fulfilled-notice {
+/* ─── Contextual Notes ─── */
+.homeos-splitter__note {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: var(--homeos-space-12) var(--homeos-space-16);
-  background: var(--homeos-success-soft);
-  border: 1px solid rgba(52, 182, 83, 0.2);
-  border-radius: var(--homeos-radius-control);
-  color: var(--homeos-success);
-  font-size: var(--homeos-text-body-sm);
-  font-weight: var(--homeos-weight-semibold);
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-top: 4px;
 }
 
-.homeos-tx-details__section {
+.homeos-splitter__note ion-icon {
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.homeos-splitter__note--settled {
+  background: var(--ledger-green-soft);
+  color: #147a52;
+}
+
+.homeos-splitter__note--ignored {
+  background: #eeeff5;
+  color: var(--ledger-muted);
+}
+
+/* ─── First-Run Guidance ─── */
+.homeos-splitter__start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 24px 20px;
+  border: 0;
+  background: var(--homeos-surface);
+  border-radius: 20px;
+}
+
+.homeos-splitter__start-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--ledger-violet-soft);
+  color: var(--ledger-violet);
+  font-size: 22px;
+}
+
+.homeos-splitter__start-title {
+  margin: 4px 0 0;
+  color: var(--ledger-ink);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.homeos-splitter__start-copy {
+  margin: 0;
+  max-width: 320px;
+  color: var(--ledger-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* ─── Transaction Details Section ─── */
+.homeos-splitter__section {
   display: flex;
   flex-direction: column;
 }
 
-.homeos-tx-details__facts {
-  margin-top: 0;
-}
-
-.homeos-tx-details__secondary-actions {
-  margin-top: calc(var(--homeos-space-4) * -1);
-}
-
-/* ─── Original bank message disclosure ─── */
-.homeos-tx-details__source-expandable {
+.homeos-tx-details-list {
+  margin: 0;
+  padding: 0 16px;
   background: var(--homeos-surface);
-  border: 1px solid var(--homeos-border);
-  border-radius: var(--homeos-radius-card);
-  overflow: hidden;
-  transition: box-shadow var(--homeos-motion-fast) var(--homeos-ease);
-}
-
-.homeos-tx-details__source-expandable[open] {
-  box-shadow: var(--homeos-shadow-subtle);
-}
-
-.homeos-tx-details__source-summary {
-  font-size: var(--homeos-text-body-sm);
-  font-weight: var(--homeos-weight-medium);
-  color: var(--homeos-ink-600);
-  cursor: pointer;
-  user-select: none;
-  padding: var(--homeos-space-12) var(--homeos-space-16);
+  border-radius: 20px;
   list-style: none;
+}
+
+.homeos-tx-details-list > li + li {
+  border-top: 1px solid var(--ledger-line);
+}
+
+.homeos-tx-detail-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: color var(--homeos-motion-fast) var(--homeos-ease),
-              background-color var(--homeos-motion-fast) var(--homeos-ease);
+  min-height: 48px;
+  padding: 12px 0;
+  gap: 12px;
 }
 
-.homeos-tx-details__source-summary::-webkit-details-marker {
+.homeos-tx-detail-row__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ledger-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.homeos-tx-detail-row__label ion-icon {
+  font-size: 17px;
+  color: var(--ledger-muted);
+}
+
+.homeos-tx-detail-row__value {
+  color: var(--ledger-ink);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+
+/* ─── Original Bank Message Disclosure ─── */
+.homeos-splitter__source {
+  background: var(--homeos-surface);
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.homeos-splitter__source-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 12px 16px;
+  color: var(--ledger-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-splitter__source-summary::-webkit-details-marker {
   display: none;
 }
 
-.homeos-tx-details__source-summary::after {
+.homeos-splitter__source-summary::after {
   content: '▾';
-  font-size: var(--homeos-text-caption);
-  color: var(--homeos-ink-500);
+  font-size: 12px;
+  color: var(--ledger-muted);
   transition: transform var(--homeos-motion-fast) var(--homeos-ease);
 }
 
-.homeos-tx-details__source-expandable[open] .homeos-tx-details__source-summary::after {
+.homeos-splitter__source[open] .homeos-splitter__source-summary::after {
   transform: rotate(180deg);
 }
 
-.homeos-tx-details__source-summary:hover {
-  color: var(--homeos-ink-950);
-  background-color: var(--homeos-soft-surface);
+.homeos-splitter__source-summary:active {
+  background: #eeeff5;
 }
 
-.homeos-tx-details__raw-message {
-  padding: var(--homeos-space-12) var(--homeos-space-16) var(--homeos-space-16);
-  border-top: 1px solid var(--homeos-border);
-  background: var(--homeos-soft-surface);
-  color: var(--homeos-ink-600);
+.homeos-splitter__source-summary:focus-visible {
+  outline: 2px solid var(--ledger-violet);
+  outline-offset: -3px;
+}
+
+.homeos-splitter__raw {
+  padding: 14px 16px;
+  border-top: 1px solid var(--ledger-line);
+  background: #f2f3f7;
+  color: var(--ledger-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: var(--homeos-text-caption);
+  font-size: 12px;
   line-height: 1.6;
   word-break: break-word;
   white-space: pre-wrap;
+}
+
+/* ─── Ignore Transaction Button ─── */
+.homeos-transaction-page .homeos-splitter__ignore {
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ledger-rose-soft);
+  color: #c23553;
+  box-shadow: none;
+  min-height: 46px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-transaction-page .homeos-splitter__ignore:active {
+  opacity: 0.7;
+}
+
+/* ─── Sticky Allocate Footer ─── */
+.homeos-splitter__footer {
+  padding: 12px var(--homeos-page-padding-x);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+  background: var(--homeos-surface);
+  border-top: 1px solid var(--ledger-line);
+}
+
+.homeos-transaction-page .homeos-splitter__add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  height: auto;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--ledger-violet);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.homeos-splitter__add ion-icon {
+  font-size: 20px;
+}
+
+/* ─── Mobile Viewport Refinements ─── */
+@media (max-width: 359px) {
+  .homeos-splitter__merchant {
+    font-size: 14px;
+  }
+  .homeos-splitter__headline-amount {
+    font-size: 26px;
+  }
+  .homeos-tx-card__icon {
+    width: 34px;
+    height: 38px;
+    font-size: 18px;
+  }
 }

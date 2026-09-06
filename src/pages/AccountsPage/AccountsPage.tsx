@@ -1,19 +1,14 @@
+import { ManagementList } from '../../shared/components/ManagementList'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useIonAlert } from '@ionic/react'
-import { walletOutline } from 'ionicons/icons'
+import { IonIcon, useIonAlert } from '@ionic/react'
+import { walletOutline, cashOutline, cardOutline } from 'ionicons/icons'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { type AccountDetail, useAllAccounts, useCreateAccount, useUpdateAccount } from '../../features/master-data/useAccounts'
 import { useActivePeople } from '../../features/master-data/usePeople'
-import { AppPage } from '../../shared/components/AppPage'
-import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
-import { QueryState } from '../../shared/components/QueryState'
 import { QuickAddSheet } from '../../shared/components/QuickAddSheet'
-import { Row } from '../../shared/components/Row'
-import { Skeleton } from '../../shared/components/Skeleton'
-import './AccountsPage.css'
 
 type SheetState = { mode: 'add' } | { mode: 'edit'; account: AccountDetail } | null
 
@@ -31,27 +26,11 @@ export function AccountsPage() {
   const [sheet, setSheet] = useState<SheetState>(null)
 
   return (
-    <AppPage title="Accounts" backHref="/app/tabs/more" onRefresh={async () => { await accounts.refetch() }}>
-      <PrimaryButton className="homeos-accounts__add" onClick={() => setSheet({ mode: 'add' })}>
-        Add account
-      </PrimaryButton>
-
-      <QueryState query={accounts} skeleton={<Skeleton height={64} />} error="Couldn't load accounts." empty="No accounts yet.">
-        {(items) => (
-          <GroupedCard>
-            {items.map((account) => (
-              <Row
-                key={account.id}
-                icon={walletOutline}
-                title={account.name}
-                meta={[account.type, account.ownerName, account.isActive ? null : 'Inactive'].filter(Boolean).join(' • ')}
-                onClick={() => setSheet({ mode: 'edit', account })}
-              />
-            ))}
-          </GroupedCard>
-        )}
-      </QueryState>
-
+    <ManagementList title="Accounts" singular="account" query={accounts}
+      onAdd={() => setSheet({ mode: 'add' })}
+      onEdit={(account) => setSheet({ mode: 'edit', account })}
+      describe={(account) => [account.type, account.ownerName].filter(Boolean).join(' · ') || 'Payment account'}
+      visual={(account) => ({ glyph: <IonIcon icon={/cash/i.test(account.type ?? '') ? cashOutline : /card/i.test(account.type ?? '') ? cardOutline : walletOutline} />, tone: /cash/i.test(account.type ?? '') ? 'green' : 'blue' })}>
       <QuickAddSheet
         isOpen={sheet !== null}
         title={sheet?.mode === 'edit' ? 'Edit account' : 'Add account'}
@@ -65,7 +44,7 @@ export function AccountsPage() {
           />
         )}
       </QuickAddSheet>
-    </AppPage>
+    </ManagementList>
   )
 }
 
@@ -78,6 +57,7 @@ function AccountForm({ initial, onSaved }: { initial?: AccountDetail; onSaved: (
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<AccountFormValues>({
@@ -95,8 +75,8 @@ function AccountForm({ initial, onSaved }: { initial?: AccountDetail; onSaved: (
   const onSubmit = async (values: AccountFormValues) => {
     if (initial) {
       presentAlert({
-        header: 'Save Changes?',
-        message: 'Are you sure you want to save these changes?',
+        header: 'Save changes?',
+        message: 'The new details replace the current ones everywhere this appears.',
         buttons: [
           { text: 'Cancel', role: 'cancel' },
           { text: 'Save', handler: () => executeSubmit(values) }
@@ -138,14 +118,13 @@ function AccountForm({ initial, onSaved }: { initial?: AccountDetail; onSaved: (
 
       <label className="homeos-field">
         <span className="homeos-field__label">Owner</span>
-        <select className="homeos-field__input" {...register('ownerId')}>
-          <option value="">No specific owner</option>
-          {people.data?.map((person) => (
-            <option key={person.id} value={person.id}>
-              {person.name}
-            </option>
-          ))}
-        </select>
+        <Controller name="ownerId" control={control} render={({ field }) => (
+          <select className="homeos-field__input" {...field}>
+            <option value="">No specific owner</option>
+            {initial?.ownerId && !people.data?.some(person => person.id === initial.ownerId) && <option value={initial.ownerId}>{initial.ownerName ?? 'Current owner'}</option>}
+            {people.data?.map(person => <option key={person.id} value={person.id}>{person.name}</option>)}
+          </select>
+        )} />
       </label>
 
       {initial && (

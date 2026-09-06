@@ -1,18 +1,13 @@
+import { ManagementList } from '../../shared/components/ManagementList'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useIonAlert } from '@ionic/react'
-import { personOutline } from 'ionicons/icons'
+import { IonIcon, useIonAlert } from '@ionic/react'
+import { homeOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { type PersonDetail, useAllPeople, useCreatePerson, useUpdatePerson } from '../../features/master-data/usePeople'
-import { AppPage } from '../../shared/components/AppPage'
-import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
-import { QueryState } from '../../shared/components/QueryState'
 import { QuickAddSheet } from '../../shared/components/QuickAddSheet'
-import { Row } from '../../shared/components/Row'
-import { Skeleton } from '../../shared/components/Skeleton'
-import './PeoplePage.css'
 
 type SheetState = { mode: 'add' } | { mode: 'edit'; person: PersonDetail } | null
 
@@ -29,29 +24,11 @@ export function PeoplePage() {
   const [sheet, setSheet] = useState<SheetState>(null)
 
   return (
-    <AppPage title="People" backHref="/app/tabs/more" onRefresh={async () => { await people.refetch() }}>
-      <PrimaryButton className="homeos-people__add" onClick={() => setSheet({ mode: 'add' })}>
-        Add person
-      </PrimaryButton>
-
-      <QueryState query={people} skeleton={<Skeleton height={64} />} error="Couldn't load people." empty="No people yet.">
-        {(items) => (
-          <GroupedCard>
-            {items.map((person) => (
-              <Row
-                key={person.id}
-                icon={personOutline}
-                title={person.name}
-                meta={[person.kind === 'household' ? 'Household' : 'Person', person.isActive ? null : 'Inactive']
-                  .filter(Boolean)
-                  .join(' • ')}
-                onClick={() => setSheet({ mode: 'edit', person })}
-              />
-            ))}
-          </GroupedCard>
-        )}
-      </QueryState>
-
+    <ManagementList title="People" singular="person" query={people}
+      onAdd={() => setSheet({ mode: 'add' })}
+      onEdit={(person) => setSheet({ mode: 'edit', person })}
+      describe={(person) => person.kind === 'household' ? 'Household' : 'Household member'}
+      visual={(person) => ({ glyph: person.kind === 'household' ? <IonIcon icon={homeOutline} /> : <span className="homeos-list-glyph--initial">{person.name.trim().slice(0, 1).toLocaleUpperCase()}</span>, tone: person.kind === 'household' ? 'violet' : 'green' })}>
       <QuickAddSheet
         isOpen={sheet !== null}
         title={sheet?.mode === 'edit' ? 'Edit person' : 'Add person'}
@@ -65,7 +42,7 @@ export function PeoplePage() {
           />
         )}
       </QuickAddSheet>
-    </AppPage>
+    </ManagementList>
   )
 }
 
@@ -89,8 +66,8 @@ function PersonForm({ initial, onSaved }: { initial?: PersonDetail; onSaved: () 
   const onSubmit = async (values: PersonFormValues) => {
     if (initial) {
       presentAlert({
-        header: 'Save Changes?',
-        message: 'Are you sure you want to save these changes?',
+        header: 'Save changes?',
+        message: 'The new details replace the current ones everywhere this appears.',
         buttons: [
           { text: 'Cancel', role: 'cancel' },
           { text: 'Save', handler: () => executeSubmit(values) }

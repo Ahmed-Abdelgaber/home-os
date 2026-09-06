@@ -3,10 +3,7 @@ import { IonIcon, IonModal, IonToggle, useIonToast } from '@ionic/react'
 import { close, phonePortraitOutline } from 'ionicons/icons'
 import { ConfirmationSheet } from '../../shared/components/ConfirmationSheet'
 import { GroupedCard } from '../../shared/components/GroupedCard'
-import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { Row } from '../../shared/components/Row'
-import { SecondaryButton } from '../../shared/components/SecondaryButton'
-import { SectionHeader } from '../../shared/components/SectionHeader'
 import { Skeleton } from '../../shared/components/Skeleton'
 import {
   useDisableBankSmsCapture,
@@ -110,8 +107,8 @@ export function BankSmsSettingsCard() {
   const isPending = enableMutation.isPending || disableMutation.isPending || regenerateMutation.isPending
 
   return (
-    <section className="homeos-bank-sms-settings">
-      <SectionHeader icon={phonePortraitOutline} title="Bank SMS Capture" />
+    <section className="homeos-settings-section homeos-bank-sms-settings" aria-label="Bank messages">
+      <h2 className="homeos-settings-heading">Bank messages</h2>
 
       {isLoading ? (
         <GroupedCard>
@@ -129,11 +126,13 @@ export function BankSmsSettingsCard() {
         <GroupedCard>
           <Row
             icon={phonePortraitOutline}
-            tone={isEnabled ? 'success' : 'neutral'}
-            title="Bank SMS Capture"
+            tone="info"
+            title="Bank SMS capture"
             meta="Automatically capture bank purchases"
             trailing={
               <IonToggle
+                className="homeos-bank-sms-toggle"
+                aria-label="Bank SMS capture"
                 checked={isEnabled}
                 disabled={isPending}
                 onIonChange={(e) => handleToggle(e.detail.checked)}
@@ -142,67 +141,35 @@ export function BankSmsSettingsCard() {
           />
 
           {isEnabled && (
-            <>
-              <div className="homeos-bank-sms-setup-header">iPhone Setup</div>
-
-              <div className="homeos-bank-sms-steps">
-                <div className="homeos-bank-sms-step">
-                  <div className="homeos-bank-sms-step__left">
-                    <span className="homeos-bank-sms-step__num">1</span>
-                    <div className="homeos-bank-sms-step__content">
-                      <span className="homeos-bank-sms-step__title">Install Shortcut</span>
-                      <span className="homeos-bank-sms-step__desc">Add HomeOS Bank Capture to your iPhone</span>
-                    </div>
+            <div className="homeos-bank-sms-setup">
+              <div className="homeos-bank-sms-setup-header">iPhone setup <span>3 steps</span></div>
+              <ol className="homeos-bank-sms-steps">
+                <li className="homeos-bank-sms-step homeos-bank-sms-step--install">
+                  <span className="homeos-bank-sms-step__number" aria-hidden="true">1</span>
+                  <div className="homeos-bank-sms-step__content">
+                    <span className="homeos-bank-sms-step__title">Add the shortcut</span>
+                    <span className="homeos-bank-sms-step__desc">Get HomeOS Bank Capture on your iPhone.</span>
+                    <a href={SHORTCUT_INSTALL_URL} target="_blank" rel="noopener noreferrer" className="homeos-bank-sms-step__action" aria-label="Install Shortcut">Install shortcut</a>
                   </div>
-                  <a
-                    href={SHORTCUT_INSTALL_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="homeos-bank-sms-step__btn"
-                    aria-label="Install Shortcut"
-                  >
-                    Install
-                  </a>
-                </div>
-
-                <div className="homeos-bank-sms-step">
-                  <div className="homeos-bank-sms-step__left">
-                    <span className="homeos-bank-sms-step__num">2</span>
-                    <div className="homeos-bank-sms-step__content">
-                      <span className="homeos-bank-sms-step__title">Connect to HomeOS</span>
-                      <span className="homeos-bank-sms-step__desc">Securely link the shortcut</span>
-                    </div>
+                </li>
+                <li className="homeos-bank-sms-step homeos-bank-sms-step--connect">
+                  <span className="homeos-bank-sms-step__number" aria-hidden="true">2</span>
+                  <div className="homeos-bank-sms-step__content">
+                    <span className="homeos-bank-sms-step__title">Link it to HomeOS</span>
+                    <span className="homeos-bank-sms-step__desc">Connect the shortcut to your account.</span>
+                    <button type="button" onClick={handleConnect} disabled={!ingestionKey} className="homeos-bank-sms-step__action" aria-label="Connect to HomeOS">Connect shortcut</button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleConnect}
-                    disabled={!ingestionKey}
-                    className="homeos-bank-sms-step__btn"
-                    aria-label="Connect to HomeOS"
-                  >
-                    Connect
-                  </button>
-                </div>
-
-                <div className="homeos-bank-sms-step">
-                  <div className="homeos-bank-sms-step__left">
-                    <span className="homeos-bank-sms-step__num">3</span>
-                    <div className="homeos-bank-sms-step__content">
-                      <span className="homeos-bank-sms-step__title">Enable Automation</span>
-                      <span className="homeos-bank-sms-step__desc">Capture CIB SMS automatically</span>
-                    </div>
+                </li>
+                <li className="homeos-bank-sms-step homeos-bank-sms-step--automation">
+                  <span className="homeos-bank-sms-step__number" aria-hidden="true">3</span>
+                  <div className="homeos-bank-sms-step__content">
+                    <span className="homeos-bank-sms-step__title">Automate bank messages</span>
+                    <span className="homeos-bank-sms-step__desc">Set up CIB messages in Shortcuts.</span>
+                    <button type="button" onClick={() => setShowAutomationModal(true)} className="homeos-bank-sms-step__action" aria-label="Set Up Automation">Show setup steps</button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowAutomationModal(true)}
-                    className="homeos-bank-sms-step__btn"
-                    aria-label="Set Up Automation"
-                  >
-                    Set Up
-                  </button>
-                </div>
-              </div>
-            </>
+                </li>
+              </ol>
+            </div>
           )}
         </GroupedCard>
       )}
@@ -219,13 +186,15 @@ export function BankSmsSettingsCard() {
       <IonModal
         isOpen={showAutomationModal}
         onDidDismiss={() => setShowAutomationModal(false)}
+        className="homeos-compact-ledger homeos-settings-overlay"
+        aria-labelledby="homeos-automation-title"
         initialBreakpoint={0.92}
         breakpoints={[0, 0.92, 1]}
       >
         <div className="homeos-automation-modal">
           <header className="homeos-automation-modal__header">
             <div className="homeos-automation-modal__title-wrap">
-              <h2 className="homeos-automation-modal__title">Enable CIB Automation</h2>
+              <h2 id="homeos-automation-title" className="homeos-automation-modal__title">Enable CIB Automation</h2>
               <p className="homeos-automation-modal__subtitle">
                 Set this up once and HomeOS will capture future CIB purchase messages automatically.
               </p>
@@ -252,12 +221,12 @@ export function BankSmsSettingsCard() {
           </div>
 
           <footer className="homeos-automation-modal__footer">
-            <PrimaryButton onClick={handleOpenShortcuts}>
+            <button type="button" className="homeos-list-submit" onClick={handleOpenShortcuts}>
               Open Shortcuts
-            </PrimaryButton>
-            <SecondaryButton onClick={() => setShowAutomationModal(false)}>
+            </button>
+            <button type="button" className="homeos-ledger-reset" onClick={() => setShowAutomationModal(false)}>
               Done
-            </SecondaryButton>
+            </button>
           </footer>
         </div>
       </IonModal>

@@ -84,3 +84,63 @@
   color: var(--homeos-ink-400);
   margin-left: var(--homeos-space-8);
 }
+
+/* ─── Compact Ledger Context Overrides ─── */
+.homeos-compact-ledger .homeos-history-section {
+  margin-top: 16px;
+}
+
+.homeos-compact-ledger .homeos-history-section__header {
+  padding: 0 8px 10px;
+  margin-bottom: 0;
+}
+
+.homeos-compact-ledger .homeos-history-section__title {
+  color: var(--ledger-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .2px;
+}
+
+.homeos-compact-ledger .homeos-history-section__summary {
+  color: var(--ledger-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.homeos-compact-ledger .homeos-history-section__list {
+  background: var(--homeos-surface);
+  border-radius: 20px;
+  padding: 0 16px;
+}
+
+.homeos-compact-ledger .homeos-history-section__entry {
+  padding: 14px 0;
+}
+
+.homeos-compact-ledger .homeos-history-section__entry + .homeos-history-section__entry {
+  border-top: 1px solid var(--ledger-line);
+}
+
+.homeos-compact-ledger .homeos-history-section__entry-title {
+  color: var(--ledger-ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.homeos-compact-ledger .homeos-history-section__entry-subtitle {
+  color: var(--ledger-muted);
+  font-size: 12px;
+}
+
+.homeos-compact-ledger .homeos-history-section__entry-meta {
+  color: var(--ledger-muted);
+  font-size: 11px;
+}
+
+.homeos-compact-ledger .homeos-history-section__entry-chevron {
+  color: #8d8e9d;
+  font-size: 14px;
+}
+
