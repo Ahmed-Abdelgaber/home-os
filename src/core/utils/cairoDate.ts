@@ -167,8 +167,9 @@ export function formatRelativeCairoTime(iso?: string | null, now: Date = new Dat
     }
 
     const cairoTargetDay = cairoDateOnlyFromTimestamp(iso)
-    const today = cairoToday()
-    const yesterday = cairoDateMinusDays(1)
+    const today = cairoDateOnlyFromTimestamp(now.toISOString()) || cairoToday()
+    const yesterdayDateObj = new Date(now.getTime() - 86400 * 1000)
+    const yesterday = cairoDateOnlyFromTimestamp(yesterdayDateObj.toISOString()) || cairoDateMinusDays(1)
 
     if (cairoTargetDay === today) {
       const diffHours = Math.floor(diffMs / (3600 * 1000))
