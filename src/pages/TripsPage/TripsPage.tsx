@@ -68,7 +68,7 @@ export function TripsPage() {
                     <Row
                       key={trip.id}
                       icon={airplaneOutline}
-                      tone="info"
+                      tone={status === 'current' ? 'success' : status === 'upcoming' ? 'info' : 'neutral'}
                       title={trip.title}
                       meta={trip.meta}
                       onClick={() => navigate(`/app/trips/${trip.id}/edit`)}

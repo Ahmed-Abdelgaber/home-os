@@ -75,7 +75,7 @@ export function PendingTransactionDetailsPage() {
             ? 'Partially Fulfilled'
             : tx.status === 'ignored'
             ? 'Ignored'
-            : 'Pending'
+            : 'Not Allocated'
 
           const statusTone =
             displayStatus === 'Fulfilled'
@@ -84,7 +84,7 @@ export function PendingTransactionDetailsPage() {
               ? 'warning'
               : displayStatus === 'Ignored'
               ? 'finished'
-              : 'warning'
+              : 'danger'
 
           const canFulfill =
             tx.status !== 'ignored' && tx.status !== 'fulfilled' && !isFullyAllocated && remaining > 0

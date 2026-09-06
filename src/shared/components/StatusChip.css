@@ -24,5 +24,10 @@
 
 .homeos-status-chip--warning {
   background: var(--homeos-warning-soft);
-  color: var(--homeos-warning);
+  color: #92400e;
+}
+
+.homeos-status-chip--danger {
+  background: var(--homeos-danger-soft);
+  color: #be123c;
 }

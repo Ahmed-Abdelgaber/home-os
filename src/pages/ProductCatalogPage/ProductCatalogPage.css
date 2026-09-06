@@ -12,18 +12,21 @@
   min-height: 40px;
   border: none;
   border-radius: var(--homeos-radius-control);
-  background: none;
+  background: transparent;
   color: var(--homeos-ink-600);
   font-family: inherit;
   font-size: var(--homeos-text-body-sm);
   font-weight: var(--homeos-weight-semibold);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all var(--homeos-motion-fast) var(--homeos-ease);
 }
 
 .homeos-catalog-view-toggle__option--selected {
   background: var(--homeos-surface);
-  color: var(--homeos-primary-600);
-  box-shadow: var(--homeos-shadow-row);
+  color: var(--homeos-ink-950);
+  box-shadow: 0 1px 3px rgba(var(--homeos-ink-950-rgb), 0.08),
+              0 1px 1px rgba(var(--homeos-ink-950-rgb), 0.04);
 }
 
 .homeos-catalog-toggle {

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { IonIcon, useIonAlert } from '@ionic/react'
 import { briefcaseOutline, checkmarkCircle, chevronForward, trendingUpOutline } from 'ionicons/icons'
 import './HeroSnapshotCard.css'
@@ -21,6 +22,7 @@ interface HeroSnapshotCardProps {
  * are shown together, never split into separate dashboard tiles.
  */
 export function HeroSnapshotCard({ currency, amount, percentVsLastMonth, travel, onCyclePeriod, isCycling }: HeroSnapshotCardProps) {
+  const navigate = useNavigate()
   const [presentAlert] = useIonAlert()
 
   const handleCycleClick = () => {
@@ -92,7 +94,11 @@ export function HeroSnapshotCard({ currency, amount, percentVsLastMonth, travel,
       </div>
 
       {travel.kind === 'home' && travel.upcoming && (
-        <button type="button" className="homeos-hero-card__upcoming">
+        <button
+          type="button"
+          className="homeos-hero-card__upcoming"
+          onClick={() => navigate('/app/trips')}
+        >
           <span className="homeos-hero-card__upcoming-icon">
             <IonIcon icon={briefcaseOutline} />
           </span>
