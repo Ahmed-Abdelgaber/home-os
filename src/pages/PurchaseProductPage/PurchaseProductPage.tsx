@@ -17,7 +17,7 @@ import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { Row } from '../../shared/components/Row'
 import { SearchBar } from '../../shared/components/SearchBar'
 import { SecondaryButton } from '../../shared/components/SecondaryButton'
-import { Skeleton } from '../../shared/components/Skeleton'
+import { RowSkeleton } from '../../shared/components/RowSkeleton'
 import './PurchaseProductPage.css'
 
 export interface PurchasePrefillState {
@@ -78,11 +78,7 @@ export function PurchaseProductPage() {
     if (productQuery.isLoading) {
       return (
         <AppPage title={effectivePrefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
-          <div className="homeos-purchase-skeleton-stack">
-            <Skeleton height={60} />
-            <Skeleton height={60} />
-            <Skeleton height={60} />
-          </div>
+          <RowSkeleton />
         </AppPage>
       )
     }
@@ -156,11 +152,7 @@ function ProductPicker({ onSelect }: { onSelect: (product: ActiveProduct) => voi
 
   if (products.isLoading) {
     return (
-      <div className="homeos-purchase-skeleton-stack">
-        <Skeleton height={60} />
-        <Skeleton height={60} />
-        <Skeleton height={60} />
-      </div>
+      <RowSkeleton />
     )
   }
 

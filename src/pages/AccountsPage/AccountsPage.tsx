@@ -7,13 +7,13 @@ import { z } from 'zod'
 import { type AccountDetail, useAllAccounts, useCreateAccount, useUpdateAccount } from '../../features/master-data/useAccounts'
 import { useActivePeople } from '../../features/master-data/usePeople'
 import { AppPage } from '../../shared/components/AppPage'
+import { EmptyState } from '../../shared/components/EmptyState'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { QueryState } from '../../shared/components/QueryState'
 import { QuickAddSheet } from '../../shared/components/QuickAddSheet'
 import { Row } from '../../shared/components/Row'
-import { Skeleton } from '../../shared/components/Skeleton'
-import './AccountsPage.css'
+import { RowSkeleton } from '../../shared/components/RowSkeleton'
 
 type SheetState = { mode: 'add' } | { mode: 'edit'; account: AccountDetail } | null
 
@@ -32,11 +32,28 @@ export function AccountsPage() {
 
   return (
     <AppPage title="Accounts" backHref="/app/tabs/more" onRefresh={async () => { await accounts.refetch() }}>
-      <PrimaryButton className="homeos-accounts__add" onClick={() => setSheet({ mode: 'add' })}>
-        Add account
-      </PrimaryButton>
+      {/* Hidden while the list is empty — the empty state carries the add action there instead. */}
+      {(accounts.data?.length ?? 0) > 0 && (
+        <PrimaryButton className="homeos-page-cta" onClick={() => setSheet({ mode: 'add' })}>
+          Add account
+        </PrimaryButton>
+      )}
 
-      <QueryState query={accounts} skeleton={<Skeleton height={64} />} error="Couldn't load accounts." empty="No accounts yet.">
+      <QueryState
+        query={accounts}
+        skeleton={<RowSkeleton />}
+        error="Couldn't load accounts."
+        empty={
+          <EmptyState
+            icon={walletOutline}
+            title="No accounts yet"
+            message="Accounts are where money leaves from — a card, a cash wallet, a bank. Add the ones you actually pay with."
+            action={
+              <PrimaryButton onClick={() => setSheet({ mode: 'add' })}>Add account</PrimaryButton>
+            }
+          />
+        }
+      >
         {(items) => (
           <GroupedCard>
             {items.map((account) => (
@@ -95,8 +112,8 @@ function AccountForm({ initial, onSaved }: { initial?: AccountDetail; onSaved: (
   const onSubmit = async (values: AccountFormValues) => {
     if (initial) {
       presentAlert({
-        header: 'Save Changes?',
-        message: 'Are you sure you want to save these changes?',
+        header: 'Save changes?',
+        message: 'The new details replace the current ones everywhere this appears.',
         buttons: [
           { text: 'Cancel', role: 'cancel' },
           { text: 'Save', handler: () => executeSubmit(values) }

@@ -5,8 +5,7 @@
 .homeos-home-body {
   position: relative;
   z-index: 2;
-  margin-top: -32px;
-  padding: 0 var(--homeos-page-padding-x) var(--homeos-space-40);
+  padding: var(--homeos-space-24) var(--homeos-page-padding-x) var(--homeos-space-40);
   display: flex;
   flex-direction: column;
   gap: var(--homeos-space-24);
@@ -32,19 +31,12 @@
   animation-delay: 180ms;
 }
 
+.homeos-home-body > *:nth-child(n+5) {
+  animation-delay: 240ms;
+}
+
 .homeos-home-section {
   display: flex;
   flex-direction: column;
 }
 
-.homeos-section-skeleton-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  border-radius: var(--homeos-radius-card);
-  overflow: hidden;
-}
-
-.homeos-section-skeleton-stack .homeos-skeleton {
-  border-radius: 0;
-}

@@ -1,15 +1,3 @@
-.homeos-purchase-skeleton-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  border-radius: var(--homeos-radius-card);
-  overflow: hidden;
-}
-
-.homeos-purchase-skeleton-stack .homeos-skeleton {
-  border-radius: 0;
-}
-
 .homeos-purchase-form {
   display: flex;
   flex-direction: column;

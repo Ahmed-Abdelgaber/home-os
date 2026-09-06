@@ -1,77 +1,196 @@
 .homeos-shopping-list {
   display: flex;
   flex-direction: column;
-  gap: var(--homeos-space-24);
+  gap: var(--homeos-space-20);
+  /* Clears the sticky Buy footer. */
   padding-bottom: 96px;
 }
 
-.homeos-shopping-list__section {
+.homeos-shopping-list__skeleton {
   display: flex;
   flex-direction: column;
+  gap: var(--homeos-space-16);
 }
 
-.homeos-shopping-list__item {
+/* RECONSTRUCTED — the original rule was uncommitted and was lost; verify against intent. */
+.homeos-shopping-list__summary {
+  margin: 0;
+  color: var(--homeos-ink-500);
+  font-size: var(--homeos-text-body-sm);
+  font-weight: var(--homeos-weight-medium);
+}
+
+.homeos-shopping-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-8);
+}
+
+/*
+  Sticky so the aisle you are standing in stays named while you scroll a long list one-handed.
+  It sits on the page background rather than a card, which keeps the list itself uninterrupted.
+*/
+.homeos-shopping-group__title {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--homeos-space-8);
+  padding: var(--homeos-space-8) 0;
+  background: var(--homeos-background);
+  color: var(--homeos-ink-600);
+  font-size: var(--homeos-text-footnote);
+  font-weight: var(--homeos-weight-bold);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.homeos-shopping-group__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--homeos-radius-circle);
+  background: var(--homeos-soft-surface);
+  color: var(--homeos-ink-500);
+  font-size: var(--homeos-text-caption);
+  font-weight: var(--homeos-weight-bold);
+  letter-spacing: 0;
+}
+
+.homeos-shopping-group__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--homeos-surface);
+  border: 1px solid var(--homeos-border);
+  border-radius: var(--homeos-radius-card);
+  box-shadow: var(--homeos-shadow-subtle);
+  overflow: hidden;
+}
+
+.homeos-shopping-item {
+  display: flex;
+  align-items: center;
+}
+
+.homeos-shopping-item + .homeos-shopping-item {
+  border-top: 1px solid var(--homeos-border);
+}
+
+/* The whole line is the checkbox — no small target to aim at with a trolley in one hand. */
+.homeos-shopping-item__tap {
+  flex: 1;
+  min-width: 0;
+  min-height: 60px;
   display: flex;
   align-items: center;
   gap: var(--homeos-space-12);
-  padding: var(--homeos-space-12) var(--homeos-space-16);
-  min-height: 48px;
+  padding: var(--homeos-space-12) var(--homeos-space-8) var(--homeos-space-12) var(--homeos-space-16);
+  background: none;
+  border: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition: background-color var(--homeos-motion-fast) var(--homeos-ease);
 }
 
-.homeos-shopping-list__item:hover {
-  background-color: var(--homeos-soft-surface);
+.homeos-shopping-item__tap:active {
+  background: var(--homeos-soft-surface);
 }
 
-.homeos-shopping-list__checkbox-label {
+.homeos-shopping-item__tap:focus-visible {
+  outline: 2px solid var(--homeos-primary-500);
+  outline-offset: -2px;
+}
+
+.homeos-shopping-item__box {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
-  gap: var(--homeos-space-12);
+  justify-content: center;
+  border: 2px solid var(--homeos-border);
+  border-radius: var(--homeos-radius-circle);
+  background: var(--homeos-surface);
+  color: transparent;
+  font-size: var(--homeos-text-body-sm);
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease),
+    border-color var(--homeos-motion-fast) var(--homeos-ease),
+    color var(--homeos-motion-fast) var(--homeos-ease),
+    transform var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-shopping-item__tap--checked .homeos-shopping-item__box {
+  background: var(--homeos-primary-500);
+  border-color: var(--homeos-primary-500);
+  color: #ffffff;
+}
+
+.homeos-shopping-item__tap:active .homeos-shopping-item__box {
+  transform: scale(0.88);
+}
+
+.homeos-shopping-item__name {
   flex: 1;
-  cursor: pointer;
-  user-select: none;
-}
-
-.homeos-shopping-list__checkbox {
-  width: 22px;
-  height: 22px;
-  accent-color: var(--homeos-primary-500);
-  cursor: pointer;
-  margin: 0;
-}
-
-.homeos-shopping-list__info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.homeos-shopping-list__name {
-  font-size: var(--homeos-text-body);
-  font-weight: var(--homeos-weight-semibold);
+  min-width: 0;
   color: var(--homeos-ink-950);
+  font-size: var(--homeos-text-body-lg);
+  font-weight: var(--homeos-weight-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color var(--homeos-motion-fast) var(--homeos-ease);
 }
 
-.homeos-shopping-list__meta {
+.homeos-shopping-item__tap--checked .homeos-shopping-item__name {
+  color: var(--homeos-ink-400);
+  text-decoration: line-through;
+  text-decoration-color: var(--homeos-ink-400);
+}
+
+.homeos-shopping-item__flag {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: var(--homeos-radius-circle);
+  background: var(--homeos-primary-50);
+  color: var(--homeos-primary-600);
   font-size: var(--homeos-text-caption);
-  color: var(--homeos-ink-500);
+  font-weight: var(--homeos-weight-semibold);
 }
 
-.homeos-shopping-list__remove {
-  background: transparent;
+/* Sits outside the tap target so a mis-aimed check never deletes the line. */
+.homeos-shopping-item__remove {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  margin-right: var(--homeos-space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
   border: none;
-  color: var(--homeos-ink-500);
-  font-size: var(--homeos-text-footnote);
-  font-weight: var(--homeos-weight-medium);
-  padding: var(--homeos-space-8);
-  border-radius: var(--homeos-radius-control);
+  border-radius: var(--homeos-radius-circle);
+  color: var(--homeos-ink-400);
+  font-size: var(--homeos-text-body-lg);
   cursor: pointer;
-  transition: color var(--homeos-motion-fast) var(--homeos-ease), background-color var(--homeos-motion-fast) var(--homeos-ease);
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease), color var(--homeos-motion-fast) var(--homeos-ease);
 }
 
-.homeos-shopping-list__remove:active {
+.homeos-shopping-item__remove:active {
   background: var(--homeos-soft-surface);
   color: var(--homeos-ink-800);
+}
+
+.homeos-shopping-item__remove:focus-visible {
+  outline: 2px solid var(--homeos-primary-500);
+  outline-offset: -2px;
 }
 
 .homeos-shopping-list__footer {

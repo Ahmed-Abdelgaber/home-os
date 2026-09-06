@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCurrentPerson } from '../../core/auth/useCurrentPerson'
 import { cairoGreeting } from '../../core/utils/cairoDate'
+import { AttentionList } from '../../features/home/AttentionList'
 import { useHomeSnapshot } from '../../features/home/useHomeSnapshot'
 import { useLongRunningItems } from '../../features/home/useLongRunningItems'
 import { useLongStockedItems } from '../../features/home/useLongStockedItems'
@@ -18,18 +19,9 @@ import { GroupedCard } from '../../shared/components/GroupedCard'
 import { QueryState } from '../../shared/components/QueryState'
 import { Row } from '../../shared/components/Row'
 import { SecondaryButton } from '../../shared/components/SecondaryButton'
+import { RowSkeleton } from '../../shared/components/RowSkeleton'
 import { Skeleton } from '../../shared/components/Skeleton'
 import './HomePage.css'
-
-function ListSkeleton({ rows }: { rows: number }) {
-  return (
-    <div className="homeos-section-skeleton-stack">
-      {Array.from({ length: rows }, (_, index) => (
-        <Skeleton key={index} height={68} />
-      ))}
-    </div>
-  )
-}
 
 /**
  * Pass B data binding per docs/06_HOME_SCREEN_SPEC.md §8 — real Supabase queries via
@@ -61,14 +53,15 @@ export function HomePage() {
           <IonRefresherContent />
         </IonRefresher>
         
-        <HomeOSHeader 
-          greeting={`${cairoGreeting()} 👋`} 
-          name={personName ?? ''} 
-          avatarInitial={personName?.charAt(0) ?? '?'} 
-          onAvatarClick={() => navigate('/app/settings')}
+        <HomeOSHeader
+          greeting={cairoGreeting()}
+          name={personName ?? ''}
+          onSettingsClick={() => navigate('/app/settings')}
         />
 
         <div className="homeos-home-body">
+          <AttentionList travel={snapshot.data?.travel} />
+
           <QueryState query={snapshot} skeleton={<Skeleton height={220} />} error="Couldn't load this month's snapshot.">
             {(data) => (
               <HeroSnapshotCard
@@ -92,7 +85,7 @@ export function HomePage() {
             />
             <QueryState
               query={longRunning}
-              skeleton={<ListSkeleton rows={3} />}
+              skeleton={<RowSkeleton rows={3} />}
               error="Couldn't load long-running items."
               empty="Everything looks normal."
             >
@@ -122,7 +115,7 @@ export function HomePage() {
             />
             <QueryState
               query={longStocked}
-              skeleton={<ListSkeleton rows={2} />}
+              skeleton={<RowSkeleton rows={2} />}
               error="Couldn't load long-stocked items."
               empty="Nothing has been stocked for too long."
             >
@@ -160,7 +153,7 @@ export function HomePage() {
             />
             <QueryState
               query={recentActivity}
-              skeleton={<ListSkeleton rows={2} />}
+              skeleton={<RowSkeleton rows={2} />}
               error="Couldn't load recent activity."
               empty="Nothing to show yet."
             >

@@ -8,9 +8,9 @@ import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { QueryState } from '../../shared/components/QueryState'
 import { Row } from '../../shared/components/Row'
+import { RowSkeleton } from '../../shared/components/RowSkeleton'
 import { SearchBar } from '../../shared/components/SearchBar'
 import { SectionHeader } from '../../shared/components/SectionHeader'
-import { Skeleton } from '../../shared/components/Skeleton'
 import './TripsPage.css'
 
 const SECTIONS: { status: TripStatus; title: string }[] = [
@@ -27,22 +27,29 @@ export function TripsPage() {
 
   return (
     <AppPage title="Trips" backHref="/app/tabs/more" onRefresh={async () => { await trips.refetch() }}>
-      <PrimaryButton className="homeos-trips__add" onClick={() => navigate('/app/trips/new')}>
-        Add trip
-      </PrimaryButton>
+      {/* Both hidden while there are no trips at all — the empty state does the asking. */}
+      {(trips.data?.length ?? 0) > 0 && (
+        <>
+          <PrimaryButton className="homeos-page-cta" onClick={() => navigate('/app/trips/new')}>
+            Add trip
+          </PrimaryButton>
 
-      <SearchBar value={search} onChange={setSearch} placeholder="Search trips…" />
+          <SearchBar value={search} onChange={setSearch} placeholder="Search trips…" />
+        </>
+      )}
 
       <QueryState
         query={trips}
-        skeleton={
-          <div className="homeos-trips-skeleton-stack">
-            <Skeleton height={64} />
-            <Skeleton height={64} />
-          </div>
-        }
+        skeleton={<RowSkeleton rows={2} />}
         error="Couldn't load trips."
-        empty="No trips yet."
+        empty={
+          <EmptyState
+            icon={airplaneOutline}
+            title="No trips yet"
+            message="Log a trip and HomeOS knows who is away, so Home can say it without you checking."
+            action={<PrimaryButton onClick={() => navigate('/app/trips/new')}>Add trip</PrimaryButton>}
+          />
+        }
       >
         {(items) => {
           const filtered = lowerSearch

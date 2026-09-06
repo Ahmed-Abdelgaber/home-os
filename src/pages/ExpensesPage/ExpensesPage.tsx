@@ -7,11 +7,11 @@ import { PendingTransactionsSection } from '../../features/bank-transactions/Pen
 import { AppPage } from '../../shared/components/AppPage'
 import { EmptyState } from '../../shared/components/EmptyState'
 import { GroupedCard } from '../../shared/components/GroupedCard'
+import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { QueryState } from '../../shared/components/QueryState'
 import { Row } from '../../shared/components/Row'
+import { RowSkeleton } from '../../shared/components/RowSkeleton'
 import { SearchBar } from '../../shared/components/SearchBar'
-import { Skeleton } from '../../shared/components/Skeleton'
-import './ExpensesPage.css'
 
 export function ExpensesPage() {
   const navigate = useNavigate()
@@ -30,21 +30,24 @@ export function ExpensesPage() {
         ])
       }}
     >
-      <SearchBar value={search} onChange={setSearch} placeholder="Search expenses…" />
+      {(expenses.data?.length ?? 0) > 0 && (
+        <SearchBar value={search} onChange={setSearch} placeholder="Search expenses…" />
+      )}
 
       {!lowerSearch && <PendingTransactionsSection />}
 
       <QueryState
         query={expenses}
-        skeleton={
-          <div className="homeos-expenses-skeleton-stack">
-            <Skeleton height={64} />
-            <Skeleton height={64} />
-            <Skeleton height={64} />
-          </div>
-        }
+        skeleton={<RowSkeleton />}
         error="Couldn't load expenses."
-        empty="No expenses yet."
+        empty={
+          <EmptyState
+            icon={cardOutline}
+            title="No expenses yet"
+            message="Every purchase you record lands here, newest first. Add one, or fulfil a bank transaction when one arrives."
+            action={<PrimaryButton onClick={() => navigate('/app/expenses/add')}>Add expense</PrimaryButton>}
+          />
+        }
       >
         {(items) => {
           const filtered = lowerSearch

@@ -44,6 +44,7 @@ async function fetchTravel(): Promise<TravelStatus> {
       who: personLabel(person),
       destination: currentTrip.name,
       returnLabel: formatShortDate(currentTrip.return_date),
+      returnDate: currentTrip.return_date,
     }
   }
 
@@ -65,6 +66,7 @@ async function fetchTravel(): Promise<TravelStatus> {
       person: personLabel(person),
       destination: upcomingTrip.name,
       rangeLabel: `${formatShortDate(upcomingTrip.departure_date)} – ${formatShortDate(upcomingTrip.return_date)}`,
+      departureDate: upcomingTrip.departure_date,
     },
   }
 }

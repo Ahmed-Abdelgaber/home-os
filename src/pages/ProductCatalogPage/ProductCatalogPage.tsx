@@ -8,9 +8,10 @@ import { AppPage } from '../../shared/components/AppPage'
 import { EmptyState } from '../../shared/components/EmptyState'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { QueryState } from '../../shared/components/QueryState'
+import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { Row } from '../../shared/components/Row'
+import { RowSkeleton } from '../../shared/components/RowSkeleton'
 import { SearchBar } from '../../shared/components/SearchBar'
-import { Skeleton } from '../../shared/components/Skeleton'
 import './ProductCatalogPage.css'
 
 type ProductsView = 'active' | 'inactive'
@@ -55,19 +56,34 @@ export function ProductCatalogPage() {
         </button>
       </div>
 
-      <SearchBar value={search} onChange={setSearch} placeholder={view === 'active' ? "Search products…" : "Search inactive products…"} />
+      {(query.data?.length ?? 0) > 0 && (
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder={view === 'active' ? 'Search products…' : 'Search inactive products…'}
+        />
+      )}
 
       <QueryState
         query={query}
-        skeleton={
-          <div className="homeos-catalog-skeleton-stack">
-            <Skeleton height={64} />
-            <Skeleton height={64} />
-            <Skeleton height={64} />
-          </div>
-        }
+        skeleton={<RowSkeleton />}
         error={`Couldn't load ${view} products.`}
-        empty={view === 'active' ? "No active products yet." : "No inactive products."}
+        empty={
+          view === 'active' ? (
+            <EmptyState
+              icon={cubeOutline}
+              title="No products yet"
+              message="A product is the thing you buy — a brand of coffee, a filter, a bag of rice. Add one and it becomes available everywhere you record a purchase."
+              action={<PrimaryButton onClick={() => navigate('/app/products/new')}>Add product</PrimaryButton>}
+            />
+          ) : (
+            <EmptyState
+              icon={cubeOutline}
+              title="Nothing retired"
+              message="Products you stop buying end up here. None have been retired yet."
+            />
+          )
+        }
       >
         {(items) => {
           const filtered = lowerSearch

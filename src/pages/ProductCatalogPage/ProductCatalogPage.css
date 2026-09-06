@@ -46,14 +46,3 @@
   accent-color: var(--homeos-primary-500);
 }
 
-.homeos-catalog-skeleton-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  border-radius: var(--homeos-radius-card);
-  overflow: hidden;
-}
-
-.homeos-catalog-skeleton-stack .homeos-skeleton {
-  border-radius: 0;
-}

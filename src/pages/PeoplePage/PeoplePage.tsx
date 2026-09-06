@@ -6,13 +6,13 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { type PersonDetail, useAllPeople, useCreatePerson, useUpdatePerson } from '../../features/master-data/usePeople'
 import { AppPage } from '../../shared/components/AppPage'
+import { EmptyState } from '../../shared/components/EmptyState'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { QueryState } from '../../shared/components/QueryState'
 import { QuickAddSheet } from '../../shared/components/QuickAddSheet'
 import { Row } from '../../shared/components/Row'
-import { Skeleton } from '../../shared/components/Skeleton'
-import './PeoplePage.css'
+import { RowSkeleton } from '../../shared/components/RowSkeleton'
 
 type SheetState = { mode: 'add' } | { mode: 'edit'; person: PersonDetail } | null
 
@@ -30,11 +30,28 @@ export function PeoplePage() {
 
   return (
     <AppPage title="People" backHref="/app/tabs/more" onRefresh={async () => { await people.refetch() }}>
-      <PrimaryButton className="homeos-people__add" onClick={() => setSheet({ mode: 'add' })}>
-        Add person
-      </PrimaryButton>
+      {/* Hidden while the list is empty — the empty state carries the add action there instead. */}
+      {(people.data?.length ?? 0) > 0 && (
+        <PrimaryButton className="homeos-page-cta" onClick={() => setSheet({ mode: 'add' })}>
+          Add person
+        </PrimaryButton>
+      )}
 
-      <QueryState query={people} skeleton={<Skeleton height={64} />} error="Couldn't load people." empty="No people yet.">
+      <QueryState
+        query={people}
+        skeleton={<RowSkeleton />}
+        error="Couldn't load people."
+        empty={
+          <EmptyState
+            icon={personOutline}
+            title="No people yet"
+            message="People are who an expense or a trip belongs to. Add everyone in the household."
+            action={
+              <PrimaryButton onClick={() => setSheet({ mode: 'add' })}>Add person</PrimaryButton>
+            }
+          />
+        }
+      >
         {(items) => (
           <GroupedCard>
             {items.map((person) => (
@@ -89,8 +106,8 @@ function PersonForm({ initial, onSaved }: { initial?: PersonDetail; onSaved: () 
   const onSubmit = async (values: PersonFormValues) => {
     if (initial) {
       presentAlert({
-        header: 'Save Changes?',
-        message: 'Are you sure you want to save these changes?',
+        header: 'Save changes?',
+        message: 'The new details replace the current ones everywhere this appears.',
         buttons: [
           { text: 'Cancel', role: 'cancel' },
           { text: 'Save', handler: () => executeSubmit(values) }

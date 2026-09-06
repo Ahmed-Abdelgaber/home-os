@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useIonToast } from '@ionic/react'
-import { informationCircleOutline } from 'ionicons/icons'
+import { IonIcon, useIonToast } from '@ionic/react'
+import { addOutline, checkmarkCircle, informationCircleOutline, receiptOutline } from 'ionicons/icons'
 import { formatTimestampDate, formatTimestampDateTime } from '../../core/utils/cairoDate'
 import { BankTransactionAllocationsList } from '../../features/bank-transactions/BankTransactionAllocationsList'
 import { FulfillTransactionModal } from '../../features/bank-transactions/FulfillTransactionModal'
@@ -22,6 +22,21 @@ import { QueryState } from '../../shared/components/QueryState'
 import { Skeleton } from '../../shared/components/Skeleton'
 import './PendingTransactionDetailsPage.css'
 
+function money(currency: string, value: number): string {
+  return `${currency} ${value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}
+
+/**
+ * The receipt splitter. One bank transaction is reconciled against one or more HomeOS
+ * expenses; this screen's whole job is to keep the remaining balance in view while the
+ * user adds allocations one at a time.
+ *
+ * Every write still goes through the existing fulfil/allocate RPCs — the modal hands off to
+ * the expense and purchase forms exactly as before, and this page only reads the totals back.
+ */
 export function PendingTransactionDetailsPage() {
   const { id, transactionId } = useParams<{ id?: string; transactionId?: string }>()
   const effectiveId = transactionId ?? id
@@ -34,167 +49,190 @@ export function PendingTransactionDetailsPage() {
   const allocationsQuery = useBankTransactionAllocations(effectiveId)
   const ignoreMutation = useIgnoreBankTransaction()
 
+  const tx = transactionQuery.data
+  const allocations = allocationsQuery.data ?? []
+  const summary = tx ? calculateAllocationSummary(tx.amount, allocations) : null
+
+  const canFulfill = Boolean(
+    tx &&
+      summary &&
+      tx.status !== 'ignored' &&
+      tx.status !== 'fulfilled' &&
+      !summary.isFullyAllocated &&
+      summary.remaining > 0,
+  )
+
+  // Sticky above the safe area so the next allocation is always one thumb-reach away,
+  // however far down the allocation list has grown.
+  const footer =
+    canFulfill && tx && summary ? (
+      <div className="homeos-splitter__footer">
+        <PrimaryButton className="homeos-splitter__add" onClick={() => setShowFulfillModal(true)}>
+          <IonIcon icon={addOutline} aria-hidden="true" />
+          Allocate {money(tx.currency, summary.remaining)}
+        </PrimaryButton>
+      </div>
+    ) : null
+
+  const handleIgnore = async (transaction: NonNullable<typeof tx>) => {
+    try {
+      await ignoreMutation.mutateAsync(transaction.id)
+      setShowIgnoreConfirm(false)
+      presentToast({ message: 'Transaction marked as ignored', duration: 2000, position: 'bottom' })
+      navigate('/app/pending-transactions', { replace: true })
+    } catch (err) {
+      presentToast({
+        message: err instanceof Error ? err.message : 'Could not ignore transaction',
+        duration: 3000,
+        position: 'bottom',
+        color: 'danger',
+      })
+    }
+  }
+
   return (
-    <AppPage title="Transaction" backHref="/app/pending-transactions">
+    <AppPage title="Transaction" backHref="/app/pending-transactions" footer={footer}>
       <QueryState
         query={transactionQuery}
         skeleton={
-          <div className="homeos-tx-details-skeleton">
-            <Skeleton height={32} />
+          <div className="homeos-splitter__skeleton">
+            <Skeleton height={18} width="55%" variant="text" />
+            <Skeleton height={188} />
             <Skeleton height={140} />
-            <Skeleton height={200} />
           </div>
         }
         error="Transaction not found or could not be loaded."
       >
-        {(tx) => {
-          const allocList = allocationsQuery.data ?? []
+        {(transaction) => {
           const { totalAllocated, remaining, isFullyAllocated } = calculateAllocationSummary(
-            tx.amount,
-            allocList
+            transaction.amount,
+            allocations,
           )
 
-          const formattedAmount = `${tx.currency} ${tx.amount.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
+          const allocatedPercent =
+            transaction.amount > 0
+              ? Math.min(100, Math.max(0, (totalAllocated / transaction.amount) * 100))
+              : 0
 
-          const formattedAllocated = `${tx.currency} ${totalAllocated.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
+          const isIgnored = transaction.status === 'ignored'
+          const settled = isFullyAllocated || transaction.status === 'fulfilled'
 
-          const formattedRemaining = `${tx.currency} ${remaining.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-
-          const displayStatus = isFullyAllocated
+          const statusLabel = settled
             ? 'Fulfilled'
-            : totalAllocated > 0
-            ? 'Partially Fulfilled'
-            : tx.status === 'ignored'
+            : isIgnored
             ? 'Ignored'
-            : 'Not Allocated'
+            : totalAllocated > 0
+            ? 'Partially fulfilled'
+            : 'Not allocated'
 
-          const statusTone =
-            displayStatus === 'Fulfilled'
-              ? 'active'
-              : displayStatus === 'Partially Fulfilled'
-              ? 'warning'
-              : displayStatus === 'Ignored'
-              ? 'finished'
-              : 'danger'
+          const statusTone = settled ? 'active' : isIgnored ? 'finished' : totalAllocated > 0 ? 'warning' : 'danger'
 
-          const canFulfill =
-            tx.status !== 'ignored' && tx.status !== 'fulfilled' && !isFullyAllocated && remaining > 0
-
-          const canIgnore = tx.status === 'pending' && totalAllocated === 0
-
-          const handleIgnore = async () => {
-            try {
-              await ignoreMutation.mutateAsync(tx.id)
-              setShowIgnoreConfirm(false)
-              presentToast({
-                message: 'Transaction marked as ignored',
-                duration: 2000,
-                position: 'bottom',
-              })
-              navigate('/app/pending-transactions', { replace: true })
-            } catch (err: any) {
-              presentToast({
-                message: err.message || 'Could not ignore transaction',
-                duration: 3000,
-                position: 'bottom',
-                color: 'danger',
-              })
-            }
-          }
+          const canIgnore = transaction.status === 'pending' && totalAllocated === 0
 
           return (
-            <div className="homeos-tx-details">
-              <div className="homeos-tx-details__identity">
-                <h1 className="homeos-tx-details__title">{tx.merchantRaw || 'Unknown Merchant'}</h1>
-                <span className={`homeos-status-chip homeos-status-chip--${statusTone}`}>
-                  {displayStatus}
-                </span>
-              </div>
-
-              <div className="homeos-tx-details__amount-card">
-                <div className="homeos-tx-details__amount-main">
-                  <p className="homeos-tx-details__amount-label">Transaction Amount</p>
-                  <p className="homeos-tx-details__amount-value">{formattedAmount}</p>
+            <div className="homeos-splitter">
+              <section
+                className={`homeos-splitter__ledger ${settled ? 'homeos-splitter__ledger--settled' : ''}`}
+              >
+                <div className="homeos-splitter__identity">
+                  <h1 className="homeos-splitter__merchant">
+                    {transaction.merchantRaw || 'Unknown merchant'}
+                  </h1>
+                  <span className={`homeos-status-chip homeos-status-chip--${statusTone}`}>{statusLabel}</span>
                 </div>
 
-                {(totalAllocated > 0 || tx.status === 'partially_fulfilled') && (
-                  <div className="homeos-tx-details__amount-breakdown">
-                    <div className="homeos-tx-details__amount-sub">
-                      <span className="homeos-tx-details__sub-label">Allocated</span>
-                      <span className="homeos-tx-details__sub-value">{formattedAllocated}</span>
-                    </div>
-                    <div className="homeos-tx-details__amount-sub homeos-tx-details__amount-sub--remaining">
-                      <span className="homeos-tx-details__sub-label">Remaining</span>
-                      <span className="homeos-tx-details__sub-value">{formattedRemaining}</span>
-                    </div>
+                <p className="homeos-splitter__headline-label">
+                  {settled ? 'Fully allocated' : totalAllocated > 0 ? 'Remaining' : 'To allocate'}
+                </p>
+                <p className="homeos-splitter__headline-amount">
+                  {money(transaction.currency, settled ? transaction.amount : remaining)}
+                </p>
+
+                <div
+                  className="homeos-splitter__track"
+                  role="progressbar"
+                  aria-label="Amount allocated"
+                  aria-valuenow={Math.round(allocatedPercent)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
+                  <div className="homeos-splitter__fill" style={{ width: `${allocatedPercent}%` }} />
+                </div>
+
+                <dl className="homeos-splitter__tally">
+                  <div className="homeos-splitter__tally-cell">
+                    <dt>Total</dt>
+                    <dd>{money(transaction.currency, transaction.amount)}</dd>
                   </div>
+                  <div className="homeos-splitter__tally-cell">
+                    <dt>Allocated</dt>
+                    <dd>{money(transaction.currency, totalAllocated)}</dd>
+                  </div>
+                </dl>
+
+                {settled && (
+                  <p className="homeos-splitter__settled-note">
+                    <IonIcon icon={checkmarkCircle} aria-hidden="true" />
+                    Every pound on this transaction is accounted for in HomeOS.
+                  </p>
                 )}
-              </div>
+              </section>
 
-              {canFulfill && (
-                <div className="homeos-tx-details__action-bar">
-                  <PrimaryButton onClick={() => setShowFulfillModal(true)}>
-                    Fulfill Transaction
-                  </PrimaryButton>
-                </div>
+              {allocations.length > 0 ? (
+                <BankTransactionAllocationsList allocations={allocations} currency={transaction.currency} />
+              ) : (
+                canFulfill && (
+                  <section className="homeos-splitter__start">
+                    <span className="homeos-splitter__start-icon" aria-hidden="true">
+                      <IonIcon icon={receiptOutline} />
+                    </span>
+                    <p className="homeos-splitter__start-title">Split this receipt</p>
+                    <p className="homeos-splitter__start-copy">
+                      Add each purchase or expense it paid for. The remaining balance drops as you go,
+                      and you can stop and come back at any point.
+                    </p>
+                  </section>
+                )
               )}
 
-              {displayStatus === 'Fulfilled' && (
-                <div className="homeos-tx-details__fulfilled-notice">
-                  <span>✓ Fully allocated to HomeOS expenses</span>
-                </div>
-              )}
-
-              <BankTransactionAllocationsList allocations={allocList} currency={tx.currency} />
-
-              <div className="homeos-tx-details__section">
+              <section className="homeos-splitter__section">
                 <SectionHeader icon={informationCircleOutline} title="Transaction details" />
-                <GroupedCard className="homeos-tx-details__facts">
-                  {formatTimestampDate(tx.transactionAt) && (
-                    <FactRow label="Date" value={formatTimestampDate(tx.transactionAt)} />
+                <GroupedCard>
+                  {formatTimestampDate(transaction.transactionAt) && (
+                    <FactRow label="Date" value={formatTimestampDate(transaction.transactionAt)} />
                   )}
-                  {formatTimestampDateTime(tx.receivedAt) ? (
-                    <FactRow label="Received" value={formatTimestampDateTime(tx.receivedAt)} />
-                  ) : formatTimestampDate(tx.receivedAt) ? (
-                    <FactRow label="Received" value={formatTimestampDate(tx.receivedAt)} />
+                  {formatTimestampDateTime(transaction.receivedAt) ? (
+                    <FactRow label="Received" value={formatTimestampDateTime(transaction.receivedAt)} />
+                  ) : formatTimestampDate(transaction.receivedAt) ? (
+                    <FactRow label="Received" value={formatTimestampDate(transaction.receivedAt)} />
                   ) : null}
-                  <FactRow label="Bank" value={tx.bank} />
-                  <FactRow label="Card" value={tx.cardLast4 ? `•••• ${tx.cardLast4}` : 'N/A'} />
-                  {tx.transactionType && <FactRow label="Type" value={tx.transactionType.toUpperCase()} />}
+                  <FactRow label="Bank" value={transaction.bank} />
+                  <FactRow label="Card" value={transaction.cardLast4 ? `•••• ${transaction.cardLast4}` : 'N/A'} />
+                  {transaction.transactionType && (
+                    <FactRow label="Type" value={transaction.transactionType.toUpperCase()} />
+                  )}
                 </GroupedCard>
-              </div>
+              </section>
+
+              <details className="homeos-splitter__source">
+                <summary className="homeos-splitter__source-summary">Original bank message</summary>
+                <div className="homeos-splitter__raw">{transaction.rawMessage}</div>
+              </details>
 
               {canIgnore && (
-                <div className="homeos-tx-details__secondary-actions">
-                  <SecondaryButton
-                    disabled={ignoreMutation.isPending}
-                    onClick={() => setShowIgnoreConfirm(true)}
-                  >
-                    {ignoreMutation.isPending ? 'Updating…' : 'Ignore transaction'}
-                  </SecondaryButton>
-                </div>
+                <SecondaryButton
+                  className="homeos-splitter__ignore"
+                  disabled={ignoreMutation.isPending}
+                  onClick={() => setShowIgnoreConfirm(true)}
+                >
+                  {ignoreMutation.isPending ? 'Updating…' : 'Ignore this transaction'}
+                </SecondaryButton>
               )}
-
-              <details className="homeos-tx-details__source-expandable">
-                <summary className="homeos-tx-details__source-summary">Original bank message</summary>
-                <div className="homeos-tx-details__raw-message">
-                  {tx.rawMessage}
-                </div>
-              </details>
 
               <FulfillTransactionModal
                 isOpen={showFulfillModal}
                 onClose={() => setShowFulfillModal(false)}
-                transaction={tx}
+                transaction={transaction}
                 remainingAmount={remaining}
                 totalAllocated={totalAllocated}
               />
@@ -204,7 +242,7 @@ export function PendingTransactionDetailsPage() {
                 header="Ignore Transaction?"
                 message="This bank transaction will be marked as ignored. It will not create an Expense or Item in HomeOS."
                 confirmLabel="Ignore"
-                onConfirm={handleIgnore}
+                onConfirm={() => handleIgnore(transaction)}
                 onCancel={() => setShowIgnoreConfirm(false)}
               />
             </div>

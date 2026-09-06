@@ -11,13 +11,13 @@ import {
   useUpdateCategory,
 } from '../../features/master-data/useCategories'
 import { AppPage } from '../../shared/components/AppPage'
+import { EmptyState } from '../../shared/components/EmptyState'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { QueryState } from '../../shared/components/QueryState'
 import { QuickAddSheet } from '../../shared/components/QuickAddSheet'
 import { Row } from '../../shared/components/Row'
-import { Skeleton } from '../../shared/components/Skeleton'
-import './CategoriesPage.css'
+import { RowSkeleton } from '../../shared/components/RowSkeleton'
 
 type SheetState = { mode: 'add' } | { mode: 'edit'; category: CategoryDetail } | null
 
@@ -34,15 +34,27 @@ export function CategoriesPage() {
 
   return (
     <AppPage title="Categories" backHref="/app/tabs/more" onRefresh={async () => { await categories.refetch() }}>
-      <PrimaryButton className="homeos-categories__add" onClick={() => setSheet({ mode: 'add' })}>
-        Add category
-      </PrimaryButton>
+      {/* Hidden while the list is empty — the empty state carries the add action there instead. */}
+      {(categories.data?.length ?? 0) > 0 && (
+        <PrimaryButton className="homeos-page-cta" onClick={() => setSheet({ mode: 'add' })}>
+          Add category
+        </PrimaryButton>
+      )}
 
       <QueryState
         query={categories}
-        skeleton={<Skeleton height={64} />}
+        skeleton={<RowSkeleton />}
         error="Couldn't load categories."
-        empty="No categories yet."
+        empty={
+          <EmptyState
+            icon={pricetagOutline}
+            title="No categories yet"
+            message="Categories group products so spending can be read by kind rather than by line item."
+            action={
+              <PrimaryButton onClick={() => setSheet({ mode: 'add' })}>Add category</PrimaryButton>
+            }
+          />
+        }
       >
         {(items) => (
           <GroupedCard>
@@ -96,8 +108,8 @@ function CategoryForm({ initial, onSaved }: { initial?: CategoryDetail; onSaved:
   const onSubmit = async (values: CategoryFormValues) => {
     if (initial) {
       presentAlert({
-        header: 'Save Changes?',
-        message: 'Are you sure you want to save these changes?',
+        header: 'Save changes?',
+        message: 'The new details replace the current ones everywhere this appears.',
         buttons: [
           { text: 'Cancel', role: 'cancel' },
           { text: 'Save', handler: () => executeSubmit(values) }
