@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { IonIcon, IonModal } from '@ionic/react'
 import { cardOutline, close, cubeOutline } from 'ionicons/icons'
 import { useNavigate } from 'react-router-dom'
@@ -30,6 +30,17 @@ export function FulfillTransactionModal({
   const [customAmount, setCustomAmount] = useState<string>(String(remainingAmount))
   const [destination, setDestination] = useState<DestinationType>('expense')
   const [amountError, setAmountError] = useState<string | null>(null)
+  const wasOpenRef = useRef(false)
+
+  // Reset to full mode and sync with the latest remainingAmount whenever the modal opens
+  useEffect(() => {
+    if (isOpen && !wasOpenRef.current) {
+      setAllocationMode('full')
+      setCustomAmount(String(remainingAmount))
+      setAmountError(null)
+    }
+    wasOpenRef.current = isOpen
+  }, [isOpen, remainingAmount])
 
   const effectiveAmount =
     allocationMode === 'full'

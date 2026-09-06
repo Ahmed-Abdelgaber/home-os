@@ -38,6 +38,8 @@ export function useCreateExpense() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      queryClient.invalidateQueries({ queryKey: ['bank_transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['bank_transaction_allocations'] })
       queryClient.invalidateQueries({ queryKey: ['home'] })
     },
   })
@@ -53,6 +55,8 @@ export function useUpdateExpense() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      queryClient.invalidateQueries({ queryKey: ['bank_transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['bank_transaction_allocations'] })
       queryClient.invalidateQueries({ queryKey: ['home'] })
     },
   })
@@ -68,6 +72,8 @@ export function useDeleteExpense() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      queryClient.invalidateQueries({ queryKey: ['bank_transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['bank_transaction_allocations'] })
       queryClient.invalidateQueries({ queryKey: ['home'] })
     },
   })

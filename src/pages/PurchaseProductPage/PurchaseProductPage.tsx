@@ -50,27 +50,34 @@ export function PurchaseProductPage() {
   const prefill = (location.state as PurchasePrefillState | null) ?? null
 
   const [pickedProduct, setPickedProduct] = useState<ActiveProduct | null>(null)
-  const [clearedPrefill, setClearedPrefill] = useState(false)
+  const [clearedPrefillProduct, setClearedPrefillProduct] = useState(false)
 
-  const activePrefill = clearedPrefill ? null : prefill
-  const prefillProductId = activePrefill?.productId
+  // Retain all fulfillment metadata (bankTransactionId, amount, merchant, purchaseDate, etc.)
+  // but allow clearing the prefilled productId if the user explicitly chose "Choose another product"
+  const effectivePrefill = prefill
+    ? {
+        ...prefill,
+        productId: clearedPrefillProduct ? undefined : prefill.productId,
+      }
+    : null
 
+  const prefillProductId = effectivePrefill?.productId
   const productQuery = useProduct(prefillProductId)
 
-  const backHref = prefill?.bankTransactionId
-    ? `/app/pending-transactions/${prefill.bankTransactionId}`
+  const backHref = effectivePrefill?.bankTransactionId
+    ? `/app/pending-transactions/${effectivePrefill.bankTransactionId}`
     : '/app/tabs/home'
 
   const handleChangeProduct = () => {
-    setClearedPrefill(true)
+    setClearedPrefillProduct(true)
     setPickedProduct(null)
   }
 
   // If prefilled with a productId, validate against product status
-  if (prefillProductId && !clearedPrefill) {
+  if (prefillProductId && !clearedPrefillProduct) {
     if (productQuery.isLoading) {
       return (
-        <AppPage title={prefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
+        <AppPage title={effectivePrefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
           <div className="homeos-purchase-skeleton-stack">
             <Skeleton height={60} />
             <Skeleton height={60} />
@@ -82,7 +89,7 @@ export function PurchaseProductPage() {
 
     if (productQuery.isError || !productQuery.data) {
       return (
-        <AppPage title={prefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
+        <AppPage title={effectivePrefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
           <EmptyState message="Couldn't load product for purchase." />
         </AppPage>
       )
@@ -90,7 +97,7 @@ export function PurchaseProductPage() {
 
     if (!productQuery.data.isActive) {
       return (
-        <AppPage title={prefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
+        <AppPage title={effectivePrefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
           <div className="homeos-purchase-inactive-card">
             <h2 className="homeos-purchase-inactive-title">{productQuery.data.name} is archived</h2>
             <p className="homeos-purchase-inactive-desc">
@@ -116,10 +123,10 @@ export function PurchaseProductPage() {
     }
 
     return (
-      <AppPage title={prefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
+      <AppPage title={effectivePrefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
         <PurchaseForm
           product={prefilledActiveProduct}
-          prefill={activePrefill}
+          prefill={effectivePrefill}
           onChangeProduct={handleChangeProduct}
           onPurchased={(itemId) => navigate(`/app/items/${itemId}`, { replace: true })}
         />
@@ -128,11 +135,11 @@ export function PurchaseProductPage() {
   }
 
   return (
-    <AppPage title={prefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
+    <AppPage title={effectivePrefill?.bankTransactionId ? 'Fulfill Purchase' : 'Buy Product'} backHref={backHref}>
       {pickedProduct ? (
         <PurchaseForm
           product={pickedProduct}
-          prefill={null}
+          prefill={effectivePrefill}
           onChangeProduct={() => setPickedProduct(null)}
           onPurchased={(itemId) => navigate(`/app/items/${itemId}`, { replace: true })}
         />
