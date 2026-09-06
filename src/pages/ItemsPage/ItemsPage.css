@@ -18,6 +18,9 @@
   font-size: var(--homeos-text-body-sm);
   font-weight: var(--homeos-weight-semibold);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   -webkit-tap-highlight-color: transparent;
   transition: all var(--homeos-motion-fast) var(--homeos-ease);
 }
@@ -29,14 +32,265 @@
               0 1px 1px rgba(var(--homeos-ink-950-rgb), 0.04);
 }
 
+.homeos-items-toggle__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 6px;
+  border-radius: var(--homeos-radius-circle);
+  background: rgba(var(--homeos-ink-950-rgb), 0.08);
+  color: var(--homeos-ink-700);
+  font-size: 11px;
+  font-weight: var(--homeos-weight-bold);
+  line-height: 1;
+  transition: all var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-items-toggle__option--selected .homeos-items-toggle__count {
+  background: var(--homeos-ink-950);
+  color: #ffffff;
+}
+
+/* ─── Item Card List ─── */
+.homeos-items-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--homeos-space-10);
+}
+
+/* ─── Individual Item Card ─── */
+.homeos-item-card {
+  display: flex;
+  align-items: center;
+  gap: var(--homeos-space-12);
+  padding: 12px 14px;
+  background: var(--homeos-surface);
+  border: 1px solid var(--homeos-border);
+  border-radius: var(--homeos-radius-card);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 1px 3px rgba(var(--homeos-ink-950-rgb), 0.03);
+  transition: transform var(--homeos-motion-fast) var(--homeos-ease),
+              box-shadow var(--homeos-motion-fast) var(--homeos-ease),
+              border-color var(--homeos-motion-fast) var(--homeos-ease),
+              background-color var(--homeos-motion-fast) var(--homeos-ease);
+  text-align: left;
+  width: 100%;
+}
+
+.homeos-item-card:hover {
+  box-shadow: 0 4px 12px rgba(var(--homeos-ink-950-rgb), 0.05);
+  border-color: var(--homeos-border-strong);
+}
+
+.homeos-item-card:active {
+  transform: scale(0.99);
+  background: var(--homeos-soft-surface);
+}
+
+.homeos-item-card:focus-visible {
+  outline: 2px solid var(--homeos-primary-500);
+  outline-offset: 2px;
+}
+
+/* ─── Item Glyph Icon ─── */
+.homeos-item-card__icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--homeos-radius-control);
+  font-size: 20px;
+  transition: transform var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-item-card:hover .homeos-item-card__icon {
+  transform: scale(1.05);
+}
+
+.homeos-item-card__icon--success {
+  background: var(--homeos-success-soft);
+  color: var(--homeos-success);
+}
+
+.homeos-item-card__icon--info {
+  background: var(--homeos-info-soft);
+  color: var(--homeos-info);
+}
+
+.homeos-item-card__icon--warning {
+  background: var(--homeos-warning-soft);
+  color: var(--homeos-warning-dark);
+}
+
+.homeos-item-card__icon--neutral {
+  background: var(--homeos-soft-surface);
+  color: var(--homeos-ink-600);
+}
+
+/* ─── Item Content & Hierarchy ─── */
+.homeos-item-card__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.homeos-item-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--homeos-space-8);
+}
+
+.homeos-item-card__title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--homeos-space-6);
+  min-width: 0;
+}
+
+.homeos-item-card__title {
+  margin: 0;
+  font-size: var(--homeos-text-body);
+  font-weight: var(--homeos-weight-semibold);
+  color: var(--homeos-ink-950);
+  line-height: var(--homeos-leading-snug);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.homeos-item-card__quantity {
+  font-size: var(--homeos-text-caption);
+  font-weight: var(--homeos-weight-semibold);
+  color: var(--homeos-ink-500);
+  background: var(--homeos-soft-surface);
+  padding: 1px 6px;
+  border-radius: var(--homeos-radius-control);
+  flex-shrink: 0;
+}
+
+/* ─── Status Pill Badge ─── */
+.homeos-item-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--homeos-radius-circle);
+  font-size: 11px;
+  font-weight: var(--homeos-weight-semibold);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.homeos-item-badge__icon {
+  font-size: 12px;
+}
+
+.homeos-item-badge--success {
+  background: var(--homeos-success-soft);
+  color: var(--homeos-success);
+}
+
+.homeos-item-badge--info {
+  background: var(--homeos-info-soft);
+  color: var(--homeos-info);
+}
+
+.homeos-item-badge--warning {
+  background: var(--homeos-warning-soft);
+  color: var(--homeos-warning-dark);
+  border: 1px solid rgba(228, 161, 27, 0.25);
+}
+
+.homeos-item-badge--neutral {
+  background: var(--homeos-soft-surface);
+  color: var(--homeos-ink-600);
+}
+
+/* ─── Subtitle & Action Row ─── */
+.homeos-item-card__meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--homeos-space-8);
+}
+
+.homeos-item-card__subtitle {
+  font-size: var(--homeos-text-body-sm);
+  color: var(--homeos-ink-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.homeos-item-card__chevron {
+  color: var(--homeos-ink-400);
+  font-size: 16px;
+  flex-shrink: 0;
+  transition: transform var(--homeos-motion-fast) var(--homeos-ease),
+              color var(--homeos-motion-fast) var(--homeos-ease);
+}
+
+.homeos-item-card:hover .homeos-item-card__chevron {
+  color: var(--homeos-ink-700);
+  transform: translateX(2px);
+}
+
+/* ─── Inline Start Using Action Button ─── */
+.homeos-item-card__start-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  background: var(--homeos-primary-500);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--homeos-radius-control);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: var(--homeos-weight-semibold);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 1px 2px rgba(var(--homeos-primary-rgb), 0.2);
+  transition: all var(--homeos-motion-fast) var(--homeos-ease);
+  flex-shrink: 0;
+}
+
+.homeos-item-card__start-btn:hover:not(:disabled) {
+  background: var(--homeos-primary-600);
+  transform: scale(1.02);
+}
+
+.homeos-item-card__start-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.homeos-item-card__start-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.homeos-item-card__start-btn ion-icon {
+  font-size: 12px;
+}
+
+/* ─── Skeleton Loading Stack ─── */
 .homeos-items-skeleton-stack {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  border-radius: var(--homeos-radius-card);
-  overflow: hidden;
+  gap: var(--homeos-space-10);
 }
 
 .homeos-items-skeleton-stack .homeos-skeleton {
-  border-radius: 0;
+  border-radius: var(--homeos-radius-card);
 }
