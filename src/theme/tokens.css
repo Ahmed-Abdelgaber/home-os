@@ -15,6 +15,7 @@
    --homeos-ink-800: #242631;
    --homeos-ink-600: #5f6475;
    --homeos-ink-500: #787e91;
+   --homeos-ink-400: #9ba1b5;
    --homeos-surface: #ffffff;
    --homeos-background: #f7f8fc;
    --homeos-soft-surface: #f1f3f8;
@@ -53,6 +54,7 @@
 
    /* Elevation. Named by the role the surface plays, not by blur radius, so a card and a
      modal can't drift into using each other's depth. */
+   --homeos-shadow-subtle: 0 1px 3px rgba(var(--homeos-ink-950-rgb), 0.04), 0 1px 2px rgba(var(--homeos-ink-950-rgb), 0.02);
    --homeos-shadow-row: 0 1px 4px rgba(var(--homeos-ink-950-rgb), 0.1);
    --homeos-shadow-card: 0 6px 20px rgba(var(--homeos-ink-950-rgb), 0.08);
    --homeos-shadow-modal: 0 12px 28px rgba(var(--homeos-ink-950-rgb), 0.14);

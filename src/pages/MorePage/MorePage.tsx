@@ -14,6 +14,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { IonIcon, useIonAlert } from '@ionic/react'
 import { supabase } from '../../core/supabase/client'
+import { usePendingBankTransactions } from '../../features/bank-transactions/useBankTransactions'
 import { AppPage } from '../../shared/components/AppPage'
 import { GroupedCard } from '../../shared/components/GroupedCard'
 import { Row } from '../../shared/components/Row'
@@ -23,6 +24,9 @@ import './MorePage.css'
 export function MorePage() {
   const navigate = useNavigate()
   const [presentAlert] = useIonAlert()
+  const { data: pendingTxs } = usePendingBankTransactions()
+  const actionableCount = pendingTxs?.length ?? 0
+  const hasUnallocated = pendingTxs?.some((tx) => tx.status === 'pending')
 
   const handleLogout = () => {
     presentAlert({
@@ -59,9 +63,16 @@ export function MorePage() {
         />
         <Row
           icon={cardOutline}
-          tone="warning"
+          tone={actionableCount > 0 ? (hasUnallocated ? 'danger' : 'warning') : 'neutral'}
           title="Pending Transactions"
           meta="Review bank SMS & imported debits"
+          accessory={
+            actionableCount > 0 ? (
+              <span className={`homeos-more-badge${hasUnallocated ? '' : ' homeos-more-badge--warning'}`}>
+                {actionableCount}
+              </span>
+            ) : null
+          }
           onClick={() => navigate('/app/pending-transactions')}
         />
         <Row tone="neutral" icon={settingsOutline} title="Settings" meta="Your account" onClick={() => navigate('/app/settings')} />

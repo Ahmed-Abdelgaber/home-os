@@ -5,6 +5,11 @@ export interface ItemSummary {
   id: string
   title: string
   meta: string
+  days?: number
+  startedDate?: string
+  purchaseDate?: string
+  finishedDate?: string
+  quantity?: number
 }
 
 function daysBetween(fromDateStr: string, toDateStr: string): number {
@@ -17,7 +22,7 @@ function daysBetween(fromDateStr: string, toDateStr: string): number {
 export async function fetchActiveItems(limit?: number): Promise<ItemSummary[]> {
   let query = supabase
     .from('items')
-    .select('id, product:products(name)')
+    .select('id, started_date, quantity, product:products(name)')
     .eq('status', 'active')
     .order('started_date', { ascending: true })
   if (limit) query = query.limit(limit)
@@ -42,6 +47,9 @@ export async function fetchActiveItems(limit?: number): Promise<ItemSummary[]> {
       id: item.id,
       title: product?.name ?? 'Unknown product',
       meta: days != null ? `Active for ${days} day${days === 1 ? '' : 's'}` : 'Active',
+      days: days ?? undefined,
+      startedDate: (item.started_date as string | null) ?? undefined,
+      quantity: (item.quantity as number | null) ?? undefined,
     }
   })
 }
@@ -50,7 +58,7 @@ export async function fetchActiveItems(limit?: number): Promise<ItemSummary[]> {
 export async function fetchLongStockedItems(limit?: number): Promise<ItemSummary[]> {
   const { data: items, error } = await supabase
     .from('items')
-    .select('id, product:products(name), expense:expenses(expense_date)')
+    .select('id, quantity, product:products(name), expense:expenses(expense_date)')
     .eq('status', 'stocked')
   if (error) throw error
 
@@ -61,25 +69,39 @@ export async function fetchLongStockedItems(limit?: number): Promise<ItemSummary
     .map((item) => {
       const product = item.product as unknown as { name: string } | null
       const expense = item.expense as unknown as { expense_date: string } | null
-      return { id: item.id, title: product?.name ?? 'Unknown product', purchaseDate: expense?.expense_date }
+      return {
+        id: item.id,
+        title: product?.name ?? 'Unknown product',
+        purchaseDate: expense?.expense_date,
+        quantity: (item.quantity as number | null) ?? undefined,
+      }
     })
-    .filter((item): item is { id: string; title: string; purchaseDate: string } => Boolean(item.purchaseDate) && item.purchaseDate! <= cutoff)
+    .filter(
+      (item): item is { id: string; title: string; purchaseDate: string; quantity: number | undefined } =>
+        Boolean(item.purchaseDate) && item.purchaseDate! <= cutoff,
+    )
     .sort((a, b) => a.purchaseDate.localeCompare(b.purchaseDate))
 
   const limited = limit ? eligible.slice(0, limit) : eligible
 
-  return limited.map((item) => ({
-    id: item.id,
-    title: item.title,
-    meta: `Stocked for ${daysBetween(item.purchaseDate, today)} days`,
-  }))
+  return limited.map((item) => {
+    const days = daysBetween(item.purchaseDate, today)
+    return {
+      id: item.id,
+      title: item.title,
+      meta: `Stocked for ${days} days`,
+      days,
+      purchaseDate: item.purchaseDate,
+      quantity: item.quantity,
+    }
+  })
 }
 
 /** All Stocked Items, newest purchase first — for the Items tab Stocked view. */
 export async function fetchAllStockedItems(): Promise<ItemSummary[]> {
   const { data: items, error } = await supabase
     .from('items')
-    .select('id, product:products(name), expense:expenses(expense_date)')
+    .select('id, quantity, product:products(name), expense:expenses(expense_date)')
     .eq('status', 'stocked')
   if (error) throw error
 
@@ -90,34 +112,44 @@ export async function fetchAllStockedItems(): Promise<ItemSummary[]> {
       const product = item.product as unknown as { name: string } | null
       const expense = item.expense as unknown as { expense_date: string } | null
       const purchaseDate = expense?.expense_date
+      const days = purchaseDate ? daysBetween(purchaseDate, today) : undefined
       return {
         id: item.id,
         title: product?.name ?? 'Unknown product',
-        meta: purchaseDate ? `Stocked for ${daysBetween(purchaseDate, today)} days` : 'Stocked',
-        purchaseDate: purchaseDate ?? '',
+        meta: purchaseDate ? `Stocked for ${days} days` : 'Stocked',
+        days,
+        purchaseDate: purchaseDate ?? undefined,
+        quantity: (item.quantity as number | null) ?? undefined,
       }
     })
-    .sort((a, b) => b.purchaseDate.localeCompare(a.purchaseDate))
-    .map(({ purchaseDate: _purchaseDate, ...item }) => item)
+    .sort((a, b) => (b.purchaseDate ?? '').localeCompare(a.purchaseDate ?? ''))
 }
 
 /** Finished Items, most recently finished first — for the Items tab Finished view. */
 export async function fetchFinishedItems(): Promise<ItemSummary[]> {
   const { data: items, error } = await supabase
     .from('items')
-    .select('id, started_date, finished_date, product:products(name)')
+    .select('id, started_date, finished_date, quantity, product:products(name)')
     .eq('status', 'finished')
     .order('finished_date', { ascending: false })
   if (error) throw error
 
   return (items ?? []).map((item) => {
     const product = item.product as unknown as { name: string } | null
-    const started = item.started_date as string
-    const finished = item.finished_date as string
+    const started = item.started_date as string | null
+    const finished = item.finished_date as string | null
+    const days = started && finished ? daysBetween(started, finished) + 1 : undefined
     return {
       id: item.id,
       title: product?.name ?? 'Unknown product',
-      meta: `${formatShortDate(started)} → ${formatShortDate(finished)} • ${daysBetween(started, finished) + 1} days`,
+      meta:
+        started && finished
+          ? `${formatShortDate(started)} → ${formatShortDate(finished)} • ${days} days`
+          : 'Finished',
+      days,
+      startedDate: started ?? undefined,
+      finishedDate: finished ?? undefined,
+      quantity: (item.quantity as number | null) ?? undefined,
     }
   })
 }

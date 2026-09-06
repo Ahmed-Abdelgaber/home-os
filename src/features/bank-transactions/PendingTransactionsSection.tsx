@@ -63,7 +63,7 @@ export function PendingTransactionsSection({ showHeader = true }: PendingTransac
             <Row
               key={tx.id}
               icon={cardOutline}
-              tone="warning"
+              tone={isPartial ? 'warning' : 'danger'}
               title={merchant}
               meta={meta}
               accessory={accessoryNode}

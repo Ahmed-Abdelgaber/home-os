@@ -15,11 +15,12 @@
   align-items: center;
   gap: var(--homeos-space-12);
   padding: var(--homeos-space-12) var(--homeos-space-16);
-  border-bottom: 1px solid var(--homeos-border);
+  min-height: 48px;
+  transition: background-color var(--homeos-motion-fast) var(--homeos-ease);
 }
 
-.homeos-shopping-list__item:last-child {
-  border-bottom: none;
+.homeos-shopping-list__item:hover {
+  background-color: var(--homeos-soft-surface);
 }
 
 .homeos-shopping-list__checkbox-label {
