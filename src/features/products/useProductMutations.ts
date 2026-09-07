@@ -1,12 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../core/supabase/client'
 import type { ConsumptionMode } from './consumptionMode'
+import type { UsageMode } from './usageMode'
 
 export interface ProductInput {
   name: string
   categoryId: string
   consumerId: string
   consumptionMode: ConsumptionMode
+  usageMode?: UsageMode
   notes: string | null
 }
 
@@ -16,6 +18,7 @@ function toRow(input: ProductInput) {
     category_id: input.categoryId,
     consumer_id: input.consumerId,
     consumption_mode: input.consumptionMode,
+    usage_mode: input.usageMode ?? 'duration',
     notes: input.notes,
   }
 }

@@ -1,3 +1,5 @@
+import type { UsageMode } from '../products/usageMode'
+
 export type ShoppingListSource = 'automatic' | 'manual'
 
 export interface ShoppingListItem {
@@ -8,4 +10,5 @@ export interface ShoppingListItem {
   source: ShoppingListSource
   createdAt: string
   isActive: boolean
+  usageMode?: UsageMode
 }

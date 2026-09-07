@@ -136,6 +136,7 @@ export function PurchaseProductPage() {
       id: productQuery.data.id,
       name: productQuery.data.name,
       categoryName: productQuery.data.categoryName,
+      usageMode: productQuery.data.usageMode,
     }
 
     return (
@@ -390,7 +391,7 @@ function PurchaseForm({
 
       <label className="homeos-purchase-form__toggle">
         <input type="checkbox" {...register('startNow')} />
-        <span>Start using now</span>
+        <span>{product.usageMode === 'one_time' ? 'Use now' : 'Start using now'}</span>
       </label>
 
       {submitError && (

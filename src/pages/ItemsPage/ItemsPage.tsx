@@ -1,11 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { IonIcon } from '@ionic/react'
-import { chevronForward, closeOutline, optionsOutline, play, searchOutline } from 'ionicons/icons'
+import { checkmarkCircleOutline, chevronForward, closeOutline, optionsOutline, play, searchOutline } from 'ionicons/icons'
 import { useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { resolveProductVisual } from '../../core/presentation/productVisuals'
 import { formatShortDate } from '../../core/utils/cairoDate'
-import { useStartItem } from '../../features/items/useItemMutations'
+import { useStartItem, useUseItem } from '../../features/items/useItemMutations'
 import { useActiveItems, useFinishedItems, useStockedItems } from '../../features/items/useItems'
 import { groupItemDays, isLongItem, LONG_ITEM_DAYS } from '../../features/items/itemLedger'
 import type { ItemOrder, ItemsView } from '../../features/items/itemLedger'
@@ -24,6 +24,7 @@ const dateLabels: Record<ItemsView, string> = { active: 'Started', stocked: 'Pur
 export function ItemsPage() {
   const queryClient = useQueryClient()
   const startItem = useStartItem()
+  const useItem = useUseItem()
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -48,6 +49,7 @@ export function ItemsPage() {
     setSearchParams(params, { replace: true })
     resetFilters()
     if (!startItem.isPending) startItem.reset()
+    if (!useItem.isPending) useItem.reset()
   }
 
   return (
@@ -81,6 +83,8 @@ export function ItemsPage() {
       </div>}
       {startItem.isError && <p className="homeos-items-feedback" role="alert">Couldn't start this item. Please try again.</p>}
       {startItem.isSuccess && <p className="homeos-ledger-feedback" role="status">Item started. You can find it in Active.</p>}
+      {useItem.isError && <p className="homeos-items-feedback" role="alert">Couldn't record item usage. Please try again.</p>}
+      {useItem.isSuccess && <p className="homeos-ledger-feedback" role="status">Item used. You can find it in Finished.</p>}
       <QueryState query={query} skeleton={<div className="homeos-items-skeleton-stack"><Skeleton height={20} width="50%" />{[0, 1, 2, 3].map((row) => <Skeleton key={row} height={72} />)}</div>}
         error={`Couldn't load ${view} items.`}
         empty={<EmptyState title={view === 'active' ? 'No active items yet' : view === 'stocked' ? 'Nothing stocked yet' : 'No finished items yet'} message={view === 'active' ? 'Start using a stocked item to see it here.' : view === 'stocked' ? 'New purchases kept for later will appear here.' : 'Items you finish will appear here with how long they lasted.'} />}>
@@ -90,26 +94,71 @@ export function ItemsPage() {
           return <div aria-label={`${viewLabels[view]} items by date`}>
             {(lowerSearch || filterLong) && <p className="homeos-ledger-feedback" role="status">{filtered.length} matching {filtered.length === 1 ? 'item' : 'items'}</p>}
             {groupItemDays(filtered, view, order).map(group => {
-              const label = group.date ? `${dateLabels[view]} ${dateFormatter.format(new Date(`${group.date}T00:00:00Z`))}` : `${dateLabels[view]} date unavailable`
+              const isAllOneTime = view === 'finished' && group.items.every(i => i.usageMode === 'one_time')
+              const datePrefix = isAllOneTime ? 'Used' : dateLabels[view]
+              const label = group.date ? `${datePrefix} ${dateFormatter.format(new Date(`${group.date}T00:00:00Z`))}` : `${datePrefix} date unavailable`
               return <section className="homeos-ledger-day" key={group.date} aria-label={label}>
                 <div className="homeos-ledger-day__heading"><h2>{label}</h2><span>{group.items.length} {group.items.length === 1 ? 'item' : 'items'}</span></div>
                 <ul className="homeos-ledger-rows">
                   {group.items.map(item => {
                     const visual = resolveProductVisual(item.title)
                     const long = isLongItem(item, view)
-                    const statusLabel = view === 'active' ? (long ? 'Long-running' : 'In use') : view === 'stocked' ? (long ? 'Long-stocked' : 'In stock') : item.startedDate ? `Started ${formatShortDate(item.startedDate)}` : 'Finished'
+                    const isOneTime = item.usageMode === 'one_time'
+                    const statusLabel =
+                      view === 'active'
+                        ? long
+                          ? 'Long-running'
+                          : 'In use'
+                        : view === 'stocked'
+                        ? long
+                          ? 'Long-stocked'
+                          : 'In stock'
+                        : isOneTime
+                        ? item.finishedDate
+                          ? `Used ${formatShortDate(item.finishedDate)}`
+                          : 'Used'
+                        : item.startedDate
+                        ? `Started ${formatShortDate(item.startedDate)}`
+                        : 'Finished'
+
                     return <li className="homeos-item-ledger-entry" key={item.id}>
                       <Link className="homeos-ledger-row homeos-item-ledger-row" to={`/app/items/${item.id}`}>
                         <span className={`homeos-ledger-row__icon homeos-ledger-row__icon--${visual.tone}`} aria-hidden="true">{visual.ruleId ? visual.emoji : '📦'}</span>
                         <span className="homeos-ledger-row__copy"><strong dir="auto">{item.title}{item.quantity != null && item.quantity > 1 && <span className="homeos-item-quantity"> ×{item.quantity}</span>}</strong><span className={`homeos-item-status homeos-item-status--${long ? 'warning' : view}`}>{statusLabel}</span></span>
-                        <span className={`homeos-item-duration homeos-item-duration--${long ? 'warning' : view}`}>
-                          {item.days != null ? <><strong>{item.days}</strong><span>{`${item.days === 1 ? 'day' : 'days'}${view === 'finished' ? ' lasted' : ''}`}</span></> : <span>—</span>}
-                        </span>
+                        {view === 'finished' && isOneTime ? null : (
+                          <span className={`homeos-item-duration homeos-item-duration--${long ? 'warning' : view}`}>
+                            {item.days != null ? <><strong>{item.days}</strong><span>{`${item.days === 1 ? 'day' : 'days'}${view === 'finished' ? ' lasted' : ''}`}</span></> : <span>—</span>}
+                          </span>
+                        )}
                         {view !== 'stocked' && <IonIcon className="homeos-ledger-chevron" icon={chevronForward} aria-hidden="true" />}
                       </Link>
-                      {view === 'stocked' && <button type="button" className="homeos-item-start" disabled={startItem.isPending} aria-busy={startItem.isPending && startItem.variables === item.id} aria-label={`Start using ${item.title}`} onClick={() => startItem.mutate(item.id)}>
-                        <IonIcon icon={play} aria-hidden="true" /><span>{startItem.isPending && startItem.variables === item.id ? 'Starting…' : 'Start'}</span>
-                      </button>}
+                      {view === 'stocked' && (
+                        isOneTime ? (
+                          <button
+                            type="button"
+                            className="homeos-item-start homeos-item-use"
+                            disabled={useItem.isPending}
+                            aria-busy={useItem.isPending && useItem.variables === item.id}
+                            aria-label={`Use ${item.title}`}
+                            onClick={() => useItem.mutate(item.id)}
+                          >
+                            <IonIcon icon={checkmarkCircleOutline} aria-hidden="true" />
+                            <span>{useItem.isPending && useItem.variables === item.id ? 'Using…' : 'Use'}</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="homeos-item-start"
+                            disabled={startItem.isPending}
+                            aria-busy={startItem.isPending && startItem.variables === item.id}
+                            aria-label={`Start using ${item.title}`}
+                            onClick={() => startItem.mutate(item.id)}
+                          >
+                            <IonIcon icon={play} aria-hidden="true" />
+                            <span>{startItem.isPending && startItem.variables === item.id ? 'Starting…' : 'Start'}</span>
+                          </button>
+                        )
+                      )}
                     </li>
                   })}
                 </ul>

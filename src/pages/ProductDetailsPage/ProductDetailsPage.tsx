@@ -2,6 +2,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { IonIcon } from '@ionic/react'
 import {
   documentTextOutline,
+  flashOutline,
+  hourglassOutline,
   personOutline,
   pricetagOutline,
   repeatOutline,
@@ -11,6 +13,7 @@ import { formatShortDate } from '../../core/utils/cairoDate'
 import { resolveProductVisual } from '../../core/presentation/productVisuals'
 import { calculateTypicalUsage, useProductHistory } from '../../features/items/useItemDetails'
 import { CONSUMPTION_MODE_LABELS } from '../../features/products/consumptionMode'
+import { USAGE_MODE_LABELS } from '../../features/products/usageMode'
 import { useLatestProductPurchase } from '../../features/products/useLatestProductPurchase'
 import { type ProductDetail, useProduct } from '../../features/products/useProductDetail'
 import { useSetProductActive } from '../../features/products/useProductMutations'
@@ -64,6 +67,7 @@ export function ProductDetailsPage() {
           )
           const typicalUsage = calculateTypicalUsage(items)
           const visual = resolveProductVisual(detail.name, detail.categoryName)
+          const isOneTime = detail.usageMode === 'one_time'
 
           const currentEntries: HistoryEntry[] = currentCoverageItems.map((h) => {
             const title = h.expense?.date
@@ -98,20 +102,25 @@ export function ProductDetailsPage() {
           })
 
           const finishedEntries: HistoryEntry[] = finishedHistoryItems.map((h) => {
+            const hIsOneTime = h.usageMode === 'one_time'
             const title =
-              h.startedDate && h.finishedDate
-                ? `${formatShortDate(h.startedDate)} → ${formatShortDate(h.finishedDate)}`
-                : h.expense?.date
-                  ? formatShortDate(h.expense.date)
-                  : 'Finished cycle'
+              hIsOneTime
+                ? (h.finishedDate ? `Used ${formatShortDate(h.finishedDate)}` : (h.expense?.date ? formatShortDate(h.expense.date) : 'Used'))
+                : (h.startedDate && h.finishedDate
+                    ? `${formatShortDate(h.startedDate)} → ${formatShortDate(h.finishedDate)}`
+                    : h.expense?.date
+                      ? formatShortDate(h.expense.date)
+                      : 'Finished cycle')
 
-            let subtitle = `Finished${
-              h.metrics ? ` · ${h.metrics.activeUsageDays} usage day${h.metrics.activeUsageDays === 1 ? '' : 's'}` : ''
-            }${
-              h.metrics && h.metrics.awayDays > 0
-                ? ` · ${h.metrics.awayDays} away day${h.metrics.awayDays === 1 ? '' : 's'}`
-                : ''
-            }`
+            let subtitle = hIsOneTime
+              ? 'Used'
+              : `Finished${
+                  h.metrics ? ` · ${h.metrics.activeUsageDays} usage day${h.metrics.activeUsageDays === 1 ? '' : 's'}` : ''
+                }${
+                  h.metrics && h.metrics.awayDays > 0
+                    ? ` · ${h.metrics.awayDays} away day${h.metrics.awayDays === 1 ? '' : 's'}`
+                    : ''
+                }`
             if (h.quantity > 1) {
               subtitle += ` · Qty ${h.quantity}`
             }
@@ -155,23 +164,32 @@ export function ProductDetailsPage() {
               </div>
 
               <div className="homeos-product-details__metrics">
-                <div className={`homeos-product-details__metric ${typicalUsage != null ? 'homeos-product-details__metric--highlight' : ''}`}>
-                  <p className="homeos-product-details__metric-value">{typicalUsage != null ? typicalUsage : '—'}</p>
-                  <p className="homeos-product-details__metric-label">Typical Days</p>
-                </div>
+                {!isOneTime && (
+                  <div className={`homeos-product-details__metric ${typicalUsage != null ? 'homeos-product-details__metric--highlight' : ''}`}>
+                    <p className="homeos-product-details__metric-value">{typicalUsage != null ? typicalUsage : '—'}</p>
+                    <p className="homeos-product-details__metric-label">Typical Days</p>
+                  </div>
+                )}
                 <div className="homeos-product-details__metric">
                   <p className="homeos-product-details__metric-value">{currentCoverageItems.length}</p>
-                  <p className="homeos-product-details__metric-label">In Stock / Active</p>
+                  <p className="homeos-product-details__metric-label">{isOneTime ? 'In Stock' : 'In Stock / Active'}</p>
                 </div>
                 <div className="homeos-product-details__metric">
                   <p className="homeos-product-details__metric-value">{finishedHistoryItems.length}</p>
-                  <p className="homeos-product-details__metric-label">Finished</p>
+                  <p className="homeos-product-details__metric-label">{isOneTime ? 'Used' : 'Finished'}</p>
                 </div>
               </div>
 
               <section className="homeos-product-details__section" aria-label="Product details">
                 <div className="homeos-ledger-day__heading"><h2>Product details</h2></div>
                 <ul className="homeos-tx-details-list">
+                  <li className="homeos-tx-detail-row">
+                    <span className="homeos-tx-detail-row__label">
+                      <IonIcon icon={isOneTime ? flashOutline : hourglassOutline} aria-hidden="true" />
+                      <span>Usage</span>
+                    </span>
+                    <span className="homeos-tx-detail-row__value">{USAGE_MODE_LABELS[detail.usageMode ?? 'duration']}</span>
+                  </li>
                   <li className="homeos-tx-detail-row">
                     <span className="homeos-tx-detail-row__label">
                       <IonIcon icon={pricetagOutline} aria-hidden="true" />
@@ -186,14 +204,16 @@ export function ProductDetailsPage() {
                     </span>
                     <span className="homeos-tx-detail-row__value">{detail.consumerName}</span>
                   </li>
-                  <li className="homeos-tx-detail-row">
-                    <span className="homeos-tx-detail-row__label">
-                      <IonIcon icon={repeatOutline} aria-hidden="true" />
-                      <span>Consumption</span>
-                    </span>
-                    <span className="homeos-tx-detail-row__value">{CONSUMPTION_MODE_LABELS[detail.consumptionMode]}</span>
-                  </li>
-                  {typicalUsage != null && (
+                  {!isOneTime && (
+                    <li className="homeos-tx-detail-row">
+                      <span className="homeos-tx-detail-row__label">
+                        <IonIcon icon={repeatOutline} aria-hidden="true" />
+                        <span>Consumption</span>
+                      </span>
+                      <span className="homeos-tx-detail-row__value">{CONSUMPTION_MODE_LABELS[detail.consumptionMode]}</span>
+                    </li>
+                  )}
+                  {!isOneTime && typicalUsage != null && (
                     <li className="homeos-tx-detail-row">
                       <span className="homeos-tx-detail-row__label">
                         <IonIcon icon={timerOutline} aria-hidden="true" />
@@ -243,7 +263,7 @@ export function ProductDetailsPage() {
 
               <HistorySection
                 title="Previous purchases"
-                summary={typicalUsage != null ? `Typical usage: ${typicalUsage} days` : undefined}
+                summary={!isOneTime && typicalUsage != null ? `Typical usage: ${typicalUsage} days` : undefined}
                 entries={finishedEntries}
                 onEntryClick={(id) => navigate(`/app/items/${id}`)}
               />

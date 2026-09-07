@@ -65,6 +65,52 @@ export function useFinishItem() {
   })
 }
 
+interface UseItemInput {
+  itemId: string
+  usedDate?: string
+}
+
+/** Stocked → Finished for one-time items per backend `use_item(p_item_id, p_used_date)` RPC. */
+export function useUseItem() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: UseItemInput | string) => {
+      const itemId = typeof input === 'string' ? input : input.itemId
+      const usedDate = typeof input === 'string' ? undefined : input.usedDate
+      const { error } = await supabase.rpc('use_item', {
+        p_item_id: itemId,
+        p_used_date: usedDate || null,
+      })
+      if (error) throw error
+
+      // Client-side fallback for automatic shopping suggestion if no active/stocked item remains
+      try {
+        const { data: itemData } = await supabase.from('items').select('product_id').eq('id', itemId).single()
+        if (itemData?.product_id) {
+          const { count } = await supabase
+            .from('items')
+            .select('id', { count: 'exact', head: true })
+            .eq('product_id', itemData.product_id)
+            .in('status', ['active', 'stocked'])
+          if (!count || count === 0) {
+            await supabase
+              .from('shopping_list_items')
+              .upsert({ product_id: itemData.product_id, source: 'automatic' }, { onConflict: 'product_id', ignoreDuplicates: true })
+          }
+        }
+      } catch {
+        // Table may not exist yet if migration has not been applied
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] })
+      queryClient.invalidateQueries({ queryKey: ['home'] })
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['shopping-list'] })
+    },
+  })
+}
+
 interface UpdateItemFinishedDateInput {
   itemId: string
   finishedDate: string

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../core/supabase/client'
 import type { ItemStatus } from '../../shared/components/StatusChip'
+import type { UsageMode } from '../products/usageMode'
 
 export interface ItemDetail {
   id: string
@@ -8,6 +9,7 @@ export interface ItemDetail {
   startedDate: string | null
   finishedDate: string | null
   quantity: number
+  usageMode: UsageMode
   notes: string | null
   productId: string
   productName: string
@@ -30,7 +32,7 @@ export function useItem(itemId: string | undefined) {
       const { data: item, error } = await supabase
         .from('items')
         .select(
-          'id, status, started_date, finished_date, quantity, notes, product_id, expense_id, product:products(name), expense:expenses(amount, merchant, expense_date, account_id, account:accounts(name))',
+          'id, status, started_date, finished_date, quantity, notes, product_id, expense_id, usage_mode, product:products(name), expense:expenses(amount, merchant, expense_date, account_id, account:accounts(name))',
         )
         .eq('id', itemId as string)
         .single()
@@ -53,12 +55,15 @@ export function useItem(itemId: string | undefined) {
           }
         | null
 
+      const usageMode = (item.usage_mode as UsageMode) ?? 'duration'
+
       return {
         id: item.id,
         status: item.status,
         startedDate: item.started_date,
         finishedDate: item.finished_date,
         quantity: item.quantity,
+        usageMode,
         notes: item.notes,
         productId: item.product_id,
         productName: product?.name ?? 'Unknown product',
@@ -72,9 +77,12 @@ export function useItem(itemId: string | undefined) {
               accountId: expense.account_id ?? null,
             }
           : null,
-        metrics: metrics
-          ? { calendarDays: metrics.calendar_days, awayDays: metrics.away_days, activeUsageDays: metrics.active_usage_days }
-          : null,
+        metrics:
+          usageMode === 'one_time'
+            ? null
+            : metrics
+            ? { calendarDays: metrics.calendar_days, awayDays: metrics.away_days, activeUsageDays: metrics.active_usage_days }
+            : null,
       }
     },
   })
@@ -86,6 +94,7 @@ export interface ProductHistoryItem {
   startedDate: string | null
   finishedDate: string | null
   quantity: number
+  usageMode: UsageMode
   metrics: {
     activeUsageDays: number
     calendarDays: number
@@ -101,7 +110,7 @@ export interface ProductHistoryItem {
 /** Calculates typical/average active usage days from finished cycles (minimum 2 finished cycles required). */
 export function calculateTypicalUsage(items: ProductHistoryItem[]): number | null {
   const finishedCycles = items.filter(
-    (i) => i.status === 'finished' && i.metrics != null && i.metrics.activeUsageDays > 0,
+    (i) => i.status === 'finished' && i.usageMode !== 'one_time' && i.metrics != null && i.metrics.activeUsageDays > 0,
   )
   if (finishedCycles.length < 2) return null
   const totalDays = finishedCycles.reduce((sum, c) => sum + (c.metrics?.activeUsageDays ?? 0), 0)
@@ -123,6 +132,7 @@ export function useProductHistory(productId: string | undefined, excludeItemId: 
           started_date,
           finished_date,
           quantity,
+          usage_mode,
           expense:expenses (
             amount,
             merchant,
@@ -162,7 +172,8 @@ export function useProductHistory(productId: string | undefined, excludeItemId: 
           merchant: string | null
           expense_date: string
         } | null
-        const metrics = metricsMap.get(row.id) ?? null
+        const usageMode: UsageMode = (row.usage_mode as UsageMode) ?? 'duration'
+        const metrics = usageMode === 'one_time' ? null : (metricsMap.get(row.id) ?? null)
 
         return {
           id: row.id,
@@ -170,6 +181,7 @@ export function useProductHistory(productId: string | undefined, excludeItemId: 
           startedDate: row.started_date,
           finishedDate: row.finished_date,
           quantity: Number(row.quantity ?? 1),
+          usageMode,
           metrics,
           expense: expense
             ? {

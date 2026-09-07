@@ -102,6 +102,19 @@ export function formatActivityEvent(
       }
     }
 
+    case 'item_used': {
+      const product = metadata.product_name || 'item'
+      return {
+        id: row.id,
+        icon: checkmarkCircleOutline,
+        tone: 'neutral',
+        label: `${actorName} used ${product}`,
+        timestamp: relativeTime,
+        occurredAt: row.occurred_at,
+        href: row.entity_id ? `/app/items/${row.entity_id}` : null,
+      }
+    }
+
     case 'expense_created': {
       const amount =
         metadata.amount != null

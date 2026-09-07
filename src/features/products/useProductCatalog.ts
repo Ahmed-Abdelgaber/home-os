@@ -1,18 +1,21 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../core/supabase/client'
 
+import type { UsageMode } from './usageMode'
+
 export interface ProductSummary {
   id: string
   title: string
   meta: string
   isActive: boolean
+  usageMode: UsageMode
 }
 
 export function useProductCatalog(includeInactive: boolean) {
   return useQuery({
     queryKey: ['products', 'catalog', includeInactive],
     queryFn: async (): Promise<ProductSummary[]> => {
-      let query = supabase.from('products').select('id, name, is_active, category:categories(name)').order('name')
+      let query = supabase.from('products').select('id, name, is_active, usage_mode, category:categories(name)').order('name')
       if (!includeInactive) query = query.eq('is_active', true)
 
       const { data, error } = await query
@@ -20,7 +23,13 @@ export function useProductCatalog(includeInactive: boolean) {
 
       return (data ?? []).map((row) => {
         const category = row.category as unknown as { name: string } | null
-        return { id: row.id, title: row.name, meta: category?.name ?? '', isActive: row.is_active }
+        return {
+          id: row.id,
+          title: row.name,
+          meta: category?.name ?? '',
+          isActive: row.is_active,
+          usageMode: (row.usage_mode as UsageMode) ?? 'duration',
+        }
       })
     },
   })
