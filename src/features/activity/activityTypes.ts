@@ -5,6 +5,7 @@ export type ActivityEventType =
   | 'item_created'
   | 'item_started'
   | 'item_finished'
+  | 'item_used'
   | 'expense_created'
   | 'expense_updated'
   | 'expense_deleted'

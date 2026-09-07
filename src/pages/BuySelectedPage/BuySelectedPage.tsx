@@ -263,7 +263,7 @@ export function BuySelectedPage() {
                         }`}
                         onClick={() => handleFieldChange(item.id, { state: 'active' })}
                       >
-                        Active
+                        {item.usageMode === 'one_time' ? 'Use now' : 'Active'}
                       </button>
                       <button
                         type="button"

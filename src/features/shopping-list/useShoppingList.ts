@@ -17,6 +17,7 @@ export function useShoppingList() {
             id,
             name,
             is_active,
+            usage_mode,
             category:categories (name)
           )
         `)
@@ -35,6 +36,7 @@ export function useShoppingList() {
           id: string
           name: string
           is_active: boolean
+          usage_mode?: string | null
           category: { name: string } | null
         } | null
 
@@ -46,6 +48,7 @@ export function useShoppingList() {
           source: (row.source as ShoppingListSource) || 'manual',
           createdAt: row.created_at,
           isActive: product?.is_active ?? true,
+          usageMode: (product?.usage_mode as any) ?? 'duration',
         }
       })
     },

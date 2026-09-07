@@ -1,5 +1,8 @@
 import { supabase } from '../../core/supabase/client'
 import { cairoDateMinusDays, cairoToday, formatShortDate } from '../../core/utils/cairoDate'
+import type { UsageMode } from '../products/usageMode'
+
+export type { UsageMode } from '../products/usageMode'
 
 export interface ItemSummary {
   id: string
@@ -10,6 +13,7 @@ export interface ItemSummary {
   purchaseDate?: string
   finishedDate?: string
   quantity?: number
+  usageMode?: UsageMode
 }
 
 function daysBetween(fromDateStr: string, toDateStr: string): number {
@@ -22,7 +26,7 @@ function daysBetween(fromDateStr: string, toDateStr: string): number {
 export async function fetchActiveItems(limit?: number): Promise<ItemSummary[]> {
   let query = supabase
     .from('items')
-    .select('id, started_date, quantity, product:products(name)')
+    .select('id, started_date, quantity, usage_mode, product:products(name)')
     .eq('status', 'active')
     .order('started_date', { ascending: true })
   if (limit) query = query.limit(limit)
@@ -31,7 +35,18 @@ export async function fetchActiveItems(limit?: number): Promise<ItemSummary[]> {
   if (error) throw error
   if (!items || items.length === 0) return []
 
-  const ids = items.map((item) => item.id)
+  // Defensively exclude any invalid one_time items from Active per lifecycle rules
+  const durationItems = items.filter((item) => {
+    if (item.usage_mode === 'one_time') {
+      console.warn('[HomeOS] Inconsistent item data: one_time item has active status', item.id)
+      return false
+    }
+    return true
+  })
+
+  if (durationItems.length === 0) return []
+
+  const ids = durationItems.map((item) => item.id)
   const { data: metrics, error: metricsError } = await supabase
     .from('item_usage_metrics')
     .select('item_id, calendar_days')
@@ -40,7 +55,7 @@ export async function fetchActiveItems(limit?: number): Promise<ItemSummary[]> {
 
   const daysById = new Map((metrics ?? []).map((m) => [m.item_id, m.calendar_days as number]))
 
-  return items.map((item) => {
+  return durationItems.map((item) => {
     const product = item.product as unknown as { name: string } | null
     const days = daysById.get(item.id)
     return {
@@ -50,6 +65,7 @@ export async function fetchActiveItems(limit?: number): Promise<ItemSummary[]> {
       days: days ?? undefined,
       startedDate: (item.started_date as string | null) ?? undefined,
       quantity: (item.quantity as number | null) ?? undefined,
+      usageMode: (item.usage_mode as UsageMode) ?? 'duration',
     }
   })
 }
@@ -58,7 +74,7 @@ export async function fetchActiveItems(limit?: number): Promise<ItemSummary[]> {
 export async function fetchLongStockedItems(limit?: number): Promise<ItemSummary[]> {
   const { data: items, error } = await supabase
     .from('items')
-    .select('id, quantity, product:products(name), expense:expenses(expense_date)')
+    .select('id, quantity, usage_mode, product:products(name), expense:expenses(expense_date)')
     .eq('status', 'stocked')
   if (error) throw error
 
@@ -74,10 +90,11 @@ export async function fetchLongStockedItems(limit?: number): Promise<ItemSummary
         title: product?.name ?? 'Unknown product',
         purchaseDate: expense?.expense_date,
         quantity: (item.quantity as number | null) ?? undefined,
+        usageMode: (item.usage_mode as UsageMode) ?? 'duration',
       }
     })
     .filter(
-      (item): item is { id: string; title: string; purchaseDate: string; quantity: number | undefined } =>
+      (item): item is { id: string; title: string; purchaseDate: string; quantity: number | undefined; usageMode: UsageMode } =>
         Boolean(item.purchaseDate) && item.purchaseDate! <= cutoff,
     )
     .sort((a, b) => a.purchaseDate.localeCompare(b.purchaseDate))
@@ -86,13 +103,15 @@ export async function fetchLongStockedItems(limit?: number): Promise<ItemSummary
 
   return limited.map((item) => {
     const days = daysBetween(item.purchaseDate, today)
+    const isOneTime = item.usageMode === 'one_time'
     return {
       id: item.id,
       title: item.title,
-      meta: `Stocked for ${days} days`,
-      days,
+      meta: isOneTime ? `Purchased ${formatShortDate(item.purchaseDate)}` : `Stocked for ${days} days`,
+      days: isOneTime ? undefined : days,
       purchaseDate: item.purchaseDate,
       quantity: item.quantity,
+      usageMode: item.usageMode,
     }
   })
 }
@@ -101,7 +120,7 @@ export async function fetchLongStockedItems(limit?: number): Promise<ItemSummary
 export async function fetchAllStockedItems(): Promise<ItemSummary[]> {
   const { data: items, error } = await supabase
     .from('items')
-    .select('id, quantity, product:products(name), expense:expenses(expense_date)')
+    .select('id, quantity, usage_mode, product:products(name), expense:expenses(expense_date)')
     .eq('status', 'stocked')
   if (error) throw error
 
@@ -113,13 +132,24 @@ export async function fetchAllStockedItems(): Promise<ItemSummary[]> {
       const expense = item.expense as unknown as { expense_date: string } | null
       const purchaseDate = expense?.expense_date
       const days = purchaseDate ? daysBetween(purchaseDate, today) : undefined
+      const usageMode: UsageMode = (item.usage_mode as UsageMode) ?? 'duration'
+      const meta =
+        usageMode === 'one_time'
+          ? purchaseDate
+            ? `Purchased ${formatShortDate(purchaseDate)}`
+            : 'Stocked'
+          : purchaseDate
+          ? `Stocked for ${days} days`
+          : 'Stocked'
+
       return {
         id: item.id,
         title: product?.name ?? 'Unknown product',
-        meta: purchaseDate ? `Stocked for ${days} days` : 'Stocked',
+        meta,
         days,
         purchaseDate: purchaseDate ?? undefined,
         quantity: (item.quantity as number | null) ?? undefined,
+        usageMode,
       }
     })
     .sort((a, b) => (b.purchaseDate ?? '').localeCompare(a.purchaseDate ?? ''))
@@ -129,7 +159,7 @@ export async function fetchAllStockedItems(): Promise<ItemSummary[]> {
 export async function fetchFinishedItems(): Promise<ItemSummary[]> {
   const { data: items, error } = await supabase
     .from('items')
-    .select('id, started_date, finished_date, quantity, product:products(name)')
+    .select('id, started_date, finished_date, quantity, usage_mode, product:products(name)')
     .eq('status', 'finished')
     .order('finished_date', { ascending: false })
   if (error) throw error
@@ -138,18 +168,27 @@ export async function fetchFinishedItems(): Promise<ItemSummary[]> {
     const product = item.product as unknown as { name: string } | null
     const started = item.started_date as string | null
     const finished = item.finished_date as string | null
-    const days = started && finished ? daysBetween(started, finished) + 1 : undefined
+    const usageMode: UsageMode = (item.usage_mode as UsageMode) ?? 'duration'
+    const isOneTime = usageMode === 'one_time'
+    const days = !isOneTime && started && finished ? daysBetween(started, finished) + 1 : undefined
+
+    const meta = isOneTime
+      ? finished
+        ? `Used ${formatShortDate(finished)}`
+        : 'Used'
+      : started && finished
+      ? `${formatShortDate(started)} → ${formatShortDate(finished)} • ${days} days`
+      : 'Finished'
+
     return {
       id: item.id,
       title: product?.name ?? 'Unknown product',
-      meta:
-        started && finished
-          ? `${formatShortDate(started)} → ${formatShortDate(finished)} • ${days} days`
-          : 'Finished',
+      meta,
       days,
-      startedDate: started ?? undefined,
+      startedDate: isOneTime ? undefined : (started ?? undefined),
       finishedDate: finished ?? undefined,
       quantity: (item.quantity as number | null) ?? undefined,
+      usageMode,
     }
   })
 }

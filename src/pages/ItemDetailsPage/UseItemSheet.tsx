@@ -2,41 +2,29 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { formatShortDate } from '../../core/utils/cairoDate'
+import { cairoToday } from '../../core/utils/cairoDate'
 import { PrimaryButton } from '../../shared/components/PrimaryButton'
 import { QuickAddSheet } from '../../shared/components/QuickAddSheet'
 import { SecondaryButton } from '../../shared/components/SecondaryButton'
 import './FinishItemSheet.css'
 
-interface EditFinishDateSheetProps {
+interface UseItemSheetProps {
   isOpen: boolean
-  currentFinishedDate: string | null
-  startedDate: string | null
   isPending: boolean
-  isOneTime?: boolean
   onClose: () => void
-  onConfirmSave: (finishedDate: string) => Promise<void>
+  onConfirmUse: (usedDate: string) => Promise<void>
 }
 
-export function EditFinishDateSheet({
+export function UseItemSheet({
   isOpen,
-  currentFinishedDate,
-  startedDate,
   isPending,
-  isOneTime = false,
   onClose,
-  onConfirmSave,
-}: EditFinishDateSheetProps) {
+  onConfirmUse,
+}: UseItemSheetProps) {
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const schema = z.object({
-    finishedDate: z
-      .string()
-      .min(1, isOneTime ? 'Select a used date' : 'Select a finish date')
-      .refine(
-        (date) => isOneTime || !startedDate || date >= startedDate,
-        `Finish date cannot be before start date (${startedDate ? formatShortDate(startedDate) : ''})`,
-      ),
+    usedDate: z.string().min(1, 'Select a date'),
   })
 
   type FormValues = z.infer<typeof schema>
@@ -48,30 +36,29 @@ export function EditFinishDateSheet({
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      finishedDate: currentFinishedDate ?? '',
+      usedDate: cairoToday(),
     },
   })
 
   const onSubmit = async (values: FormValues) => {
     setSubmitError(null)
     try {
-      await onConfirmSave(values.finishedDate)
+      await onConfirmUse(values.usedDate)
       onClose()
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Could not update date. Try again.')
+      setSubmitError(error instanceof Error ? error.message : 'Could not use item. Try again.')
     }
   }
 
-  const title = isOneTime ? 'Edit used date' : 'Edit finish date'
-  const fieldLabel = isOneTime ? 'Used date' : 'Finish date'
-
   return (
-    <QuickAddSheet isOpen={isOpen} title={title} onClose={onClose}>
+    <QuickAddSheet isOpen={isOpen} title="Use item" onClose={onClose}>
       <form className="homeos-finish-form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <p className="homeos-finish-form__desc">When did you use this item?</p>
+
         <label className="homeos-field">
-          <span className="homeos-field__label">{fieldLabel}</span>
-          <input type="date" className="homeos-field__input" {...register('finishedDate')} />
-          {errors.finishedDate && <span className="homeos-field__error">{errors.finishedDate.message}</span>}
+          <span className="homeos-field__label">Used date</span>
+          <input type="date" className="homeos-field__input" {...register('usedDate')} />
+          {errors.usedDate && <span className="homeos-field__error">{errors.usedDate.message}</span>}
         </label>
 
         {submitError && (
@@ -82,7 +69,7 @@ export function EditFinishDateSheet({
 
         <div className="homeos-finish-form__actions">
           <PrimaryButton type="submit" disabled={isPending}>
-            {isPending ? 'Saving…' : 'Save'}
+            {isPending ? 'Using…' : 'Use item'}
           </PrimaryButton>
           <SecondaryButton type="button" onClick={onClose} disabled={isPending}>
             Cancel

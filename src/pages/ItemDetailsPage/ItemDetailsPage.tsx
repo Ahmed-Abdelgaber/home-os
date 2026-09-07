@@ -6,6 +6,8 @@ import {
   cashOutline,
   checkmarkDoneOutline,
   documentTextOutline,
+  flashOutline,
+  hourglassOutline,
   layersOutline,
   playOutline,
   storefrontOutline,
@@ -14,7 +16,7 @@ import {
 import { formatShortDate } from '../../core/utils/cairoDate'
 import { resolveProductVisual } from '../../core/presentation/productVisuals'
 import { useItem, useProductHistory } from '../../features/items/useItemDetails'
-import { useDeleteItem, useFinishItem, useStartItem, useUpdateItemFinishedDate } from '../../features/items/useItemMutations'
+import { useDeleteItem, useFinishItem, useStartItem, useUpdateItemFinishedDate, useUseItem } from '../../features/items/useItemMutations'
 import { useShoppingList } from '../../features/shopping-list/useShoppingList'
 import { useAddToShoppingList } from '../../features/shopping-list/useShoppingListMutations'
 import { AppPage } from '../../shared/components/AppPage'
@@ -28,6 +30,7 @@ import { StatusChip } from '../../shared/components/StatusChip'
 import { CompactRow, ListGroup } from '../../shared/components/CompactList'
 import { EditFinishDateSheet } from './EditFinishDateSheet'
 import { FinishItemSheet } from './FinishItemSheet'
+import { UseItemSheet } from './UseItemSheet'
 import '../../shared/components/CompactLedger.css'
 import '../../shared/components/CompactList.css'
 import './ItemDetailsPage.css'
@@ -40,11 +43,13 @@ export function ItemDetailsPage() {
   const shoppingList = useShoppingList()
   const addToShoppingList = useAddToShoppingList()
   const startItem = useStartItem()
+  const useItemMutation = useUseItem()
   const finishItem = useFinishItem()
   const updateFinishedDate = useUpdateItemFinishedDate()
   const deleteItem = useDeleteItem()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [finishingItem, setFinishingItem] = useState(false)
+  const [usingItem, setUsingItem] = useState(false)
   const [editingFinishDate, setEditingFinishDate] = useState(false)
   const [presentToast] = useIonToast()
 
@@ -65,6 +70,8 @@ export function ItemDetailsPage() {
                 historyEntries={history.data ?? []}
                 onStart={() => startItem.mutate(detail.id)}
                 isStarting={startItem.isPending}
+                onRequestUse={() => setUsingItem(true)}
+                isUsing={useItemMutation.isPending}
                 onRequestFinish={() => setFinishingItem(true)}
                 onRequestEditFinishDate={() => setEditingFinishDate(true)}
                 isOnShoppingList={isOnShoppingList}
@@ -91,6 +98,21 @@ export function ItemDetailsPage() {
                 }}
               />
 
+              <UseItemSheet
+                isOpen={usingItem}
+                isPending={useItemMutation.isPending}
+                onClose={() => setUsingItem(false)}
+                onConfirmUse={async (usedDate) => {
+                  await useItemMutation.mutateAsync({ itemId: detail.id, usedDate })
+                  setUsingItem(false)
+                  presentToast({
+                    message: 'Item marked as used',
+                    duration: 2000,
+                    position: 'bottom',
+                  })
+                }}
+              />
+
               <FinishItemSheet
                 isOpen={finishingItem}
                 startedDate={detail.startedDate}
@@ -105,12 +127,13 @@ export function ItemDetailsPage() {
                 isOpen={editingFinishDate}
                 currentFinishedDate={detail.finishedDate}
                 startedDate={detail.startedDate}
+                isOneTime={detail.usageMode === 'one_time'}
                 isPending={updateFinishedDate.isPending}
                 onClose={() => setEditingFinishDate(false)}
                 onConfirmSave={async (finishedDate) => {
                   await updateFinishedDate.mutateAsync({ itemId: detail.id, finishedDate })
                   presentToast({
-                    message: 'Finish date updated',
+                    message: detail.usageMode === 'one_time' ? 'Used date updated' : 'Finish date updated',
                     duration: 2000,
                     position: 'bottom',
                   })
@@ -129,6 +152,8 @@ interface ItemDetailsBodyProps {
   historyEntries: ReturnType<typeof useProductHistory>['data']
   onStart: () => void
   isStarting: boolean
+  onRequestUse: () => void
+  isUsing: boolean
   onRequestFinish: () => void
   onRequestEditFinishDate: () => void
   isOnShoppingList: boolean
@@ -146,6 +171,8 @@ function ItemDetailsBody({
   historyEntries,
   onStart,
   isStarting,
+  onRequestUse,
+  isUsing,
   onRequestFinish,
   onRequestEditFinishDate,
   isOnShoppingList,
@@ -159,6 +186,7 @@ function ItemDetailsBody({
 }: ItemDetailsBodyProps) {
   const navigate = useNavigate()
   const visual = resolveProductVisual(detail.productName)
+  const isOneTime = detail.usageMode === 'one_time'
 
   return (
     <div className="homeos-item-details-body">
@@ -173,15 +201,17 @@ function ItemDetailsBody({
               {detail.status === 'active'
                 ? `Started ${formatShortDate(detail.startedDate)}`
                 : detail.status === 'stocked'
-                ? `Purchased ${detail.expense ? formatShortDate(detail.expense.date) : ''}`
+                ? (detail.expense ? `Purchased ${formatShortDate(detail.expense.date)}` : 'Stocked')
+                : isOneTime
+                ? `Used ${formatShortDate(detail.finishedDate)}`
                 : `Finished ${formatShortDate(detail.finishedDate)}`}
             </span>
           </div>
         </div>
-        <StatusChip status={detail.status} />
+        <StatusChip status={detail.status} usageMode={detail.usageMode} />
       </div>
 
-      {detail.metrics && (
+      {!isOneTime && detail.metrics && (
         <div className="homeos-item-details__metrics">
           <div className={`homeos-item-details__metric ${detail.status === 'active' ? 'homeos-item-details__metric--highlight' : ''}`}>
             <p className="homeos-item-details__metric-value">{detail.metrics.activeUsageDays}</p>
@@ -203,7 +233,14 @@ function ItemDetailsBody({
       <section className="homeos-item-details__section" aria-label="Item facts">
         <div className="homeos-ledger-day__heading"><h2>Item details</h2></div>
         <ul className="homeos-tx-details-list">
-          {detail.startedDate && (
+          <li className="homeos-tx-detail-row">
+            <span className="homeos-tx-detail-row__label">
+              <IonIcon icon={isOneTime ? flashOutline : hourglassOutline} aria-hidden="true" />
+              <span>Usage</span>
+            </span>
+            <span className="homeos-tx-detail-row__value">{isOneTime ? 'Single use' : 'Track duration'}</span>
+          </li>
+          {!isOneTime && detail.startedDate && (
             <li className="homeos-tx-detail-row">
               <span className="homeos-tx-detail-row__label">
                 <IonIcon icon={playOutline} aria-hidden="true" />
@@ -216,7 +253,7 @@ function ItemDetailsBody({
             <li className="homeos-tx-detail-row">
               <span className="homeos-tx-detail-row__label">
                 <IonIcon icon={checkmarkDoneOutline} aria-hidden="true" />
-                <span>Finished</span>
+                <span>{isOneTime ? 'Used' : 'Finished'}</span>
               </span>
               <span className="homeos-tx-detail-row__value">{formatShortDate(detail.finishedDate)}</span>
             </li>
@@ -280,9 +317,15 @@ function ItemDetailsBody({
 
       <div className="homeos-item-details__actions">
         {detail.status === 'stocked' && (
-          <PrimaryButton className="homeos-item-details__start" onClick={onStart} disabled={isStarting}>
-            {isStarting ? 'Starting…' : 'Start using'}
-          </PrimaryButton>
+          isOneTime ? (
+            <PrimaryButton className="homeos-item-details__start" onClick={onRequestUse} disabled={isUsing}>
+              {isUsing ? 'Using…' : 'Use item'}
+            </PrimaryButton>
+          ) : (
+            <PrimaryButton className="homeos-item-details__start" onClick={onStart} disabled={isStarting}>
+              {isStarting ? 'Starting…' : 'Start using'}
+            </PrimaryButton>
+          )
         )}
         {detail.status === 'active' && (
           <PrimaryButton onClick={onRequestFinish}>
@@ -303,7 +346,7 @@ function ItemDetailsBody({
         
         {detail.status === 'finished' && (
           <SecondaryButton onClick={onRequestEditFinishDate}>
-            Edit finish date
+            {isOneTime ? 'Edit used date' : 'Edit finish date'}
           </SecondaryButton>
         )}
         
@@ -345,18 +388,30 @@ function ItemDetailsBody({
         </ListGroup>
       </section>
 
-
       {(() => {
         const formattedHistory: HistoryEntry[] = (historyEntries ?? []).map((h) => {
+          const hIsOneTime = h.usageMode === 'one_time'
           let title = 'Not started'
-          if (h.startedDate && h.finishedDate) {
-            title = `${formatShortDate(h.startedDate)} → ${formatShortDate(h.finishedDate)}`
-          } else if (h.startedDate) {
-            title = `${formatShortDate(h.startedDate)} → In progress`
+          if (hIsOneTime) {
+            if (h.finishedDate) {
+              title = `Used ${formatShortDate(h.finishedDate)}`
+            } else if (h.expense?.date) {
+              title = `Purchased ${formatShortDate(h.expense.date)}`
+            } else {
+              title = 'Single use'
+            }
+          } else {
+            if (h.startedDate && h.finishedDate) {
+              title = `${formatShortDate(h.startedDate)} → ${formatShortDate(h.finishedDate)}`
+            } else if (h.startedDate) {
+              title = `${formatShortDate(h.startedDate)} → In progress`
+            }
           }
 
           let subtitle: string | undefined = undefined
-          if (h.metrics) {
+          if (hIsOneTime) {
+            subtitle = h.status === 'stocked' ? 'Stocked' : 'Used'
+          } else if (h.metrics) {
             const usage = `${h.metrics.activeUsageDays} usage day${h.metrics.activeUsageDays === 1 ? '' : 's'}`
             const away = h.metrics.awayDays > 0 ? ` · ${h.metrics.awayDays} away day${h.metrics.awayDays === 1 ? '' : 's'}` : ''
             subtitle = `${usage}${away}`

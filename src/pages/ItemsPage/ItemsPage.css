@@ -33,6 +33,7 @@
 .homeos-item-duration > strong { font-size: 18px; line-height: 1.2; font-weight: 600; }
 .homeos-item-duration > span { font-size: 11px; line-height: 1.5; }
 .homeos-item-start { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 44px; width: 70px; flex-shrink: 0; padding: 6px; border: 0; border-radius: 12px; background: var(--ledger-green-soft); color: var(--items-green); font: inherit; font-size: 12px; font-weight: 600; }
+.homeos-item-use { background: var(--ledger-violet-soft); color: var(--ledger-violet); }
 .homeos-items-page .homeos-ledger-options button[aria-pressed='true'] { background: var(--items-accent); }
 .homeos-items-page .homeos-ledger-tool--selected { color: var(--items-accent); background: var(--items-accent-soft); }
 .homeos-items-page .homeos-ledger-reset { color: var(--items-accent); }

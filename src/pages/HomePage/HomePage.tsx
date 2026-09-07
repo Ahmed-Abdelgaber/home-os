@@ -12,7 +12,7 @@ import { useHomeSnapshot } from '../../features/home/useHomeSnapshot'
 import { useLongRunningItems } from '../../features/home/useLongRunningItems'
 import { useLongStockedItems } from '../../features/home/useLongStockedItems'
 import { useRecentActivity } from '../../features/home/useRecentActivity'
-import { useStartItem } from '../../features/items/useItemMutations'
+import { useStartItem, useUseItem } from '../../features/items/useItemMutations'
 import { useCyclePeriod } from '../../features/periods/usePeriodMutations'
 import { HomeOSHeader } from '../../shared/components/HomeOSHeader'
 import { QueryState } from '../../shared/components/QueryState'
@@ -46,6 +46,7 @@ export function HomePage() {
   const longStocked = useLongStockedItems()
   const recentActivity = useRecentActivity()
   const startItem = useStartItem()
+  const useItem = useUseItem()
   const cyclePeriod = useCyclePeriod()
   const [showAllActivity, setShowAllActivity] = useState(false)
   const hasMoreActivity = (recentActivity.data?.length ?? 0) > ACTIVITY_PREVIEW_COUNT
@@ -121,20 +122,36 @@ export function HomePage() {
                 </div>
                 <QueryState query={longStocked} skeleton={<HomeRowsLoading rows={2} />} error="Couldn't load stocked items." empty={<></>}>
                   {(items) => <ul className="homeos-house-list">
-                    {items.slice(0, STOCKED_PREVIEW_COUNT).map((item) => <li className="homeos-house-stocked" key={item.id}>
-                      <Link className="homeos-house-row" to={`/app/items/${item.id}`}>
-                        <HomeProductIcon title={item.title} />
-                        <span className="homeos-house-row__copy"><span className="homeos-house-row__name">{item.title}</span><span className="homeos-home-meta">{item.meta}</span></span>
-                      </Link>
-                      <button className="homeos-home-start" type="button" disabled={startItem.isPending} onClick={() => startItem.mutate(item.id)} aria-label={`Start using ${item.title}`}>
-                        {startItem.isPending && startItem.variables === item.id ? 'Starting…' : 'Start using'}
-                      </button>
-                    </li>)}
+                    {items.slice(0, STOCKED_PREVIEW_COUNT).map((item) => {
+                      const isOneTime = item.usageMode === 'one_time'
+                      const isPending = isOneTime
+                        ? useItem.isPending && useItem.variables === item.id
+                        : startItem.isPending && startItem.variables === item.id
+                      return (
+                        <li className="homeos-house-stocked" key={item.id}>
+                          <Link className="homeos-house-row" to={`/app/items/${item.id}`}>
+                            <HomeProductIcon title={item.title} />
+                            <span className="homeos-house-row__copy"><span className="homeos-house-row__name">{item.title}</span><span className="homeos-home-meta">{item.meta}</span></span>
+                          </Link>
+                          <button
+                            className="homeos-home-start"
+                            type="button"
+                            disabled={isOneTime ? useItem.isPending : startItem.isPending}
+                            onClick={() => (isOneTime ? useItem.mutate(item.id) : startItem.mutate(item.id))}
+                            aria-label={isOneTime ? `Use ${item.title}` : `Start using ${item.title}`}
+                          >
+                            {isPending ? (isOneTime ? 'Using…' : 'Starting…') : (isOneTime ? 'Use' : 'Start using')}
+                          </button>
+                        </li>
+                      )
+                    })}
                   </ul>}
                 </QueryState>
                 {longStocked.isError && <button className="homeos-home-link" type="button" onClick={() => void longStocked.refetch()}>Try again</button>}
                 {startItem.isError && <p className="homeos-home-feedback" role="alert">Couldn't start this item. Please try again.</p>}
                 {startItem.isSuccess && <p className="homeos-home-meta" role="status">Item started.</p>}
+                {useItem.isError && <p className="homeos-home-feedback" role="alert">Couldn't use this item. Please try again.</p>}
+                {useItem.isSuccess && <p className="homeos-home-meta" role="status">Item used.</p>}
               </div>
             </section>
 

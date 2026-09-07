@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../core/supabase/client'
 import type { ConsumptionMode } from './consumptionMode'
+import type { UsageMode } from './usageMode'
 
 export interface ProductDetail {
   id: string
@@ -10,6 +11,7 @@ export interface ProductDetail {
   consumerId: string
   consumerName: string
   consumptionMode: ConsumptionMode
+  usageMode: UsageMode
   notes: string | null
   isActive: boolean
 }
@@ -22,7 +24,7 @@ export function useProduct(productId: string | undefined) {
       const { data, error } = await supabase
         .from('products')
         .select(
-          'id, name, category_id, consumer_id, consumption_mode, notes, is_active, category:categories(name), consumer:people(name)',
+          'id, name, category_id, consumer_id, consumption_mode, usage_mode, notes, is_active, category:categories(name), consumer:people(name)',
         )
         .eq('id', productId as string)
         .single()
@@ -39,6 +41,7 @@ export function useProduct(productId: string | undefined) {
         consumerId: data.consumer_id,
         consumerName: consumer?.name ?? 'Unknown',
         consumptionMode: data.consumption_mode,
+        usageMode: (data.usage_mode as UsageMode) ?? 'duration',
         notes: data.notes,
         isActive: data.is_active,
       }

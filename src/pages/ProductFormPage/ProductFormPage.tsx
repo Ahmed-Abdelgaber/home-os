@@ -8,6 +8,7 @@ import { resolveProductVisual } from '../../core/presentation/productVisuals'
 import { useActiveCategories } from '../../features/master-data/useCategories'
 import { useActivePeople } from '../../features/master-data/usePeople'
 import { CONSUMPTION_MODES, CONSUMPTION_MODE_LABELS } from '../../features/products/consumptionMode'
+import { USAGE_MODES, USAGE_MODE_LABELS, USAGE_MODE_DESCRIPTIONS } from '../../features/products/usageMode'
 import { useProduct } from '../../features/products/useProductDetail'
 import { useCreateProduct, useUpdateProduct } from '../../features/products/useProductMutations'
 import { AppPage } from '../../shared/components/AppPage'
@@ -22,6 +23,7 @@ const productSchema = z.object({
   name: z.string().min(1, 'Enter a product name'),
   categoryId: z.string().min(1, 'Select a category'),
   consumerId: z.string().min(1, 'Select a consumer'),
+  usageMode: z.enum(USAGE_MODES),
   consumptionMode: z.enum(CONSUMPTION_MODES),
   notes: z.string().optional(),
 })
@@ -65,6 +67,7 @@ export function ProductFormPage() {
       name: values.name,
       categoryId: values.categoryId,
       consumerId: values.consumerId,
+      usageMode: values.usageMode,
       consumptionMode: values.consumptionMode,
       notes: values.notes?.trim() || null,
     }
@@ -107,6 +110,7 @@ export function ProductFormPage() {
                   name: existing.data.name,
                   categoryId: existing.data.categoryId,
                   consumerId: existing.data.consumerId,
+                  usageMode: existing.data.usageMode,
                   consumptionMode: existing.data.consumptionMode,
                   notes: existing.data.notes ?? '',
                 }
@@ -146,14 +150,16 @@ function ProductForm({
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: { consumptionMode: 'never_pause', ...defaultValues },
+    defaultValues: { usageMode: 'duration', consumptionMode: 'never_pause', ...defaultValues },
   })
 
   const watchedName = watch('name')
   const watchedCategoryId = watch('categoryId')
+  const watchedUsageMode = watch('usageMode')
   const selectedCategory = categories.find((c) => c.id === watchedCategoryId)?.name
   const visual = resolveProductVisual(watchedName || defaultValues?.name || '', selectedCategory)
 
@@ -229,18 +235,45 @@ function ProductForm({
           {errors.consumerId && <span className="homeos-field__error">{errors.consumerId.message}</span>}
         </label>
 
-        <label className="homeos-field">
-          <span className="homeos-field__label">Consumption Mode</span>
-          <div className="homeos-field__select-wrap">
-            <select className="homeos-field__input homeos-field__select" {...register('consumptionMode')}>
-              {CONSUMPTION_MODES.map((mode) => (
-                <option key={mode} value={mode}>
-                  {CONSUMPTION_MODE_LABELS[mode]}
-                </option>
-              ))}
-            </select>
+        <div className="homeos-field">
+          <span className="homeos-field__label">Usage</span>
+          <div className="homeos-usage-mode-options" role="radiogroup" aria-label="Usage mode">
+            {USAGE_MODES.map((mode) => {
+              const isSelected = watchedUsageMode === mode
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  className={`homeos-usage-mode-option ${
+                    isSelected ? 'homeos-usage-mode-option--selected' : ''
+                  }`}
+                  onClick={() => setValue('usageMode', mode, { shouldValidate: true })}
+                >
+                  <strong className="homeos-usage-mode-option__title">{USAGE_MODE_LABELS[mode]}</strong>
+                  <span className="homeos-usage-mode-option__desc">{USAGE_MODE_DESCRIPTIONS[mode]}</span>
+                </button>
+              )
+            })}
           </div>
-        </label>
+          {errors.usageMode && <span className="homeos-field__error">{errors.usageMode.message}</span>}
+        </div>
+
+        {watchedUsageMode === 'duration' && (
+          <label className="homeos-field">
+            <span className="homeos-field__label">Consumption Mode</span>
+            <div className="homeos-field__select-wrap">
+              <select className="homeos-field__input homeos-field__select" {...register('consumptionMode')}>
+                {CONSUMPTION_MODES.map((mode) => (
+                  <option key={mode} value={mode}>
+                    {CONSUMPTION_MODE_LABELS[mode]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </label>
+        )}
 
         <label className="homeos-field">
           <span className="homeos-field__label">Notes (Optional)</span>
